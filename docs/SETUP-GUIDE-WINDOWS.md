@@ -127,10 +127,10 @@ If you need to rebuild the installer after code changes:
 cd frontend && npm run build
 cd ..\backend && npm run build
 cd ..
-"C:\Program Files (x86)\NSIS\Bin\makensis.exe" installer\workstation-meva-setup.nsi
+"C:\Program Files (x86)\NSIS\Bin\makensis.exe" installer\newsmeva.nsi
 ```
 
-The NSIS script is at `installer\workstation-meva-setup.nsi`. NSIS (Nullsoft Scriptable Install System) must be installed (`winget install NSIS.NSIS`).
+The NSIS script is at `installer\newsmeva.nsi`. NSIS (Nullsoft Scriptable Install System) must be installed (`winget install NSIS.NSIS`).
 
 ---
 
@@ -483,7 +483,7 @@ The installer is a single-file NSIS build that bundles the **pre-built app** plu
 cd frontend && npm run build
 cd ..\backend && npm run build
 cd ..
-"C:\Program Files (x86)\NSIS\Bin\makensis.exe" installer\workstation-meva-setup.nsi
+"C:\Program Files (x86)\NSIS\Bin\makensis.exe" installer\newsmeva.nsi
 ```
 
 Output: `installer\workstation-meva-setup.exe` (~68 MB).

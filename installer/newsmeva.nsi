@@ -5,7 +5,7 @@
 ;
 ; Usage:
 ;   1. Build the app first:  cd frontend && npm run build && cd ..\backend && npm run build
-;   2. Compile:  "C:\Program Files (x86)\NSIS\Bin\makensis.exe" installer\workstation-meva-setup.nsi
+;   2. Compile:  "C:\Program Files (x86)\NSIS\Bin\makensis.exe" installer\newsmeva.nsi
 
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
