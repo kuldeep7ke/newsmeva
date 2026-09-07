@@ -1,6 +1,6 @@
 {
   "name": "workstation-backend",
-  "version": "1.0.0-beta.1",
+  "version": "3.0.0",
   "private": true,
   "scripts": {
     "dev": "set PORT=3003&& tsx watch src/index.ts",

@@ -73,9 +73,9 @@ echo "Node.js: $NODE_BIN (v$("$NODE_BIN" -v))"
 echo ""
 
 # --- Stop existing service (if any) ---
-echo "Stopping any existing workstation-meva service..."
-sudo systemctl stop workstation-meva.service 2>/dev/null || true
-sudo systemctl disable workstation-meva.service 2>/dev/null || true
+echo "Stopping any existing newsmeva service..."
+sudo systemctl stop newsmeva.service 2>/dev/null || true
+sudo systemctl disable newsmeva.service 2>/dev/null || true
 sleep 1
 
 # --- Deploy the source tree ---
@@ -129,17 +129,17 @@ sudo chown -R "$SERVICE_USER":"$SERVICE_USER" "$TARGET_BASE"
 
 # --- Install systemd unit ---
 echo "Installing systemd unit..."
-sudo cp "$SCRIPT_DIR/workstation-meva.service" /etc/systemd/system/
-sudo sed -i "s|User=meva|User=$SERVICE_USER|" /etc/systemd/system/workstation-meva.service
-sudo sed -i "s|WorkingDirectory=/opt/workstation-online|WorkingDirectory=$TARGET_BASE|" /etc/systemd/system/workstation-meva.service
-sudo sed -i "s|ExecStart=/usr/bin/node|ExecStart=$NODE_BIN|" /etc/systemd/system/workstation-meva.service
+sudo cp "$SCRIPT_DIR/newsmeva.service" /etc/systemd/system/
+sudo sed -i "s|User=meva|User=$SERVICE_USER|" /etc/systemd/system/newsmeva.service
+sudo sed -i "s|WorkingDirectory=/opt/workstation-online|WorkingDirectory=$TARGET_BASE|" /etc/systemd/system/newsmeva.service
+sudo sed -i "s|ExecStart=/usr/bin/node|ExecStart=$NODE_BIN|" /etc/systemd/system/newsmeva.service
 sudo systemctl daemon-reload
 
 # --- Enable and start ---
 echo "Enabling and starting service..."
-sudo systemctl enable --now workstation-meva.service
+sudo systemctl enable --now newsmeva.service
 sleep 3
-sudo systemctl status workstation-meva.service --no-pager
+sudo systemctl status newsmeva.service --no-pager
 
 echo ""
 echo "============================================"
@@ -151,14 +151,14 @@ if curl -s "http://localhost:$PORT/api/health" | grep -q '"status":"ok"'; then
     echo "OK  Health endpoint: http://localhost:$PORT/api/health"
 else
     echo "NOTE: server may still be starting. Check logs:"
-    echo "  sudo journalctl -u workstation-meva.service -n 30 --no-pager"
+    echo "  sudo journalctl -u newsmeva.service -n 30 --no-pager"
 fi
 
 echo ""
 echo "Next steps:"
 echo "  1. Open http://localhost:$PORT  (LAN users: http://<THIS-MACHINE-IP>:$PORT)"
 echo "  2. First visitor signs up -> becomes admin automatically"
-echo "  3. View logs: sudo journalctl -u workstation-meva.service -f"
+echo "  3. View logs: sudo journalctl -u newsmeva.service -f"
 echo "  4. LAN URL without :3002 (Caddy): see docs/SETUP-GUIDE-UBUNTU.md section 5"
 echo ""
 echo "============================================"

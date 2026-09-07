@@ -692,12 +692,12 @@ export async function seedPostgresDefaults(): Promise<void> {
       }
     }
   } catch (e) { console.error('[db] PG template seeding failed:', e); }
-  // Seed channel_metadata - default is empty so frontend shows "NEWS MEVA" via fallback
+  // Seed channel_metadata - default website is newsmeva.com, channel name empty so frontend shows "NEWS MEVA" via fallback
   // Custom names only show when user explicitly sets them via Settings -> Channel Metadata
   try {
     const cnt = await adapter.get('SELECT COUNT(*) as cnt FROM channel_metadata');
     if (!cnt?.cnt || cnt.cnt === '0' || cnt.cnt === 0) {
-      await adapter.raw("INSERT INTO channel_metadata (channel_name, channel_display_name, website_url, editor_name, editor_position, subscribe_url) VALUES ('', '', '', '', '', '')");
+      await adapter.raw("INSERT INTO channel_metadata (channel_name, channel_display_name, website_url, editor_name, editor_position, subscribe_url) VALUES ('', '', 'www.newsmeva.com', '', '', '')");
     }
   } catch (e) { console.error('[db] PG channel_metadata seeding failed:', e); }
   // Seed backup_config
@@ -1555,7 +1555,7 @@ function runMigrations() {
   )`);
   const channelCount = db.exec('SELECT COUNT(*) as cnt FROM channel_metadata');
   if (!channelCount?.[0]?.values?.[0]?.[0]) {
-    db.run("INSERT INTO channel_metadata (channel_name, channel_display_name, website_url, editor_name, editor_position, subscribe_url) VALUES ('', '', '', '', '', '')");
+    db.run("INSERT INTO channel_metadata (channel_name, channel_display_name, website_url, editor_name, editor_position, subscribe_url) VALUES ('', '', 'www.newsmeva.com', '', '', '')");
   }
 
   if (!columnExists('profiles', 'pin')) {

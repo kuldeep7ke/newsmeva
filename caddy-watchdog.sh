@@ -29,7 +29,7 @@ if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet caddy 2>/
 fi
 
 if [[ ! -w "$BASE" ]]; then
-  LOG="/tmp/workstation-meva-caddy.log"
+  LOG="/tmp/newsmeva-caddy.log"
 fi
 
 port_busy() {

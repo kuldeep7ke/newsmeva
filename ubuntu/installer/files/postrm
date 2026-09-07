@@ -5,8 +5,8 @@ set -e
 case "$1" in
   purge)
     # "apt purge": remove everything including user data.
-    systemctl stop workstation-meva.service workstation-meva-caddy.service 2>/dev/null || true
-    systemctl disable workstation-meva.service workstation-meva-caddy.service 2>/dev/null || true
+    systemctl stop newsmeva.service newsmeva-caddy.service 2>/dev/null || true
+    systemctl disable newsmeva.service newsmeva-caddy.service 2>/dev/null || true
     rm -rf /opt/workstation-online
     rm -rf /opt/workstation-node
     if id -u meva >/dev/null 2>&1; then userdel meva 2>/dev/null || true; fi

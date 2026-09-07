@@ -224,14 +224,14 @@
                         app:iconGravity="textStart" />
                 </LinearLayout>
 
-                <!-- Open Workstation button -->
+                <!-- Open NEWS MEVA button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnOpen"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="12dp"
                     android:enabled="false"
-                    android:text="Open Workstation"
+                    android:text="Open NEWS MEVA"
                     android:textColor="@color/background"
                     android:textSize="15sp"
                     android:fontFamily="sans-serif-medium"

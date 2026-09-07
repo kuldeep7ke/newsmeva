@@ -1,7 +1,7 @@
 ; NEWS MEVA Online - Windows Installer
 ; NSIS Script - compiles with makensis.exe (NSIS 3.x)
 ;
-; Produces: installer/workstation-meva-setup.exe
+; Produces: installer/newsmeva-setup.exe
 ;
 ; Usage:
 ;   1. Build the app first:  cd frontend && npm run build && cd ..\backend && npm run build
@@ -16,17 +16,17 @@
 ; Configuration
 ; ---------------------------------------------------------------------------
 Name "NEWS MEVA Online"
-OutFile "workstation-meva-setup.exe"
+OutFile "newsmeva-setup.exe"
 InstallDir "C:\Workstation-Meva"
 InstallDirRegKey HKLM "Software\WorkstationMeva" "InstallDir"
 RequestExecutionLevel admin
 Unicode True
 
 ; Version info shown in Explorer properties
-VIProductVersion "1.0.0.2"
+VIProductVersion "3.0.0.0"
 VIAddVersionKey "ProductName" "NEWS MEVA Online"
-VIAddVersionKey "ProductVersion" "1.0.0-beta.1"
-VIAddVersionKey "FileVersion" "1.0.0-beta.1"
+VIAddVersionKey "ProductVersion" "3.0.0"
+VIAddVersionKey "FileVersion" "3.0.0"
 VIAddVersionKey "FileDescription" "NEWS MEVA Online Installer (Beta)"
 VIAddVersionKey "LegalCopyright" "Free & public domain (Unlicense)"
 
@@ -37,7 +37,7 @@ VIAddVersionKey "LegalCopyright" "Free & public domain (Unlicense)"
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 !define MUI_WELCOMEPAGE_TITLE "NEWS MEVA Online Setup"
-!define MUI_WELCOMEPAGE_TEXT "This wizard will install NEWS MEVA Online on your computer.$\r$\n$\r$\nINSTALLER NOTES:$\r$\n  - BETA release (v1.0.0-beta.1) - testing mode$\r$\n  - Free & open source - public domain (Unlicense)$\r$\n  - Always installs a FRESH copy: NO user data, NO database, NO previous settings$\r$\n$\r$\nThe installer will:$\r$\n  - Copy the application files$\r$\n  - Open port 3002 in the Windows Firewall$\r$\n  - Create Start Menu shortcuts$\r$\n$\r$\nClick Next to continue."
+!define MUI_WELCOMEPAGE_TEXT "This wizard will install NEWS MEVA Online on your computer.$\r$\n$\r$\nINSTALLER NOTES:$\r$\n  - BETA release (v3.0.0) - testing mode$\r$\n  - Free & open source - public domain (Unlicense)$\r$\n  - Always installs a FRESH copy: NO user data, NO database, NO previous settings$\r$\n$\r$\nThe installer will:$\r$\n  - Copy the application files$\r$\n  - Open port 3002 in the Windows Firewall$\r$\n  - Create Start Menu shortcuts$\r$\n$\r$\nClick Next to continue."
 !define MUI_FINISHPAGE_RUN "$INSTDIR\windows\Control Panel.bat"
 !define MUI_FINISHPAGE_RUN_TEXT "Open the Control Panel (set up your database)"
 !define MUI_FINISHPAGE_LINK "Open documentation"

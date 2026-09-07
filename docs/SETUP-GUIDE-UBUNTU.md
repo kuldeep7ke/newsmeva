@@ -33,7 +33,7 @@ This version uses **your own Supabase PostgreSQL database** (free tier) instead 
 | App URL (LAN) | `http://<SERVER-IP>:3002` â€” also `http://<SERVER-IP>` (port 80, bundled Caddy proxy) and `http://<HOSTNAME>` when the client can resolve the server's computer name |
 | Port | `3002` (TCP) |
 | Installed at | `/opt/workstation-online` (config in `backend/.env`) |
-| Service | `workstation-meva.service` under systemd |
+| Service | `newsmeva.service` under systemd |
 
 **Two ways to install:** (a) a one-file `.deb` package that is **fully offline** â€” it bundles the built app, a Node.js runtime, and Caddy, so the machine needs no Node.js/npm/compiler/internet (see Â§3a); or (b) the source-based route, where `ubuntu/install.sh` deploys the source to `/opt/workstation-online`, installs dependencies with `npm ci`, builds both packages, creates `backend/.env` from the template, and registers the systemd service. The database is **never** shipped â€” the first server start creates all tables automatically (empty), and the first signup becomes the admin.
 
@@ -56,7 +56,7 @@ Quick version:
 
 ### 3a. One-file `.deb` package (recommended)
 
-A prebuilt, **fully offline** Debian/Ubuntu package is available: `installer/workstation-meva-online_1.0.0_amd64.deb`.
+A prebuilt, **fully offline** Debian/Ubuntu package is available: `installer/newsmeva-online_3.0.0_amd64.deb`.
 It bundles the built app, a Node.js runtime, and the Caddy reverse proxy, so **no Node.js, no npm, no compiler,
 and no internet are needed at install time**. To build it yourself from source run
 `node ubuntu/installer/build-deb.js` (produces the file above).
@@ -64,7 +64,7 @@ and no internet are needed at install time**. To build it yourself from source r
 Copy it to the Ubuntu machine and install:
 
 ```bash
-sudo apt install ./workstation-meva-online_1.0.0_amd64.deb
+sudo apt install ./newsmeva-online_3.0.0_amd64.deb
 ```
 
 What `postinst` does automatically on first install:
@@ -72,7 +72,7 @@ What `postinst` does automatically on first install:
 1. Creates a `meva` system user
 2. Extracts the bundled Node.js to `/opt/workstation-node`
 3. Creates `/opt/workstation-online/backend/.env` (once, with a generated `JWT_SECRET`)
-4. Registers + starts two systemd services: `workstation-meva.service` (the app) and `workstation-meva-caddy.service` (proxy on port 80)
+4. Registers + starts two systemd services: `newsmeva.service` (the app) and `newsmeva-caddy.service` (proxy on port 80)
 5. Opens ports `80` and `3002` in `ufw` if it's active
 
 Then configure your database (same as below): edit `/opt/workstation-online/backend/.env`,
@@ -80,10 +80,10 @@ set `DATABASE_URL`, and restart:
 
 ```bash
 sudo nano /opt/workstation-online/backend/.env
-sudo systemctl restart workstation-meva.service
+sudo systemctl restart newsmeva.service
 ```
 
-Upgrading later = `sudo apt install ./workstation-meva-online_1.0.0_amd64.deb` again when a new `.deb` is
+Upgrading later = `sudo apt install ./newsmeva-online_3.0.0_amd64.deb` again when a new `.deb` is
 released (your `.env` and data are preserved). To fully remove: `sudo apt remove --purge workstation-meva-online`.
 
 ### 3b. Install from source
@@ -113,7 +113,7 @@ sudo bash ubuntu/install.sh
 2. Deploys the source to `/opt/workstation-online`
 3. Runs `npm ci` + `npm run build` for backend and frontend
 4. Creates `backend/.env` from `.env.example` (if missing)
-5. Creates a system user `meva` and registers `workstation-meva.service`
+5. Creates a system user `meva` and registers `newsmeva.service`
 6. Enables + starts the service and verifies the health endpoint
 
 **After installing â€” configure your database:**
@@ -135,7 +135,7 @@ JWT_SECRET=change-me-to-a-random-string
 Save, then restart:
 
 ```bash
-sudo systemctl restart workstation-meva.service
+sudo systemctl restart newsmeva.service
 ```
 
 > Note: passwords with special characters must be URL-encoded in the connection string (`&` â†’ `%26`, `%` â†’ `%25`, `@` â†’ `%40`).
@@ -217,14 +217,14 @@ tools. For full administration, always use the first admin signup.
 
 ```bash
 # Service status
-sudo systemctl status workstation-meva.service --no-pager
+sudo systemctl status newsmeva.service --no-pager
 
 # Health endpoint
 curl http://localhost:3002/api/health
 # â†’ {"status":"ok",...}
 
 # Live logs
-sudo journalctl -u workstation-meva.service -f
+sudo journalctl -u newsmeva.service -f
 ```
 
 ---
@@ -232,11 +232,11 @@ sudo journalctl -u workstation-meva.service -f
 ## 8. Managing the Service
 
 ```bash
-sudo systemctl start workstation-meva.service    # start
-sudo systemctl stop workstation-meva.service     # stop
-sudo systemctl restart workstation-meva.service  # restart
-sudo systemctl status workstation-meva.service   # status
-sudo systemctl disable workstation-meva.service  # disable autostart at boot
+sudo systemctl start newsmeva.service    # start
+sudo systemctl stop newsmeva.service     # stop
+sudo systemctl restart newsmeva.service  # restart
+sudo systemctl status newsmeva.service   # status
+sudo systemctl disable newsmeva.service  # disable autostart at boot
 ```
 
 Manual (foreground) mode â€” useful for debugging:
@@ -269,9 +269,9 @@ Your `backend/.env` and all data in Supabase are preserved â€” they live ou
 | Port 3002 busy | `sudo lsof -i tcp:3002` â†’ kill the process, or change `PORT` in `.env` |
 | Empty dashboard / no staff | Fresh database â€” sign up the first user (becomes admin) |
 | LAN users can't connect | Open port 3002 in the firewall (section 4) |
-| Browser shows `Cannot GET /` or `Frontend build not found` | The frontend was never built on this machine â€” `cd frontend && npm ci && npm run build`, then restart (`sudo systemctl restart workstation-meva`) |
+| Browser shows `Cannot GET /` or `Frontend build not found` | The frontend was never built on this machine â€” `cd frontend && npm ci && npm run build`, then restart (`sudo systemctl restart newsmeva`) |
 | `http://workstation` / `http://<hostname>` doesn't resolve | Name lookup happens on the *client* â€” use the server IP, run a helper from `lan/` on that client, or add a DNS entry in the router |
-| Health endpoint not ready | Give it a few seconds after start, then `journalctl -u workstation-meva.service -n 30` |
+| Health endpoint not ready | Give it a few seconds after start, then `journalctl -u newsmeva.service -n 30` |
 
 ---
 
@@ -280,8 +280,8 @@ Your `backend/.env` and all data in Supabase are preserved â€” they live ou
 ```
 Install:      sudo bash ubuntu/install.sh
 Configure:    sudo nano /opt/workstation-online/backend/.env
-Restart:      sudo systemctl restart workstation-meva.service
-Logs:         sudo journalctl -u workstation-meva.service -f
+Restart:      sudo systemctl restart newsmeva.service
+Logs:         sudo journalctl -u newsmeva.service -f
 Manual run:   sudo -u meva bash /opt/workstation-online/ubuntu/start.sh
 Stop manual:  sudo -u meva bash /opt/workstation-online/ubuntu/stop.sh
 ```

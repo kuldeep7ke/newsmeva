@@ -1,6 +1,6 @@
 // Release metadata for the whole app. Bump here + in package.json when a new
 // version ships. This is a pre-release beta under public-domain (Unlicense).
-export const APP_VERSION = '1.0.0-beta.1';
+export const APP_VERSION = '3.0.0';
 export const APP_STATUS = 'Beta';
 export const TESTING_MODE = true;
 export const APP_LICENSE = 'Public Domain (Unlicense)';

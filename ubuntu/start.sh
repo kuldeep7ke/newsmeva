@@ -25,7 +25,7 @@ LOG=""
 if [[ -w "$BASE" ]]; then
     LOG="$BASE/server.log"
 else
-    LOG="/tmp/workstation-meva-server.log"
+    LOG="/tmp/newsmeva-server.log"
 fi
 
 if [[ ! -f "$ENTRY" ]]; then
@@ -110,7 +110,7 @@ start_caddy() {
         fi
         echo "Starting Caddy reverse proxy..."
         local clog
-        if [[ -w "$BASE" ]]; then clog="$BASE/proxy/caddy-err.log"; else clog="/tmp/workstation-meva-caddy.log"; fi
+        if [[ -w "$BASE" ]]; then clog="$BASE/proxy/caddy-err.log"; else clog="/tmp/newsmeva-caddy.log"; fi
         nohup caddy run --config "$caddyfile" >> "$clog" 2>&1 &
     fi
 }

@@ -1,4 +1,4 @@
-package com.workstation.meva
+package com.newsmeva
 
 import android.Manifest
 import android.animation.ObjectAnimator
@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupButtons() {
         btnStart.setOnClickListener { startServer() }
         btnStop.setOnClickListener { stopServer() }
-        btnOpen.setOnClickListener { openWorkstation() }
+        btnOpen.setOnClickListener { openNewsmeva() }
 
         // Button press animations
         listOf(btnStart, btnStop, btnOpen).forEach { btn ->
@@ -201,23 +201,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openWorkstation() {
+    private fun openNewsmeva() {
         lifecycleScope.launch {
             btnOpen.isEnabled = false
             btnOpen.text = "Connecting..."
 
             val ok = waitForServer(10_000)
             if (ok) {
-                showWorkstation()
+                showNewsmeva()
             } else {
                 render(NodeService.STATUS_ERROR, "Cannot reach server. Press Start first.")
                 btnOpen.isEnabled = true
-                btnOpen.text = "Open Workstation"
+                btnOpen.text = "Open NEWS MEVA"
             }
         }
     }
 
-    private fun showWorkstation() {
+    private fun showNewsmeva() {
         controlPanel.visibility = View.GONE
         webView.visibility = View.VISIBLE
         webView.loadUrl(SERVER_URL)
@@ -279,7 +279,7 @@ class MainActivity : AppCompatActivity() {
 
         // Button states
         btnOpen.isEnabled = status == NodeService.STATUS_RUNNING
-        btnOpen.text = if (status == NodeService.STATUS_RUNNING) "Open Workstation" else "Open Workstation"
+        btnOpen.text = if (status == NodeService.STATUS_RUNNING) "Open NEWS MEVA" else "Open NEWS MEVA"
         btnStart.isEnabled = status != NodeService.STATUS_STARTING
         btnStop.isEnabled = status == NodeService.STATUS_RUNNING || status == NodeService.STATUS_STARTING
     }

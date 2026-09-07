@@ -1,4 +1,4 @@
-package com.workstation.meva
+package com.newsmeva
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -19,8 +19,8 @@ class NodeService : Service() {
 
     companion object {
         const val TAG = "NodeService"
-        const val ACTION_START = "com.workstation.meva.START"
-        const val ACTION_STOP = "com.workstation.meva.STOP"
+        const val ACTION_START = "com.newsmeva.START"
+        const val ACTION_STOP = "com.newsmeva.STOP"
         const val CHANNEL_ID = "meva_server_channel"
         const val NOTIFICATION_ID = 1
 

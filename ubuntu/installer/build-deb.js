@@ -7,7 +7,7 @@
  *   - bundled Node.js linux-x64 runtime (extracted by postinst)
  *   - bundled Caddy v2 linux binary (reverse proxy on :80)
  *   - systemd units + one-time .env creation
- * Install is fully offline:  sudo apt install ./workstation-meva-online_*.deb
+ * Install is fully offline:  sudo apt install ./newsmeva-online_*.deb
  *
  * Usage:
  *   node ubuntu/installer/build-deb.js [--version 1.0.0] [--arch amd64]
@@ -29,13 +29,14 @@ const ROOT = path.resolve(__dirname, '..', '..');
 // ----------------------------------------------------------------------------
 // package metadata
 // ----------------------------------------------------------------------------
-const PKG = 'workstation-meva-online';
-const VERSION = process.argv.find((a, i) => process.argv[i - 1] === '--version') || '1.0.0';
+const PKG = 'workstation-meva-online';       // apt package identity (upgrade/remove)
+const DEB_PREFIX = 'newsmeva-online';        // .deb output filename prefix
+const VERSION = process.argv.find((a, i) => process.argv[i - 1] === '--version') || '3.0.0';
 const ARCH = process.argv.find((a, i) => process.argv[i - 1] === '--arch') || 'amd64';
 const INSTALL_DIR = '/opt/workstation-online';
 const NODE_PREFIX = '/opt/workstation-node';
 const OUT_DIR = path.join(ROOT, 'installer');
-const OUT_DEB = path.join(OUT_DIR, `${PKG}_${VERSION}_${ARCH}.deb`);
+const OUT_DEB = path.join(OUT_DIR, `${DEB_PREFIX}_${VERSION}_${ARCH}.deb`);
 const BUILD = path.join(os.tmpdir(), `wm-deb-${Date.now()}`);
 const STAGING = path.join(BUILD, 'data');           // data.tar payload root
 const CONTROL_DIR = path.join(BUILD, 'control');    // control files
@@ -181,8 +182,8 @@ async function assemble() {
   // systemd units
   const etc = path.join(STAGING, 'etc', 'systemd', 'system');
   fs.mkdirSync(etc, { recursive: true });
-  cp(path.join(FILES_DIR, 'workstation-meva.service'), path.join(etc, 'workstation-meva.service'));
-  cp(path.join(FILES_DIR, 'workstation-meva-caddy.service'), path.join(etc, 'workstation-meva-caddy.service'));
+  cp(path.join(FILES_DIR, 'newsmeva.service'), path.join(etc, 'newsmeva.service'));
+  cp(path.join(FILES_DIR, 'newsmeva-caddy.service'), path.join(etc, 'newsmeva-caddy.service'));
 
   npmModules && fs.rmSync(npmModules, { recursive: true, force: true });
 }
@@ -306,7 +307,7 @@ function buildControl() {
     'Section: web',
     'Priority: optional',
     `Architecture: ${ARCH}`,
-    'Maintainer: NEWS MEVA <support@workstation-meva.invalid>',
+    'Maintainer: NEWS MEVA <support@newsmeva.invalid>',
     `Installed-Size: ${size}`,
     'Suggests: openssl',
     'Description: NEWS MEVA Online - Marathi newsroom office suite (offline, self-contained)',
@@ -393,7 +394,7 @@ async function main() {
   console.log(`  size        : ${(deb.length / 1024 / 1024).toFixed(1)} MB`);
   console.log(`  control arc : ${controlGz.length} bytes, data arc: ${dataGz.length} bytes`);
   console.log(`  Installed   : ${INSTALL_DIR} (data preserved on upgrade; .env one-time)`);
-  console.log(`  Services    : workstation-meva.service + workstation-meva-caddy.service (NEWS MEVA)`);
+  console.log(`  Services    : newsmeva.service + newsmeva-caddy.service (NEWS MEVA)`);
   fs.rmSync(BUILD, { recursive: true, force: true });
 }
 

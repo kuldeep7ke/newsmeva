@@ -2044,7 +2044,7 @@ cd frontend && npm run build
 | `ubuntu/start.sh` | Manual launcher â€” firewall self-heal (ufw), .env creation, Caddy auto-start, hidden background with `start-server-core.sh`, health check, browser open |
 | `ubuntu/stop.sh` | Kills wrapper FIRST, then node, then Caddy |
 | `ubuntu/start-server-core.sh` | Auto-restart watchdog (bash) |
-| `ubuntu/workstation-meva.service` | systemd unit â€” `User=meva`, `Restart=always`, `Wants=caddy.service`, loads `.env` |
+| `ubuntu/newsmeva.service` | systemd unit â€” `User=meva`, `Restart=always`, `Wants=caddy.service`, loads `.env` |
 
 ### RHEL/CentOS/Rocky/AlmaLinux/Fedora (4 files)
 
@@ -2054,7 +2054,7 @@ cd frontend && npm run build
 | `redhat/start.sh` | Manual launcher â€” same as Ubuntu but `firewalld` port 3002 |
 | `redhat/stop.sh` | Same as Ubuntu |
 | `redhat/start-server-core.sh` | Auto-restart watchdog (bash) |
-| `redhat/workstation-meva.service` | systemd unit (identical to Ubuntu) |
+| `redhat/newsmeva.service` | systemd unit (identical to Ubuntu) |
 
 ### Root Scripts (2 files)
 
@@ -2092,8 +2092,8 @@ cd frontend && npm run build
 |----|-----------|-----------|
 | Windows | `Install Autostart.bat` â†’ `.lnk` in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` | `Start Server Hidden.vbs` â†’ `start-server.ps1 -Mode hidden` |
 | macOS | `Install AutoStart.command` â†’ `~/Library/LaunchAgents/com.workstation.meva.plist` | `start-server-core.sh` â†’ `node dist/index.js` (KeepAlive) |
-| Ubuntu | `install.sh` â†’ `systemctl enable workstation-meva` | systemd `Restart=always` |
-| RHEL | `install.sh` â†’ `systemctl enable workstation-meva` | systemd `Restart=always` |
+| Ubuntu | `install.sh` â†’ `systemctl enable newsmeva` | systemd `Restart=always` |
+| RHEL | `install.sh` â†’ `systemctl enable newsmeva` | systemd `Restart=always` |
 
 ### Auto-Restart (on crash)
 

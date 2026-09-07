@@ -1,7 +1,7 @@
 [Unit]
 Description=NEWS MEVA Online server
-After=network.target workstation-meva-caddy.service
-Wants=workstation-meva-caddy.service
+After=network.target newsmeva-caddy.service
+Wants=newsmeva-caddy.service
 
 [Service]
 Type=simple

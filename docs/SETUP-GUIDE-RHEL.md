@@ -33,7 +33,7 @@ This version uses **your own Supabase PostgreSQL database** (free tier) instead 
 | App URL (LAN) | `http://<SERVER-IP>:3002` â€” also `http://<SERVER-IP>` (port 80, bundled Caddy proxy) and `http://<HOSTNAME>` when the client can resolve the server's computer name |
 | Port | `3002` (TCP) |
 | Installed at | `/opt/workstation-online` (config in `backend/.env`) |
-| Service | `workstation-meva.service` under systemd |
+| Service | `newsmeva.service` under systemd |
 
 The app has no native modules, so the **same code** runs on Ubuntu and RedHat-family distros â€” only the Node.js install and firewall commands differ (this guide covers those: `dnf` + `firewalld`).
 
@@ -79,7 +79,7 @@ sudo bash redhat/install.sh
 2. Deploys the source to `/opt/workstation-online`
 3. Runs `npm ci` + `npm run build` for backend and frontend
 4. Creates `backend/.env` from `.env.example` (if missing)
-5. Creates a system user `meva` and registers `workstation-meva.service`
+5. Creates a system user `meva` and registers `newsmeva.service`
 6. Opens port `3002` in firewalld
 7. Enables + starts the service and verifies the health endpoint
 
@@ -102,7 +102,7 @@ JWT_SECRET=change-me-to-a-random-string
 Save, then restart:
 
 ```bash
-sudo systemctl restart workstation-meva.service
+sudo systemctl restart newsmeva.service
 ```
 
 > Note: passwords with special characters must be URL-encoded in the connection string (`&` â†’ `%26`, `%` â†’ `%25`, `@` â†’ `%40`).
@@ -181,14 +181,14 @@ tools. For full administration, always use the first admin signup.
 
 ```bash
 # Service status
-sudo systemctl status workstation-meva.service --no-pager
+sudo systemctl status newsmeva.service --no-pager
 
 # Health endpoint
 curl http://localhost:3002/api/health
 # â†’ {"status":"ok",...}
 
 # Live logs
-sudo journalctl -u workstation-meva.service -f
+sudo journalctl -u newsmeva.service -f
 ```
 
 ---
@@ -196,11 +196,11 @@ sudo journalctl -u workstation-meva.service -f
 ## 8. Managing the Service
 
 ```bash
-sudo systemctl start workstation-meva.service    # start
-sudo systemctl stop workstation-meva.service     # stop
-sudo systemctl restart workstation-meva.service  # restart
-sudo systemctl status workstation-meva.service   # status
-sudo systemctl disable workstation-meva.service  # disable autostart at boot
+sudo systemctl start newsmeva.service    # start
+sudo systemctl stop newsmeva.service     # stop
+sudo systemctl restart newsmeva.service  # restart
+sudo systemctl status newsmeva.service   # status
+sudo systemctl disable newsmeva.service  # disable autostart at boot
 ```
 
 Manual (foreground) mode â€” useful for debugging:
@@ -233,9 +233,9 @@ Your `backend/.env` and all data in Supabase are preserved â€” they live ou
 | Port 3002 busy | `sudo lsof -i tcp:3002` â†’ kill the process, or change `PORT` in `.env` |
 | Empty dashboard / no staff | Fresh database â€” sign up the first user (becomes admin) |
 | LAN users can't connect | Firewall: `sudo firewall-cmd --permanent --add-port=3002/tcp` then reload |
-| Browser shows `Cannot GET /` or `Frontend build not found` | The frontend was never built on this machine â€” `cd frontend && npm ci && npm run build`, then restart (`sudo systemctl restart workstation-meva`) |
+| Browser shows `Cannot GET /` or `Frontend build not found` | The frontend was never built on this machine â€” `cd frontend && npm ci && npm run build`, then restart (`sudo systemctl restart newsmeva`) |
 | `http://workstation` / `http://<hostname>` doesn't resolve | Name lookup happens on the *client* â€” use the server IP, run a helper from `lan/` on that client, or add a DNS entry in the router |
-| Health endpoint not ready | Give it a few seconds after start, then `journalctl -u workstation-meva.service -n 30` |
+| Health endpoint not ready | Give it a few seconds after start, then `journalctl -u newsmeva.service -n 30` |
 
 ---
 
@@ -244,8 +244,8 @@ Your `backend/.env` and all data in Supabase are preserved â€” they live ou
 ```
 Install:      sudo bash redhat/install.sh
 Configure:    sudo nano /opt/workstation-online/backend/.env
-Restart:      sudo systemctl restart workstation-meva.service
-Logs:         sudo journalctl -u workstation-meva.service -f
+Restart:      sudo systemctl restart newsmeva.service
+Logs:         sudo journalctl -u newsmeva.service -f
 Manual run:   sudo -u meva bash /opt/workstation-online/redhat/start.sh
 Stop manual:  sudo -u meva bash /opt/workstation-online/redhat/stop.sh
 ```

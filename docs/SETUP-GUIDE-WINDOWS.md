@@ -51,7 +51,7 @@ If `tools/node/` is present on first run, Node is installed automatically from i
 
 ## 2. Quick Install (.exe Installer)
 
-> **Beta:** this is a pre-release beta (`v1.0.0-beta.1`) running in **testing mode**, and the
+> **Beta:** this is a pre-release beta (`v3.0.0`) running in **testing mode**, and the
 > app is **free & public domain (Unlicense)**. The installer **never carries over user data** â€”
 > it always deploys a fresh copy (no database, no settings), ready for new users only.
 
@@ -86,7 +86,7 @@ The panel reads and writes the **same** state files the `.bat` launchers use â�
 
 ### Install
 
-1. Run `installer\workstation-meva-setup.exe`
+1. Run `installer\newsmeva-setup.exe`
 2. Click **Next** on the Welcome page
 3. Tick **"I accept the Terms and Conditions"** and click **Next** (the wizard will not continue without it)
 4. Choose the install folder (default: `C:\Workstation-Meva`)
@@ -97,7 +97,7 @@ The app opens at `http://localhost:3002`. Create your first account â€” it 
 
 ### Re-run the installer (Maintenance)
 
-If the app is already installed, re-running `workstation-meva-setup.exe` shows a single **Maintenance** page (there is no separate Modify / Repair step anymore):
+If the app is already installed, re-running `newsmeva-setup.exe` shows a single **Maintenance** page (there is no separate Modify / Repair step anymore):
 
 - **Reinstall / Repair** (default) â€” refreshes ALL application files, shortcuts and the firewall rule; your data in the install folder is kept
 - **Uninstall** â€” removes NEWS MEVA Online from this computer (see below)
@@ -486,7 +486,7 @@ cd ..
 "C:\Program Files (x86)\NSIS\Bin\makensis.exe" installer\newsmeva.nsi
 ```
 
-Output: `installer\workstation-meva-setup.exe` (~68 MB).
+Output: `installer\newsmeva-setup.exe` (~68 MB).
 
 ### What gets bundled
 
@@ -549,8 +549,8 @@ The self-healing launcher (`windows\start-server.ps1`) runs these steps in order
 
 | Action | Command |
 |--------|---------|
-| **Install (no tech needed)** | `installer\workstation-meva-setup.exe` â€” accepts T&C, then installs |
-| **Repair / Reinstall** | Re-run `installer\workstation-meva-setup.exe` â†’ **Reinstall / Repair** (keeps data) |
+| **Install (no tech needed)** | `installer\newsmeva-setup.exe` â€” accepts T&C, then installs |
+| **Repair / Reinstall** | Re-run `installer\newsmeva-setup.exe` â†’ **Reinstall / Repair** (keeps data) |
 | **Uninstall** | Add/Remove Programs â†’ NEWS MEVA Online, **or** Start Menu â†’ Uninstall, **or** run installer â†’ **Uninstall** (choose Keep data / Remove ALL) |
 | **Control Panel (setup & daily use)** | `windows\Control Panel.bat` â€” server start/stop + status, database URL + live test, autostart toggle, proxy toggle, LAN addresses, repair/heal/clean tools |
 | **Start server** | `windows\Start Server.bat` |

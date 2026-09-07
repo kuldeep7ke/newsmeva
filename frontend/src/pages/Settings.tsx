@@ -172,7 +172,7 @@ export default function Settings() {
     catch { return false; }
   });
   const [channelMeta, setChannelMeta] = useState({
-    channel_name: '', channel_display_name: '', website_url: '',
+channel_name: '', channel_display_name: '', website_url: 'www.newsmeva.com',
     editor_name: '', editor_position: '', subscribe_url: '',
   });
   const [savingChannel, setSavingChannel] = useState(false);
@@ -527,9 +527,9 @@ export default function Settings() {
               <p className="text-sm font-medium text-surface-800">NEWS MEVA Team</p>
               <div className="flex items-center gap-2 text-xs text-surface-500">
                 <Globe className="w-3.5 h-3.5" />
-                <a href="https://marathimeva.com" target="_blank" rel="noopener noreferrer"
+                <a href="https://www.newsmeva.com" target="_blank" rel="noopener noreferrer"
                   className="text-accent-600 hover:text-accent-700 flex items-center gap-1">
-                  marathimeva.com <ExternalLink className="w-3 h-3" />
+                  www.newsmeva.com <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
             </div>
@@ -541,16 +541,16 @@ export default function Settings() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs text-surface-600">
                 <Mail className="w-3.5 h-3.5 text-surface-400" />
-                <a href="mailto:info@marathimeva.com"
-                  className="text-accent-600 hover:text-accent-700">info@marathimeva.com</a>
+                <a href="mailto:info@newsmeva.com"
+                  className="text-accent-600 hover:text-accent-700">info@newsmeva.com</a>
               </div>
               <div className="flex items-center gap-2 text-xs text-surface-600">
                 <Phone className="w-3.5 h-3.5 text-surface-400" />
-                <span>+91 86006 33899</span>
+                <span>8600633899</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-surface-600">
                 <MapPin className="w-3.5 h-3.5 text-surface-400" />
-                <span>kuldeep7ke, Maliwada, Ahilyanagar, Maharashtra, India - 414001</span>
+                <span>News Meva, Maliwada, Ahilyanagar, MH IN - 414001</span>
               </div>
             </div>
           </div>

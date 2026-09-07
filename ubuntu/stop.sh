@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # NEWS MEVA Online - stop the manual (non-systemd) server.
-# If running under systemd, use:  sudo systemctl stop workstation-meva.service
+# If running under systemd, use:  sudo systemctl stop newsmeva.service
 
 set -euo pipefail
 

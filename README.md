@@ -10,7 +10,7 @@ Supabase PostgreSQL** database â€” with an **offline-first sync engine**: i
 internet goes down, the server keeps working on a local mirror and
 automatically syncs everything back the moment the connection returns.
 
-> **Status: Pre-release Beta (`v1.0.0-beta.1`) â€” Testing Mode.** The app is
+> **Status: Pre-release Beta (`v3.0.0`) â€” Testing Mode.** The app is
 > **free & public domain (Unlicense)** and travels as a **fresh copy**: no user
 > data, no database, no previous settings â€” ready for new users only.
 >
@@ -206,7 +206,7 @@ render.yaml        Render.com cloud config
 ## Installer (Beta)
 
 The Windows `.exe` installer highlights:
-- **v1.0.0-beta.1 (Beta â€” testing mode)**, free & public domain
+- **v3.0.0 (Beta â€” testing mode)**, free & public domain
 - **Always installs a fresh copy** â€” explicitly excludes any database, `.db`/`.sqlite`
   files, `.env`, logs, backups, and telemetry, so **no previous user data** ever ships
 - Bundles the Node.js runtime + Caddy proxy + launcher scripts for fully-offline setup
@@ -294,7 +294,7 @@ cd workstation
 sudo bash ubuntu/install.sh        # installs Node (bundled offline v24.19.0, else NodeSource 20 LTS), builds, installs systemd service, creates .env (auto JWT_SECRET)
 # .env is created automatically (local database). To use Supabase later:
 sudo nano /opt/workstation-online/backend/.env   # set DATABASE_URL + JWT_SECRET
-sudo systemctl restart workstation-meva.service
+sudo systemctl restart newsmeva.service
 ```
 
 Manual (no systemd): `bash ubuntu/start.sh` starts the server hidden in the
@@ -314,7 +314,7 @@ cd workstation
 sudo bash redhat/install.sh        # dnf + firewalld, opens port 3002, installs Node (bundled offline v24.19.0, else NodeSource 20 LTS), creates .env (auto JWT_SECRET)
 # .env is created automatically (local database). To use Supabase later:
 sudo nano /opt/workstation-online/backend/.env   # set DATABASE_URL + JWT_SECRET
-sudo systemctl restart workstation-meva.service
+sudo systemctl restart newsmeva.service
 ```
 
 Manual (no systemd): `bash redhat/start.sh` â€” same behavior as Ubuntu above

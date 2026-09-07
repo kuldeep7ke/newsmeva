@@ -114,16 +114,17 @@ export default function About() {
               <h3 className="text-sm font-semibold text-surface-800 mb-2">Contact / Project</h3>
               <div className="space-y-1 text-xs text-surface-500">
                 <p>Project: <a href="https://github.com/kuldeep7ke/newsmeva" className="text-accent-500 hover:text-accent-600">github.com/kuldeep7ke/newsmeva</a></p>
-                <p>Email: <a href="mailto:info@marathimeva.com" className="text-accent-500 hover:text-accent-600">info@marathimeva.com</a></p>
-                <p>Phone: <a href="tel:+918600633899" className="text-accent-500 hover:text-accent-600">+91 86006 33899</a></p>
+                <p>Email: <a href="mailto:info@newsmeva.com" className="text-accent-500 hover:text-accent-600">info@newsmeva.com</a></p>
+                <p>Website: <a href="https://www.newsmeva.com" className="text-accent-500 hover:text-accent-600">www.newsmeva.com</a></p>
+                <p>Phone: <a href="tel:8600633899" className="text-accent-500 hover:text-accent-600">8600633899</a></p>
               </div>
             </div>
             <div className="bg-white rounded-xl border border-surface-200 p-4">
               <h3 className="text-sm font-semibold text-surface-800 mb-2">Location</h3>
               <p className="text-xs text-surface-500 leading-relaxed">
+                News Meva,<br />
                 Maliwada,<br />
-                Ahilyanagar, Maharashtra,<br />
-                India &mdash; PIN 414001
+                Ahilyanagar, MH IN - 414001
               </p>
             </div>
           </div>

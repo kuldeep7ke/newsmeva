@@ -5,12 +5,12 @@ import { Mail, Phone, MapPin, Clock, Globe } from 'lucide-react';
 const APP = getAppName();
 
 const CONTACT_INFO = {
-  email: 'info@marathimeva.com',
-  phone: '+91 86006 33899',
-  phoneRaw: '+918600633899',
-  address: 'kuldeep7ke, Maliwada, Ahilyanagar, Maharashtra, India',
+  email: 'info@newsmeva.com',
+  phone: '8600633899',
+  phoneRaw: '8600633899',
+  address: 'News Meva, Maliwada, Ahilyanagar, MH IN',
   pin: '414001',
-  website: 'marathimeva.com',
+  website: 'www.newsmeva.com',
 };
 
 export default function Contact() {

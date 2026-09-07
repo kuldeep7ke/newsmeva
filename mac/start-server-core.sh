@@ -16,7 +16,7 @@ if [[ -z "$LOG" || ! -w "$(dirname "$LOG")" ]]; then
   LOG="$ROOT/server.log"
 fi
 if [[ ! -w "$(dirname "$LOG")" ]]; then
-  LOG="/tmp/workstation-meva-server.log"
+  LOG="/tmp/newsmeva-server.log"
 fi
 MAX_RESTARTS=5          # max restarts within the window
 RESET_WINDOW=60         # seconds â€” counter resets after server runs this long

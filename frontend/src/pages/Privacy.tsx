@@ -63,7 +63,7 @@ export default function Privacy() {
 
           <section>
             <h2 className="text-lg font-bold text-surface-800 mb-3">7. Contact</h2>
-            <p>For privacy-related inquiries, contact us at <a href="mailto:info@marathimeva.com" className="text-accent-500 hover:text-accent-600">info@marathimeva.com</a> or call <a href="tel:+918600633899" className="text-accent-500 hover:text-accent-600">+91 86006 33899</a>.</p>
+            <p>For privacy-related inquiries, contact us at <a href="mailto:info@newsmeva.com" className="text-accent-500 hover:text-accent-600">info@newsmeva.com</a> or call <a href="tel:8600633899" className="text-accent-500 hover:text-accent-600">8600633899</a>.</p>
           </section>
         </div>
 

@@ -8,7 +8,7 @@ server creates all tables automatically on first start. Total time: ~5 minutes.
 1. Go to https://supabase.com â†’ **Start your project** â†’ sign up with GitHub or email
 2. Click **New project**
 3. **Organization**: pick yours or create one (free)
-4. **Project name**: anything, e.g. `workstation-meva`
+4. **Project name**: anything, e.g. `newsmeva`
 5. **Database password**: generate a strong one â€” **save it now** (shown once)
 6. **Region**: choose the closest to your users (e.g. Mumbai, Singapore, Tokyo)
 7. **Create new project** and wait ~2 minutes

@@ -7,7 +7,7 @@ const router = Router();
 
 router.get('/', async (_req: AuthRequest, res: Response) => {
   const row = await prepare('SELECT * FROM channel_metadata WHERE id = 1').get();
-  if (!row) return res.json({ channel_name: '', channel_display_name: '', website_url: '', editor_name: '', editor_position: '', subscribe_url: '' });
+  if (!row) return res.json({ channel_name: '', channel_display_name: '', website_url: 'www.newsmeva.com', editor_name: '', editor_position: '', subscribe_url: '' });
   res.json(row);
 });
 
