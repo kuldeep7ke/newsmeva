@@ -240,7 +240,7 @@ function startServer() {
   });
 
   // Bind '::' (dual-stack): serves IPv4 AND IPv6, so hostname access
-  // (http://n24s1:3002 via LLMNR/mDNS/hosts) works no matter which address
+  // (http://newsmeva:3002 via LLMNR/mDNS/hosts) works no matter which address
   // family the client resolves first.
   server.listen(PORT, '::', () => {
     console.log(`NEWS MEVA API running on http://0.0.0.0:${PORT} (dual-stack)`);

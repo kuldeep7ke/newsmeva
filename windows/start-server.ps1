@@ -24,6 +24,11 @@ $front   = Join-Path $root 'frontend'
 $log     = Join-Path $root 'server.log'
 $PORT    = 3002
 
+# Friendly LAN hostname - same value mapped by lan\Add Workstation Hosts.bat /
+# lan\Add Workstation Hosts.command. The OS computer name may carry the old
+# brand; show the friendly name so LAN users use a URL that resolves.
+$appHost = 'newsmeva'
+
 function Write-Log($msg) {
   $line = "[{0}] [launcher] {1}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $msg
   try { $line | Out-File -FilePath $log -Append -Encoding utf8 } catch {}
@@ -382,7 +387,7 @@ if ($Mode -in @('visible','open')) {
     if ($lanIp) {
       Write-Host "  LAN users:  http://${lanIp}:$PORT"
       Write-Host "              http://$lanIp        (when the bundled Caddy proxy is running)"
-      Write-Host "              http://$env:COMPUTERNAME   (computer name - resolves from most LAN machines)"
+      Write-Host "              http://$appHost   (friendly name - use where the hosts entry is mapped)"
     }
     Write-Host ""
     try { Start-Process "http://localhost:$PORT" } catch {}

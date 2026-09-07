@@ -8,7 +8,7 @@ REM Uses the friendly http://newsmeva when it actually works,
 REM otherwise falls back to the server IP directly.
 REM
 REM SERVER IP - change ONLY this line if the server's IP changes:
-set "SERVER_IP=192.168.1.14"
+set "SERVER_IP=192.168.1.9"
 REM ============================================================
 
 REM Probe the friendly name for real (3s timeout) before using it -

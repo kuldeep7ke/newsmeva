@@ -26,6 +26,12 @@ if (-not (Test-Path -LiteralPath $nodeExe)) { $nodeExe = 'node' }
 $probe   = Join-Path $winDir 'db-probe.js'
 
 $script:cfg = @{ PORT = 3002; DATABASE_URL = '' }
+
+# Friendly LAN hostname - same name mapped by lan\Add Workstation Hosts.bat /
+# lan\Add Workstation Hosts.command (192.168.1.9 newsmeva). The machine's OS
+# name may still carry the old brand; the panel shows the friendly name so LAN
+# users copy a URL that actually works.
+$script:appHost = 'newsmeva'
 $script:dbJob = $null
 $script:dbBusy = $false
 $script:dbLast = (Get-Date).AddMinutes(-10)
@@ -335,7 +341,7 @@ function Update-Status {
   }
   $pxDetail = "Port 80 reverse proxy for LAN access."
   if ($px.State -ne 'Stopped') {
-    if (Get-Process caddy -ErrorAction SilentlyContinue) { $pxDetail = "caddy.exe is running - http://<LAN-IP> and http://$env:COMPUTERNAME work (no :$($script:cfg.PORT))." }
+    if (Get-Process caddy -ErrorAction SilentlyContinue) { $pxDetail = "caddy.exe is running - http://<LAN-IP> and http://$script:appHost work (no :$($script:cfg.PORT))." }
   }
   $txtPxDetail.Text = $pxDetail
 
@@ -344,9 +350,9 @@ function Update-Status {
   $lanText = "Local: http://localhost:$($script:cfg.PORT)`n"
   if ($ips.Count -gt 0) {
     $lanText += "LAN: http://$($ips[0]):$($script:cfg.PORT)`n"
-    $lanText += "Hostname: http://$env:COMPUTERNAME"
+    $lanText += "Hostname: http://$script:appHost"
     if ($px.State -eq 'Running') {
-      $lanText += "`n(No port needed when the proxy is running - http://$($ips[0]) / http://$env:COMPUTERNAME)"
+      $lanText += "`n(No port needed when the proxy is running - http://$($ips[0]) / http://$script:appHost)"
     }
   } else {
     $lanText += "No LAN IP detected."
@@ -537,7 +543,7 @@ $lnkDbGuide.Add_Click({ Open-Url 'https://github.com/kuldeep7ke/newsmeva/blob/ma
 
 $btnCopyLocal.Add_Click({ Copy-ToClip "http://localhost:$($script:cfg.PORT)" })
 $btnCopyLan.Add_Click({ $ips = Get-LanData; if ($ips.Count -gt 0) { Copy-ToClip "http://$($ips[0]):$($script:cfg.PORT)" } })
-$btnCopyHost.Add_Click({ Copy-ToClip "http://$env:COMPUTERNAME" })
+$btnCopyHost.Add_Click({ Copy-ToClip "http://$script:appHost" })
 
 # ---------------------------------------------------------------------------
 # Kick-off
