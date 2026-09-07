@@ -92,12 +92,12 @@ export default function MobileApp() {
     }
   };
 
-  // Not logged in — show login screen
+  // Not logged in â€” show login screen
   if (!token) {
     return (
       <div className="login-screen">
         <div className="login-logo">W</div>
-        <div className="login-title">Workstation Meva</div>
+        <div className="login-title">NEWS MEVA</div>
         <div className="login-sub">Sign in to your office dashboard</div>
         <form onSubmit={handleLogin} style={{ width: '100%', maxWidth: 320 }}>
           <input
@@ -127,7 +127,7 @@ export default function MobileApp() {
     <div className="mobile-app">
       {/* Header */}
       <div className="mobile-header">
-        <h1>Workstation Meva</h1>
+        <h1>NEWS MEVA</h1>
         <div className={`status-badge ${serverOnline ? 'online' : 'offline'}`}>
           <span className={`status-dot ${serverOnline ? 'online' : 'offline'}`} />
           {serverOnline ? 'Online' : 'Offline'}
@@ -144,19 +144,19 @@ export default function MobileApp() {
             <div className="stat-grid">
               <div className="stat-card">
                 <div className="label">Tasks</div>
-                <div className="value accent">{dashboard?.tasks ?? '—'}</div>
+                <div className="value accent">{dashboard?.tasks ?? 'â€”'}</div>
               </div>
               <div className="stat-card">
                 <div className="label">Bulletins</div>
-                <div className="value success">{dashboard?.bulletins ?? '—'}</div>
+                <div className="value success">{dashboard?.bulletins ?? 'â€”'}</div>
               </div>
               <div className="stat-card">
                 <div className="label">Programs</div>
-                <div className="value warning">{dashboard?.programs ?? '—'}</div>
+                <div className="value warning">{dashboard?.programs ?? 'â€”'}</div>
               </div>
               <div className="stat-card">
                 <div className="label">Stories</div>
-                <div className="value" style={{color: '#7c3aed'}}>{dashboard?.stories ?? '—'}</div>
+                <div className="value" style={{color: '#7c3aed'}}>{dashboard?.stories ?? 'â€”'}</div>
               </div>
             </div>
 
@@ -164,19 +164,19 @@ export default function MobileApp() {
             <div className="section-header">Quick Actions</div>
             <div className="action-grid">
               <div className="action-btn" onClick={() => setTab('tasks')}>
-                <span className="icon">📋</span>
+                <span className="icon">ðŸ“‹</span>
                 Tasks
               </div>
               <div className="action-btn" onClick={() => setTab('bulletins')}>
-                <span className="icon">📺</span>
+                <span className="icon">ðŸ“º</span>
                 Bulletins
               </div>
               <div className="action-btn" onClick={handleRefresh}>
-                <span className="icon">🔄</span>
+                <span className="icon">ðŸ”„</span>
                 Refresh
               </div>
               <div className="action-btn danger" onClick={() => { setToken(null); localStorage.removeItem('token'); }}>
-                <span className="icon">🚪</span>
+                <span className="icon">ðŸšª</span>
                 Sign Out
               </div>
             </div>
@@ -188,12 +188,12 @@ export default function MobileApp() {
             <div className="section-header">Recent Tasks</div>
             <div className="mobile-list">
               <div className="mobile-list-item" onClick={() => setTab('home')}>
-                <div className="item-icon blue">📋</div>
+                <div className="item-icon blue">ðŸ“‹</div>
                 <div className="item-text">
                   <div className="item-title">View all tasks</div>
                   <div className="item-sub">{dashboard?.tasks ?? 0} tasks in database</div>
                 </div>
-                <div className="item-arrow">›</div>
+                <div className="item-arrow">â€º</div>
               </div>
             </div>
           </>
@@ -204,12 +204,12 @@ export default function MobileApp() {
             <div className="section-header">Bulletin Board</div>
             <div className="mobile-list">
               <div className="mobile-list-item" onClick={() => setTab('home')}>
-                <div className="item-icon green">📺</div>
+                <div className="item-icon green">ðŸ“º</div>
                 <div className="item-text">
                   <div className="item-title">View all bulletins</div>
                   <div className="item-sub">{dashboard?.bulletins ?? 0} bulletin slots</div>
                 </div>
-                <div className="item-arrow">›</div>
+                <div className="item-arrow">â€º</div>
               </div>
             </div>
           </>
@@ -220,21 +220,21 @@ export default function MobileApp() {
             <div className="section-header">Settings</div>
             <div className="mobile-list">
               <div className="mobile-list-item">
-                <div className="item-icon purple">⚙️</div>
+                <div className="item-icon purple">âš™ï¸</div>
                 <div className="item-text">
                   <div className="item-title">Server Status</div>
                   <div className="item-sub">{serverOnline ? 'Running on port 3002' : 'Offline'}</div>
                 </div>
               </div>
               <div className="mobile-list-item" onClick={handleRefresh}>
-                <div className="item-icon blue">🔄</div>
+                <div className="item-icon blue">ðŸ”„</div>
                 <div className="item-text">
                   <div className="item-title">Refresh Data</div>
                   <div className="item-sub">Pull to update dashboard</div>
                 </div>
               </div>
               <div className="mobile-list-item danger" onClick={() => { setToken(null); localStorage.removeItem('token'); }}>
-                <div className="item-icon" style={{background: 'rgba(255,82,82,0.15)'}}>🚪</div>
+                <div className="item-icon" style={{background: 'rgba(255,82,82,0.15)'}}>ðŸšª</div>
                 <div className="item-text">
                   <div className="item-title" style={{color: 'var(--danger)'}}>Sign Out</div>
                   <div className="item-sub">Clear session</div>
@@ -248,19 +248,19 @@ export default function MobileApp() {
       {/* Bottom nav */}
       <div className="bottom-nav">
         <button className={`nav-item ${tab === 'home' ? 'active' : ''}`} onClick={() => setTab('home')}>
-          <span className="nav-icon">🏠</span>
+          <span className="nav-icon">ðŸ </span>
           Home
         </button>
         <button className={`nav-item ${tab === 'tasks' ? 'active' : ''}`} onClick={() => setTab('tasks')}>
-          <span className="nav-icon">📋</span>
+          <span className="nav-icon">ðŸ“‹</span>
           Tasks
         </button>
         <button className={`nav-item ${tab === 'bulletins' ? 'active' : ''}`} onClick={() => setTab('bulletins')}>
-          <span className="nav-icon">📺</span>
+          <span className="nav-icon">ðŸ“º</span>
           News
         </button>
         <button className={`nav-item ${tab === 'settings' ? 'active' : ''}`} onClick={() => setTab('settings')}>
-          <span className="nav-icon">⚙️</span>
+          <span className="nav-icon">âš™ï¸</span>
           Settings
         </button>
       </div>

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Workstation Meva Online - Ubuntu/Debian Install Helper
+# NEWS MEVA Online - Ubuntu/Debian Install Helper
 #
 # Deploys the repository (backend + frontend) from THIS folder into
 # /opt/workstation-online and registers it as a systemd service.
@@ -25,7 +25,7 @@ chmod +x "$SCRIPT_DIR_FOR_FIX"/*.sh 2>/dev/null || true
 # ---------------------------------------------------------------------------------
 
 echo "============================================"
-echo "  Workstation Meva Online - Ubuntu Installer"
+echo "  NEWS MEVA Online - Ubuntu Installer"
 echo "============================================"
 echo ""
 
@@ -65,7 +65,7 @@ if [[ -z "$NODE_BIN" ]]; then
 fi
 NODE_VER=$("$NODE_BIN" -p "process.versions.node.split('.')[0]")
 if [[ "$NODE_VER" -lt 18 ]]; then
-    echo "Error: Node.js $NODE_VER detected — need 18 or newer."
+    echo "Error: Node.js $NODE_VER detected â€” need 18 or newer."
     echo "Upgrade Node.js first (see docs/SETUP-GUIDE-UBUNTU.md)."
     exit 1
 fi
@@ -89,8 +89,8 @@ sudo rsync -a --delete \
     --exclude .git --exclude '*.log' \
     --exclude 'backend/.env' --exclude '*.db' --exclude 'backups/' \
     "$REPO_ROOT/" "$TARGET_BASE/" 2>/dev/null \
-    || { echo "rsync unavailable — falling back to cp"; sudo cp -r "$REPO_ROOT/backend" "$REPO_ROOT/frontend" "$REPO_ROOT/package.json" "$REPO_ROOT/.env.example" "$REPO_ROOT/create-env.sh" "$REPO_ROOT/clean-junk.sh" "$REPO_ROOT/caddy-watchdog.sh" "$REPO_ROOT/render.yaml" "$TARGET_BASE/" 2>/dev/null && sudo mkdir -p "$TARGET_BASE/docs" && sudo cp -r "$REPO_ROOT/docs/SETUP-SUPABASE.md" "$REPO_ROOT/docs/SETUP-GUIDE-UBUNTU.md" "$TARGET_BASE/docs/" 2>/dev/null; } \
-    || { echo "Error: rsync and cp both failed — install rsync or check permissions."; exit 1; }
+    || { echo "rsync unavailable â€” falling back to cp"; sudo cp -r "$REPO_ROOT/backend" "$REPO_ROOT/frontend" "$REPO_ROOT/package.json" "$REPO_ROOT/.env.example" "$REPO_ROOT/create-env.sh" "$REPO_ROOT/clean-junk.sh" "$REPO_ROOT/caddy-watchdog.sh" "$REPO_ROOT/render.yaml" "$TARGET_BASE/" 2>/dev/null && sudo mkdir -p "$TARGET_BASE/docs" && sudo cp -r "$REPO_ROOT/docs/SETUP-SUPABASE.md" "$REPO_ROOT/docs/SETUP-GUIDE-UBUNTU.md" "$TARGET_BASE/docs/" 2>/dev/null; } \
+    || { echo "Error: rsync and cp both failed â€” install rsync or check permissions."; exit 1; }
 
 # --- Service user (create BEFORE npm ci so deps aren't installed as root) ---
 sudo useradd --system --home "$TARGET_BASE" --shell /usr/sbin/nologin "$SERVICE_USER" 2>/dev/null || true

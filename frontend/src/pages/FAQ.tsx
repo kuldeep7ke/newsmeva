@@ -7,7 +7,7 @@ const APP = getAppName();
 
 const faqs = [
   {
-    q: 'Is Workstation Meva free?',
+    q: 'Is NEWS MEVA free?',
     a: 'Yes, completely. The application is free and its source code is released to the public domain (Unlicense) — use, modify, and distribute it for any purpose, including commercial use. No paid tiers, no license keys.',
   },
   {
@@ -15,7 +15,7 @@ const faqs = [
     a: 'The application is a pre-release beta running in testing mode. Features are validated with real workflows and may change between releases. Feedback and bug reports are welcome on the project page.',
   },
   {
-    q: 'What is Workstation Meva?',
+    q: 'What is NEWS MEVA?',
     a: `${APP} is an open-source tool for managing the lifecycle of news production — from task assignment and script writing to bulletin scheduling, video editing, and teleprompter delivery. Initiated and maintained by kuldeep7ke.`,
   },
   {

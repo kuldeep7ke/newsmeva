@@ -1,5 +1,5 @@
 #!/bin/bash
-# Workstation Meva Online - Fix Permissions (.command version)
+# NEWS MEVA Online - Fix Permissions (.command version)
 # Same as "Fix Permissions.sh" but double-clickable.
 cd "$(dirname "$0")/.."
 

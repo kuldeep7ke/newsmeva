@@ -368,7 +368,7 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             AlertDialog.Builder(this)
-                .setTitle("Exit Workstation Meva?")
+                .setTitle("Exit NEWS MEVA?")
                 .setMessage("The server will keep running in the background.")
                 .setPositiveButton("Stop & Exit") { _, _ ->
                     stopServer()

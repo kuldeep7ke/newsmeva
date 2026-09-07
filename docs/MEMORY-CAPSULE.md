@@ -1,4 +1,4 @@
-﻿# WorkStation Online — Memory Capsule
+# WorkStation Online — Memory Capsule
 
 > The complete project memory: decisions, architecture, invariants, critical
 > logic, current verified state, runbook, and debugging playbook. Use this to
@@ -12,7 +12,7 @@
 
 ## 1. What This Is
 
-**WorkStation Online** ("Workstation Meva") is a Marathi newsroom office suite —
+**WorkStation Online** ("NEWS MEVA") is a Marathi newsroom office suite —
 users/roles, a 17-stage news-task workflow, stories, bulletins, programs, ads,
 archives, locations, reporters, leaves, teleprompter screens, analytics, PIN
 login, and real-time updates. Originally a Windows/SQLite desktop app, now a web
@@ -444,7 +444,7 @@ autostart), `repair` (fix launcher files and exit — used by
    If listening but not answering → kill the stale listener and start fresh.
 3. **Junk cleanup** — logs/tsbuildinfo older than 7 days (same whitelist as
    `windows/Clean Junk.bat` / `clean-junk.sh`).
-4. **Firewall self-heal** — if the rule `Workstation Meva 3002` is missing,
+4. **Firewall self-heal** — if the rule `NEWS MEVA 3002` is missing,
    relaunch `firewall-heal.bat` elevated (UAC `-Verb RunAs`) — the helper adds
    the rule with `profile=any` (Domain/Private/Public).
 5. **Caddy auto-start** (only if `proxy\caddy\caddy.exe` exists, not already
@@ -754,3 +754,15 @@ v24.19.0 has only arm64, so a bump silently breaks 32-bit devices.
 | 81 | **Fix: self-healing PG schema reconciliation 2026-09-04** - systemic bug class: live Supabase tables (created by older releases) were missing columns added since then because the PG path only ran `CREATE TABLE IF NOT EXISTS` (a no-op on existing tables) plus a short hardcoded ALTER list, while the SQLite mirror got all its columns via `columnExists`→ALTER. Any column added to a pre-existing live table (e.g. `ads.brand_type`, `tasks.reviewer_id`/`headline`/`slug`/`news_category`, `profiles.pin`/`shift_type`, `special_programs.schedule_time`, `stories.uid`) could fail to sync. `initDatabase()` now reconciles every canonical table against `PG_TABLES` on startup with idempotent `ALTER TABLE <t> ADD COLUMN IF NOT EXISTS "<col>" <type>`, so the live DB always matches the code (343 columns, skips PK id, `_new` legacy tables, `backup_config`) | `backend/src/database/schema.ts` |
 
 | 82 | **Fix: Ads card showing "0" on every card 2026-09-04** - classic React gotcha: `ad.rate && ad.rate > 0` and `ad.slots_count && ad.slots_count > 0` evaluate to the number `0` when the value is zero, and React renders `0` as visible text (unlike `false`/`null`/`undefined`). Fixed to `Number(ad.rate) > 0` and `Number(ad.slots_count) > 0` so zero values produce `false` (not rendered) | `frontend/src/pages/Ads.tsx` |
+
+| 83 | **Ads: clickable status cards filter the list 2026-09-07** - the six summary cards (Total Ads / Running Now / Expiring Soon / Auto Renew-Loop / Last Month / Inactive-Expired) are now buttons; clicking one filters the ads grid below by that status/cohort, and clicking it again (or **Clear filter**) restores "show all". Active card gets a colored ring. Uses the same predicates as the stats (expiring within 7 days, renewal_type auto_renew|loop, created in the previous calendar month, inactive OR expired-active) with a per-filter "Showing X of Y" counter and an empty-filter state | `frontend/src/pages/Ads.tsx` |
+
+| 84 | **Ads: category/period edits reflect on cards 2026-09-07** - verified end-to-end: editing an ad (e.g. Festival Special → General, or changing renewal cycle/period) persists via `PUT /ads/:id` (backend updates `ad_type`/`renewal_type`/`renewal_period`) and the list re-fetches, so the card badges (`typeLabel`/`renewalLabel`) and summary statistics update immediately from the latest row | `frontend/src/pages/Ads.tsx`, `backend/src/routes/ads.ts` |
+
+| 85 | **Task news form: reporter list follows bulletin news level 2026-09-07** - the Add/Edit News reporter dropdown is now filtered by the bulletin template's `news_level`: local→local reporters, district→taluka, state→district, national→state, world/unknown→all. Backend task detail exposes `bt.news_level as bulletin_news_level`; the dropdown shows a footer explaining the level filter and an inline note for world/unknown. Combined with the existing reporter→region data this stops a state-level story from offering unrelated region reporters | `frontend/src/pages/TaskDetail.tsx`, `backend/src/routes/tasks.ts` |
+
+| 86 | **Task news form: reporter selection auto-fills Location 2026-09-07** - picking a reporter in the Add/Edit News form now copies the reporter's `location` into the Location field (only when the reporter has a location; an existing typed location is kept otherwise). The dropdown rows also show the reporter's region for quick scanning | `frontend/src/pages/TaskDetail.tsx` |
+
+| 87 | **LAN hostname: `workstation`/`N24S1` → `newsmeva` 2026-09-07** - the friendly LAN hostname is now `newsmeva`. Hosts-file scripts (`lan/Add Workstation Hosts.bat`/`.command`) map `192.168.1.14 newsmeva` (and clean up legacy `workstation` entries); `lan/Open App.bat`/`.command` probe and open `http://newsmeva`; `lan/README.md` references updated end-to-end | `lan/*` |
+
+| 88 | **Rebrand: app name "Workstation Meva" → "NEWS MEVA" 2026-09-07** - display-name rename everywhere: default app name + legacy-value fallback (`appConfig.ts`), `index.html` title, logo SVGs, login/MobileApp titles, FAQ/Settings/About strings, channel-name fallback, Windows launcher titles + startup shortcut name + firewall rule `NEWS MEVA 3002` (legacy rule still cleaned up), NSIS installer text/shortcuts/Start-Menu folder/registry DisplayName, .deb maintainer+description, GCP/backend log lines, systemd unit Description, Mac/Linux/RedHat/RHEL scripts, Android app strings + titles. Internal identifiers kept (package.json name, `workstation-meva.service`, `.deb`/`.exe` filenames, repo URL, DB filenames) so existing installs keep working; installers now also remove old-name autostart/firewall/Start-Menu/desktop artifacts | repo-wide display strings |

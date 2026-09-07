@@ -1,5 +1,5 @@
 #!/bin/sh
-# Workstation Meva Online - Debian/Ubuntu package post-install
+# NEWS MEVA Online - Debian/Ubuntu package post-install
 set -e
 
 APP="/opt/workstation-online"

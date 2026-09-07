@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Workstation Meva - create backend/.env (one-time, idempotent)
+# NEWS MEVA - create backend/.env (one-time, idempotent)
 # Used by Mac/Linux launchers on first run. Never overwrites an existing .env.
 # Usage: bash create-env.sh [silent]
 

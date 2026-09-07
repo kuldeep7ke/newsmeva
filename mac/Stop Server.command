@@ -1,5 +1,5 @@
 #!/bin/bash
-# Workstation Meva Online - Stop Server (Mac)
+# NEWS MEVA Online - Stop Server (Mac)
 cd "$(dirname "$0")/.."
 
 # Self-heal: restore executable bits + clear quarantine.
@@ -21,7 +21,7 @@ pkill -f "start-server-core.sh" 2>/dev/null || true
 
 if lsof -ti tcp:3002 >/dev/null 2>&1; then
   lsof -ti tcp:3002 | xargs kill
-  echo "Workstation Meva server stopped."
+  echo "NEWS MEVA server stopped."
 else
   echo "Server is not running."
 fi

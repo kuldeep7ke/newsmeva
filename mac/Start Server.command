@@ -1,5 +1,5 @@
 #!/bin/bash
-# Workstation Meva Online - Start Server (Mac)
+# NEWS MEVA Online - Start Server (Mac)
 # Works from a cloned repo: installs deps + builds if needed, then starts.
 cd "$(dirname "$0")/.."
 
@@ -88,7 +88,7 @@ show_urls() {
   if [ -n "$LAN_IP" ]; then
     echo "  LAN users:     http://$LAN_IP:3002"
     echo "                 http://$LAN_IP        (when the bundled Caddy proxy is running)"
-    echo "                 http://$(hostname -s)   (computer name — resolves from most LAN machines)"
+    echo "                 http://$(hostname -s)   (computer name â€” resolves from most LAN machines)"
     echo ""
     echo "  Tip: the first time you start the server, macOS may ask whether to"
     echo "  allow 'node' to accept incoming connections - click Allow, or LAN"
@@ -115,7 +115,7 @@ start_caddy
 nohup bash "$(dirname "$0")/../caddy-watchdog.sh" "$(pwd)" >> server.log 2>&1 &
 
 LOG_FILE="$(pwd)/server.log"
-echo "Starting Workstation Meva Online server (hidden, background)..."
+echo "Starting NEWS MEVA Online server (hidden, background)..."
 chmod +x "$(dirname "$0")/start-server-core.sh" 2>/dev/null || true
 LOG="$LOG_FILE" nohup bash "$(dirname "$0")/start-server-core.sh" >> "$LOG_FILE" 2>&1 &
 

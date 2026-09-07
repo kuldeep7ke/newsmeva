@@ -1,5 +1,5 @@
 #!/bin/bash
-# Workstation Meva Online - Install Auto-Start on Login (Mac)
+# NEWS MEVA Online - Install Auto-Start on Login (Mac)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 

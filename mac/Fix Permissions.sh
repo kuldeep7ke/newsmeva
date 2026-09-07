@@ -1,8 +1,8 @@
 #!/bin/bash
-# Workstation Meva Online - Fix Permissions (.sh version)
+# NEWS MEVA Online - Fix Permissions (.sh version)
 #
 # Run this from Terminal with:  bash "Fix Permissions.sh"
-# (No executable bit needed — bash reads the file directly.)
+# (No executable bit needed â€” bash reads the file directly.)
 #
 # Fixes "could not be executed because you do not have appropriate access
 # privileges" errors on .command launchers copied from Windows / a USB

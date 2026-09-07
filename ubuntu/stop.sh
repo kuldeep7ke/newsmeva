@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Workstation Meva Online - stop the manual (non-systemd) server.
+# NEWS MEVA Online - stop the manual (non-systemd) server.
 # If running under systemd, use:  sudo systemctl stop workstation-meva.service
 
 set -euo pipefail
@@ -16,7 +16,7 @@ sleep 1
 PIDS=$(pgrep -f "backend/dist/index.js" || true)
 
 if [[ -n "$PIDS" ]]; then
-    echo "Stopping Workstation Meva server (PIDs: $PIDS)..."
+    echo "Stopping NEWS MEVA server (PIDs: $PIDS)..."
     kill $PIDS
     sleep 1
 
@@ -26,14 +26,14 @@ if [[ -n "$PIDS" ]]; then
         kill -9 $PIDS2 || true
     fi
 else
-    echo "No running Workstation Meva server found."
+    echo "No running NEWS MEVA server found."
 fi
 
-# 3. Stop the Caddy proxy + its watchdog if WE started it (manual mode only —
+# 3. Stop the Caddy proxy + its watchdog if WE started it (manual mode only â€”
 #    never touches a Caddy running as a systemd service).
 pkill -f "caddy-watchdog.sh" 2>/dev/null || true
 if systemctl is-active --quiet caddy 2>/dev/null; then
-    echo "Caddy runs as a systemd service — leaving it running."
+    echo "Caddy runs as a systemd service â€” leaving it running."
 else
     CPIDS=$(pgrep -f "caddy run --config.*proxy/caddy/Caddyfile" || true)
     if [[ -n "$CPIDS" ]]; then

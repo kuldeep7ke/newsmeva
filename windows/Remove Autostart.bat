@@ -1,6 +1,6 @@
 @echo off
-title Remove Workstation Meva Autostart
-set "LNK=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\Workstation Meva.lnk"
+title Remove NEWS MEVA Autostart
+set "LNK=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\NEWS MEVA.lnk"
 if exist "%LNK%" (
   del "%LNK%"
   echo Autostart removed.

@@ -1,9 +1,9 @@
 #!/bin/bash
-# Workstation Meva Online - auto-restart wrapper (Mac)
+# NEWS MEVA Online - auto-restart wrapper (Mac)
 # Runs the node server and restarts it if it crashes (up to MAX_RESTARTS
 # within RESET_WINDOW; the counter resets after the server runs stably).
 #
-# Used by Start Server.command — run this directly only for debugging.
+# Used by Start Server.command â€” run this directly only for debugging.
 
 set -euo pipefail
 
@@ -19,7 +19,7 @@ if [[ ! -w "$(dirname "$LOG")" ]]; then
   LOG="/tmp/workstation-meva-server.log"
 fi
 MAX_RESTARTS=5          # max restarts within the window
-RESET_WINDOW=60         # seconds — counter resets after server runs this long
+RESET_WINDOW=60         # seconds â€” counter resets after server runs this long
 
 NODE_BIN="$(command -v node)"
 
@@ -55,7 +55,7 @@ while true; do
   last_start=$(date +%s)
 
   if [[ $restart_count -ge $MAX_RESTARTS ]]; then
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Server crashed $MAX_RESTARTS times in ${RESET_WINDOW}s — giving up." >> "$LOG"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Server crashed $MAX_RESTARTS times in ${RESET_WINDOW}s â€” giving up." >> "$LOG"
     echo ""
     echo "Server crashed $MAX_RESTARTS times quickly. Check server.log for the reason."
     echo "Common fixes:"

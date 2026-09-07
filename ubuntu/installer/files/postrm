@@ -1,5 +1,5 @@
 #!/bin/sh
-# Workstation Meva Online - Debian/Ubuntu package post-remove
+# NEWS MEVA Online - Debian/Ubuntu package post-remove
 set -e
 
 case "$1" in

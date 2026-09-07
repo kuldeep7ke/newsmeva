@@ -1,4 +1,4 @@
-' Starts the Workstation Meva server silently (no console window).
+' Starts the NEWS MEVA server silently (no console window).
 ' Calls start-server.ps1 directly (the .bat files are repaired by it,
 ' so even a broken Start Server.bat cannot break the autostart).
 ' Run with "-open" to also open the app in the default browser when ready.

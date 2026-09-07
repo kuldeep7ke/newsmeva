@@ -1,5 +1,5 @@
 @echo off
-title Workstation Meva - Clean Junk Files
+title NEWS MEVA - Clean Junk Files
 REM ==================================================
 REM  Deletes temp/runtime junk older than 7 days:
 REM    - runtime logs  (server.log, server-err.log, smoke2*.log, caddy-*.log)

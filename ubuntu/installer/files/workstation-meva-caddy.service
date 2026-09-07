@@ -1,5 +1,5 @@
 [Unit]
-Description=Workstation Meva Online reverse proxy (Caddy)
+Description=NEWS MEVA Online reverse proxy (Caddy)
 After=network.target
 
 [Service]

@@ -1,4 +1,4 @@
-; Workstation Meva Online - Windows Installer
+; NEWS MEVA Online - Windows Installer
 ; NSIS Script - compiles with makensis.exe (NSIS 3.x)
 ;
 ; Produces: installer/workstation-meva-setup.exe
@@ -15,7 +15,7 @@
 ; ---------------------------------------------------------------------------
 ; Configuration
 ; ---------------------------------------------------------------------------
-Name "Workstation Meva Online"
+Name "NEWS MEVA Online"
 OutFile "workstation-meva-setup.exe"
 InstallDir "C:\Workstation-Meva"
 InstallDirRegKey HKLM "Software\WorkstationMeva" "InstallDir"
@@ -24,10 +24,10 @@ Unicode True
 
 ; Version info shown in Explorer properties
 VIProductVersion "1.0.0.2"
-VIAddVersionKey "ProductName" "Workstation Meva Online"
+VIAddVersionKey "ProductName" "NEWS MEVA Online"
 VIAddVersionKey "ProductVersion" "1.0.0-beta.1"
 VIAddVersionKey "FileVersion" "1.0.0-beta.1"
-VIAddVersionKey "FileDescription" "Workstation Meva Online Installer (Beta)"
+VIAddVersionKey "FileDescription" "NEWS MEVA Online Installer (Beta)"
 VIAddVersionKey "LegalCopyright" "Free & public domain (Unlicense)"
 
 ; ---------------------------------------------------------------------------
@@ -36,8 +36,8 @@ VIAddVersionKey "LegalCopyright" "Free & public domain (Unlicense)"
 !define MUI_ABORTWARNING
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
-!define MUI_WELCOMEPAGE_TITLE "Workstation Meva Online Setup"
-!define MUI_WELCOMEPAGE_TEXT "This wizard will install Workstation Meva Online on your computer.$\r$\n$\r$\nINSTALLER NOTES:$\r$\n  - BETA release (v1.0.0-beta.1) - testing mode$\r$\n  - Free & open source - public domain (Unlicense)$\r$\n  - Always installs a FRESH copy: NO user data, NO database, NO previous settings$\r$\n$\r$\nThe installer will:$\r$\n  - Copy the application files$\r$\n  - Open port 3002 in the Windows Firewall$\r$\n  - Create Start Menu shortcuts$\r$\n$\r$\nClick Next to continue."
+!define MUI_WELCOMEPAGE_TITLE "NEWS MEVA Online Setup"
+!define MUI_WELCOMEPAGE_TEXT "This wizard will install NEWS MEVA Online on your computer.$\r$\n$\r$\nINSTALLER NOTES:$\r$\n  - BETA release (v1.0.0-beta.1) - testing mode$\r$\n  - Free & open source - public domain (Unlicense)$\r$\n  - Always installs a FRESH copy: NO user data, NO database, NO previous settings$\r$\n$\r$\nThe installer will:$\r$\n  - Copy the application files$\r$\n  - Open port 3002 in the Windows Firewall$\r$\n  - Create Start Menu shortcuts$\r$\n$\r$\nClick Next to continue."
 !define MUI_FINISHPAGE_RUN "$INSTDIR\windows\Control Panel.bat"
 !define MUI_FINISHPAGE_RUN_TEXT "Open the Control Panel (set up your database)"
 !define MUI_FINISHPAGE_LINK "Open documentation"
@@ -88,13 +88,13 @@ UninstPage custom un.unDataPageCreate un.unDataPageLeave
 ; Terms & Conditions page (accept before installing)
 ; ---------------------------------------------------------------------------
 Function TermsPageCreate
-  !insertmacro MUI_HEADER_TEXT "Workstation Meva Online - Terms and Conditions" "Please read and accept the terms before continuing"
+  !insertmacro MUI_HEADER_TEXT "NEWS MEVA Online - Terms and Conditions" "Please read and accept the terms before continuing"
   nsDialogs::Create 1018
   Pop $TermsDialog
   ${If} $TermsDialog == error
     Abort
   ${EndIf}
-  ${NSD_CreateLabel} 0 0 100% 100u "Workstation Meva Online is free and open-source software (Unlicense / public domain).$\r$\n$\r$\nInstalling this application copies files to your computer, opens TCP port 3002 in the Windows Firewall, adds Start Menu and desktop shortcuts, and installs small helper utilities.$\r$\n$\r$\nYour ONLINE data is stored in your own Supabase project. Local files (workstation.db, backups, telemetry, logs, .env) stay on THIS computer - uninstalling can keep or permanently delete them (you choose at uninstall time).$\r$\n$\r$\nThe software is provided AS IS, WITHOUT warranty of any kind. Use it at your own risk.$\r$\n$\r$\nFull legal text: see the LICENSE file included with the source code."
+  ${NSD_CreateLabel} 0 0 100% 100u "NEWS MEVA Online is free and open-source software (Unlicense / public domain).$\r$\n$\r$\nInstalling this application copies files to your computer, opens TCP port 3002 in the Windows Firewall, adds Start Menu and desktop shortcuts, and installs small helper utilities.$\r$\n$\r$\nYour ONLINE data is stored in your own Supabase project. Local files (workstation.db, backups, telemetry, logs, .env) stay on THIS computer - uninstalling can keep or permanently delete them (you choose at uninstall time).$\r$\n$\r$\nThe software is provided AS IS, WITHOUT warranty of any kind. Use it at your own risk.$\r$\n$\r$\nFull legal text: see the LICENSE file included with the source code."
   Pop $0
   ${NSD_CreateCheckBox} 12u 108u 80% 14u "I &accept the Terms and Conditions"
   Pop $TermsAgreedChk
@@ -121,18 +121,18 @@ Function MaintenancePageCreate
   ${IfNot} ${FileExists} "$INSTDIR\Uninstall.exe"
     Abort
   ${EndIf}
-  !insertmacro MUI_HEADER_TEXT "Workstation Meva Online Maintenance" "Reinstall/repair or uninstall the installation"
+  !insertmacro MUI_HEADER_TEXT "NEWS MEVA Online Maintenance" "Reinstall/repair or uninstall the installation"
   nsDialogs::Create 1018
   Pop $MaintDialog
   ${If} $MaintDialog == error
     Abort
   ${EndIf}
-  ${NSD_CreateLabel} 0 0 100% 24u "Welcome to the Workstation Meva Online Setup maintenance.$\r$\nSelect one of the following options:"
+  ${NSD_CreateLabel} 0 0 100% 24u "Welcome to the NEWS MEVA Online Setup maintenance.$\r$\nSelect one of the following options:"
   Pop $0
   ${NSD_CreateRadioButton} 12u 36u 88% 12u "&Reinstall / Repair - refresh ALL application files, shortcuts and firewall rule (your data in this folder is kept)"
   Pop $RadioReinstall
   ${NSD_Check} $RadioReinstall
-  ${NSD_CreateRadioButton} 12u 54u 88% 12u "&Uninstall - remove Workstation Meva Online from this computer"
+  ${NSD_CreateRadioButton} 12u 54u 88% 12u "&Uninstall - remove NEWS MEVA Online from this computer"
   Pop $RadioUninstall
   nsDialogs::Show
 FunctionEnd
@@ -171,6 +171,15 @@ Section "Install" SecMain
   ; it now. For Reinstall/Repair (app.installed already exists), preserve
   ; the user's previous choice - don't touch.
   ${IfNot} ${FileExists} "$INSTDIR\app.installed"
+    Delete "$SMSTARTUP\NEWS MEVA.lnk"
+    SetShellVarContext all
+    Delete "$SMSTARTUP\NEWS MEVA.lnk"
+    SetShellVarContext current
+    nsExec::Exec 'cmd /c del /f /q "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\NEWS MEVA.lnk" 2>nul'
+    nsExec::Exec 'cmd /c del /f /q "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NEWS MEVA.lnk" 2>nul'
+    DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "NEWS MEVA"
+    DeleteRegValue HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "NEWS MEVA"
+    ; Legacy cleanup - remove old app-name autostart artifacts from prior installs.
     Delete "$SMSTARTUP\Workstation Meva.lnk"
     SetShellVarContext all
     Delete "$SMSTARTUP\Workstation Meva.lnk"
@@ -243,29 +252,30 @@ Section "Install" SecMain
   ; the machine may be offline). Without this, Start would fail after Caddy
   ; fired up - the "caddy runs but server never starts" bug.
   FileOpen $0 "$INSTDIR\app.installed" w
-  FileWrite $0 "Workstation Meva packaged layout - pre-built, skip npm install/build."
+  FileWrite $0 "NEWS MEVA packaged layout - pre-built, skip npm install/build."
   FileClose $0
 
   ; .env is auto-created by the launcher on first run (random JWT_SECRET)
 
   ; --- Open port 3002 in Windows Firewall (delete first so Modify/Repair can re-add) ---
+  nsExec::Exec 'netsh advfirewall firewall delete rule name="NEWS MEVA 3002"'
   nsExec::Exec 'netsh advfirewall firewall delete rule name="Workstation Meva 3002"'
-  nsExec::ExecToLog 'netsh advfirewall firewall add rule name="Workstation Meva 3002" protocol=TCP dir=in localport=3002 action=allow profile=any'
+  nsExec::ExecToLog 'netsh advfirewall firewall add rule name="NEWS MEVA 3002" protocol=TCP dir=in localport=3002 action=allow profile=any'
 
   ; --- Start Menu shortcuts ---
-  CreateDirectory "$SMPROGRAMS\Workstation Meva"
-  CreateShortcut "$SMPROGRAMS\Workstation Meva\Start Server.lnk" "$INSTDIR\windows\Start Server.bat" "" "" "" SW_SHOWMINIMIZED
-  CreateShortcut "$SMPROGRAMS\Workstation Meva\Start Server (Hidden).lnk" "$INSTDIR\windows\Start Server Hidden.vbs"
-  CreateShortcut "$SMPROGRAMS\Workstation Meva\Control Panel.lnk" "$INSTDIR\windows\Control Panel.bat"
-  CreateShortcut "$SMPROGRAMS\Workstation Meva\Stop Server.lnk" "$INSTDIR\windows\Stop Server.bat"
-  CreateShortcut "$SMPROGRAMS\Workstation Meva\Install Autostart.lnk" "$INSTDIR\windows\Install Autostart.bat"
-  CreateShortcut "$SMPROGRAMS\Workstation Meva\Remove Autostart.lnk" "$INSTDIR\windows\Remove Autostart.bat"
-  CreateShortcut "$SMPROGRAMS\Workstation Meva\Workstation Meva Website.lnk" "http://localhost:3002"
-  CreateShortcut "$SMPROGRAMS\Workstation Meva\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
+  CreateDirectory "$SMPROGRAMS\NEWS MEVA"
+  CreateShortcut "$SMPROGRAMS\NEWS MEVA\Start Server.lnk" "$INSTDIR\windows\Start Server.bat" "" "" "" SW_SHOWMINIMIZED
+  CreateShortcut "$SMPROGRAMS\NEWS MEVA\Start Server (Hidden).lnk" "$INSTDIR\windows\Start Server Hidden.vbs"
+  CreateShortcut "$SMPROGRAMS\NEWS MEVA\Control Panel.lnk" "$INSTDIR\windows\Control Panel.bat"
+  CreateShortcut "$SMPROGRAMS\NEWS MEVA\Stop Server.lnk" "$INSTDIR\windows\Stop Server.bat"
+  CreateShortcut "$SMPROGRAMS\NEWS MEVA\Install Autostart.lnk" "$INSTDIR\windows\Install Autostart.bat"
+  CreateShortcut "$SMPROGRAMS\NEWS MEVA\Remove Autostart.lnk" "$INSTDIR\windows\Remove Autostart.bat"
+  CreateShortcut "$SMPROGRAMS\NEWS MEVA\NEWS MEVA Website.lnk" "http://localhost:3002"
+  CreateShortcut "$SMPROGRAMS\NEWS MEVA\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 
   ; --- Desktop shortcut ---
-  CreateShortcut "$DESKTOP\Workstation Meva.lnk" "$INSTDIR\windows\Start Server.bat" "" "" "" SW_SHOWMINIMIZED
-  CreateShortcut "$DESKTOP\Workstation Meva Control Panel.lnk" "$INSTDIR\windows\Control Panel.bat"
+  CreateShortcut "$DESKTOP\NEWS MEVA.lnk" "$INSTDIR\windows\Start Server.bat" "" "" "" SW_SHOWMINIMIZED
+  CreateShortcut "$DESKTOP\NEWS MEVA Control Panel.lnk" "$INSTDIR\windows\Control Panel.bat"
 
   ; --- Uninstaller ---
   WriteUninstaller "$INSTDIR\Uninstall.exe"
@@ -276,7 +286,7 @@ Section "Install" SecMain
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "EstimatedSize" "$0"
 
   ; --- Add/Remove Programs entry ---
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "DisplayName" "Workstation Meva Online"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "DisplayName" "NEWS MEVA Online"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "UninstallString" '"$INSTDIR\Uninstall.exe"'
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "InstallLocation" "$INSTDIR"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "DisplayIcon" "$INSTDIR\Uninstall.exe"
@@ -297,7 +307,7 @@ SectionEnd
 
 ; Ask the user what to remove: keep local user data, or clean everything.
 Function un.unDataPageCreate
-  !insertmacro MUI_HEADER_TEXT "Workstation Meva Online Uninstall" "Choose whether to keep your data"
+  !insertmacro MUI_HEADER_TEXT "NEWS MEVA Online Uninstall" "Choose whether to keep your data"
   nsDialogs::Create 1018
   Pop $UnDataDlg
   ${If} $UnDataDlg == error
@@ -340,6 +350,7 @@ Section "Uninstall"
 
   ; Remove firewall rule (silent - no "No rules match..." noise when
   ; the rule was already removed or never created)
+  nsExec::Exec 'netsh advfirewall firewall delete rule name="NEWS MEVA 3002"'
   nsExec::Exec 'netsh advfirewall firewall delete rule name="Workstation Meva 3002"'
 
   ; Remove Autostart entry (Startup folder) - otherwise next OS boot tries
@@ -354,12 +365,24 @@ Section "Uninstall"
   ;  4) sweep C:\Users\*\AppData\... for any other user that enabled it
   ;  5) registry Run + scheduled task (future-proof, no-ops if absent)
   ${If} ${FileExists} "$INSTDIR\windows\Remove Autostart.bat"
-    ; Remove Autostart.bat is just: del "%APPDATA%\...\Startup\Workstation Meva.lnk"
+    ; Remove Autostart.bat is just: del "%APPDATA%\...\Startup\NEWS MEVA.lnk"
     ; but it ends with `pause` which would hang the uninstaller, so we
     ; replicate its `del` directly instead of Exec-ing the .bat.
     ; Keep the intent: "remove by Remove Autostart.bat".
-    nsExec::Exec 'cmd /c del /f /q "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\Workstation Meva.lnk" 2>nul'
+    nsExec::Exec 'cmd /c del /f /q "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\NEWS MEVA.lnk" 2>nul'
   ${EndIf}
+  Delete "$SMSTARTUP\NEWS MEVA.lnk"
+  SetShellVarContext all
+  Delete "$SMSTARTUP\NEWS MEVA.lnk"
+  SetShellVarContext current
+  nsExec::Exec 'cmd /c del /f /q "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\NEWS MEVA.lnk" 2>nul'
+  nsExec::Exec 'cmd /c del /f /q "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Startup\NEWS MEVA.lnk" 2>nul'
+  nsExec::Exec 'powershell -NoProfile -NoLogo -Command "Get-ChildItem ''C:\Users'' -Directory -EA SilentlyContinue | ForEach-Object { Remove-Item -Path (Join-Path $$_.FullName ''AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\NEWS MEVA.lnk'') -Force -EA SilentlyContinue }"'
+  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "NEWS MEVA"
+  DeleteRegValue HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "NEWS MEVA"
+  nsExec::Exec 'schtasks /Delete /TN "NEWS MEVA" /F 2>nul'
+  nsExec::Exec 'schtasks /Delete /TN "WorkstationMeva" /F 2>nul'
+  ; Legacy cleanup - remove old app-name autostart artifacts from prior installs.
   Delete "$SMSTARTUP\Workstation Meva.lnk"
   SetShellVarContext all
   Delete "$SMSTARTUP\Workstation Meva.lnk"
@@ -370,12 +393,14 @@ Section "Uninstall"
   DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Workstation Meva"
   DeleteRegValue HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "Workstation Meva"
   nsExec::Exec 'schtasks /Delete /TN "Workstation Meva" /F 2>nul'
-  nsExec::Exec 'schtasks /Delete /TN "WorkstationMeva" /F 2>nul'
 
   ; Remove Start Menu shortcuts
+  RMDir /r "$SMPROGRAMS\NEWS MEVA"
   RMDir /r "$SMPROGRAMS\Workstation Meva"
 
   ; Remove desktop shortcut
+  Delete "$DESKTOP\NEWS MEVA.lnk"
+  Delete "$DESKTOP\NEWS MEVA Control Panel.lnk"
   Delete "$DESKTOP\Workstation Meva.lnk"
   Delete "$DESKTOP\Workstation Meva Control Panel.lnk"
 

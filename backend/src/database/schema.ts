@@ -692,7 +692,7 @@ export async function seedPostgresDefaults(): Promise<void> {
       }
     }
   } catch (e) { console.error('[db] PG template seeding failed:', e); }
-  // Seed channel_metadata - default is empty so frontend shows "Workstation Meva" via fallback
+  // Seed channel_metadata - default is empty so frontend shows "NEWS MEVA" via fallback
   // Custom names only show when user explicitly sets them via Settings -> Channel Metadata
   try {
     const cnt = await adapter.get('SELECT COUNT(*) as cnt FROM channel_metadata');
@@ -742,7 +742,7 @@ export async function initDatabase() {
         try { await adapter.raw(sql); } catch (e: any) { console.error('[db] PG migration error:', e.message); }
       }
       // Self-healing reconciliation: the live Supabase tables (created by older
-      // releases) miss columns added since then — CREATE TABLE IF NOT EXISTS is a
+      // releases) miss columns added since then â€” CREATE TABLE IF NOT EXISTS is a
       // no-op on existing tables, so pre-existing live tables never gained them
       // (e.g. ads.brand_type, tasks.reviewer_id, profiles.pin, ...). Reconcile every
       // canonical table against PG_TABLES with idempotent ADD COLUMN IF NOT EXISTS
@@ -772,7 +772,7 @@ export async function initDatabase() {
         }
       }
       // Repair anchor_tasks CHECK constraint created with the wrong vocabulary
-      // (footage_collection/editor_assigned) before the anchor-flow fix — the code
+      // (footage_collection/editor_assigned) before the anchor-flow fix â€” the code
       // and SQLite mirror use footage_gathering/video_editor_assigned.
       try {
         await adapter.raw('ALTER TABLE anchor_tasks DROP CONSTRAINT IF EXISTS anchor_tasks_status_check');
@@ -780,7 +780,7 @@ export async function initDatabase() {
       } catch (e: any) { console.error('[db] PG anchor_tasks constraint repair failed:', e.message); }
       // Repair login_attempts CHECK constraint: the login/pin flows also log
       // 'failed_status' (blocked login: offline/suspended), 'failed_pin_reset'
-      // and 'pin_reset', but the original CHECK only allowed 4 actions — blocked
+      // and 'pin_reset', but the original CHECK only allowed 4 actions â€” blocked
       // logins used to fail the write and jam the sync queue with retries.
       try {
         await adapter.raw('ALTER TABLE login_attempts DROP CONSTRAINT IF EXISTS login_attempts_action_check');
@@ -790,11 +790,11 @@ export async function initDatabase() {
       console.log('[db] PostgreSQL schema initialized');
     } catch (e: any) {
       adapter = null;
-      console.error(`[db] PostgreSQL unavailable at startup (${e.message}) — starting OFFLINE on the local database; changes will sync when the connection returns.`);
+      console.error(`[db] PostgreSQL unavailable at startup (${e.message}) â€” starting OFFLINE on the local database; changes will sync when the connection returns.`);
     }
   }
 
-  // Local mirror (sql.js) — always initialized; serves reads/writes when the
+  // Local mirror (sql.js) â€” always initialized; serves reads/writes when the
   // cloud database is unreachable and keeps the sync queue.
   const SQL = await ensureSqlJs();
   if (fs.existsSync(DB_PATH)) {
@@ -822,7 +822,7 @@ export async function initDatabase() {
   initialized = true;
 }
 
-// Reconnect to a different database at runtime (used by Settings → Database Connection).
+// Reconnect to a different database at runtime (used by Settings â†’ Database Connection).
 // Closes the old pool, updates DATABASE_URL, and re-runs schema initialization.
 // With preserveMirror the local mirror's data is kept (only the stale sync queue
 // is dropped) so the caller can push it up or pull the new database down; without
@@ -1086,7 +1086,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 
 function runMigrations() {
   // Rebuild login_attempts when it still has the old CHECK constraint (only 4
-  // actions) — blocked logins ('failed_status'), PIN resets and 'pin_reset'
+  // actions) â€” blocked logins ('failed_status'), PIN resets and 'pin_reset'
   // would otherwise fail the write and jam the sync queue with retries.
   try {
     const def = db.exec("SELECT sql FROM sqlite_master WHERE type='table' AND name='login_attempts'");
@@ -1685,10 +1685,10 @@ action TEXT NOT NULL CHECK(action IN ('success','failed_password','failed_pin','
     if (isLegacyTaskTable || isV2MissingTrashed) {
       // The legacy tasks table (created by createTables below) predates the
       // headline column; without it the SELECT below fails with
-      // "no such column: headline" and the table never migrates — leaving
+      // "no such column: headline" and the table never migrates â€” leaving
       // every task write hitting the legacy status/priority CHECK.
       // The legacy rebuild chain above also drops reporter_id/archive_id/
-      // location_id (added earlier via ALTER), so re-add them here — the
+      // location_id (added earlier via ALTER), so re-add them here â€” the
       // INSERT SELECT below references them and must never hit a missing
       // column, or the migration aborts silently (non-fatal catch).
       if (!columnExists('tasks', 'headline')) {
@@ -2055,7 +2055,7 @@ export async function nextUid(prefix: string, table: string): Promise<string> {
   return `${prefix}-${String(next).padStart(4, '0')}`;
 }
 
-// ===== Backup functions (no-op for PostgreSQL — Supabase handles backups) =====
+// ===== Backup functions (no-op for PostgreSQL â€” Supabase handles backups) =====
 
 const PRESERVE_ON_RESTORE = ['bulletin_templates', 'user_bulletin_defaults', 'system_bulletin_defaults'];
 
@@ -2144,7 +2144,7 @@ export interface RestoreSummary {
 }
 
 export async function restoreDatabaseFromFile(backupPath: string): Promise<RestoreSummary> {
-  if (isPostgres()) throw new Error('Restore not supported on PostgreSQL — use Supabase dashboard');
+  if (isPostgres()) throw new Error('Restore not supported on PostgreSQL â€” use Supabase dashboard');
   if (!fs.existsSync(backupPath)) throw new Error('Backup file not found');
 
   const warnings: string[] = [];
@@ -2194,7 +2194,7 @@ export async function restoreDatabaseFromFile(backupPath: string): Promise<Resto
     }
   }
 
-  // The restored snapshot replaces the entire database — queued sync changes from
+  // The restored snapshot replaces the entire database â€” queued sync changes from
   // the previous state must not be replayed against PostgreSQL (they would fail or
   // duplicate data and cause repeated 'synced' broadcasts / reload loops).
   let syncQueueCleared = false;

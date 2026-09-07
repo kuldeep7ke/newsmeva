@@ -1,5 +1,5 @@
 @echo off
-title Workstation Meva - Create .env (one-time setup)
+title NEWS MEVA - Create .env (one-time setup)
 REM One-time setup for a fresh download. Creates backend\.env with:
 REM   - an auto-generated JWT_SECRET
 REM   - DATABASE_URL empty (fill it later: app Backups page -> Database tab, or edit backend\.env)

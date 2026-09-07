@@ -1,5 +1,5 @@
 #!/bin/bash
-# Workstation Meva Online - Remove Auto-Start on Login (Mac)
+# NEWS MEVA Online - Remove Auto-Start on Login (Mac)
 PLIST="$HOME/Library/LaunchAgents/com.workstation-meva-online.server.plist"
 
 launchctl unload "$PLIST" >/dev/null 2>&1

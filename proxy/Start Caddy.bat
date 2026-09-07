@@ -1,5 +1,5 @@
 @echo off
-title Workstation Meva - Caddy (reverse proxy)
+title NEWS MEVA - Caddy (reverse proxy)
 cd /d "%~dp0caddy"
 if not exist "%~dp0caddy\caddy.exe" (
   echo Caddy is not installed.

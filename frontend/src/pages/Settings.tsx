@@ -277,7 +277,7 @@ export default function Settings() {
           <div className="flex-1">
             <label className="flat-label">Application Name</label>
             <input className="flat-input" value={name} onChange={(e) => setName(e.target.value)}
-              placeholder="Workstation Tracker" />
+              placeholder="NEWS MEVA" />
           </div>
           <div className="flex items-end">
             <button type="submit" className="flat-btn-accent">
@@ -317,13 +317,13 @@ export default function Settings() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="flat-label">Channel Name (English)</label>
-                  <input className="flat-input" placeholder="e.g. Workstation Meva"
+                  <input className="flat-input" placeholder="e.g. NEWS MEVA"
                     value={channelMeta.channel_name}
                     onChange={(e) => setChannelMeta({ ...channelMeta, channel_name: e.target.value })} />
                 </div>
                 <div>
                   <label className="flat-label">Channel Name (Display)</label>
-                  <input className="flat-input" placeholder="e.g. Workstation Meva"
+                  <input className="flat-input" placeholder="e.g. NEWS MEVA"
                     value={channelMeta.channel_display_name}
                     onChange={(e) => setChannelMeta({ ...channelMeta, channel_display_name: e.target.value })} />
                 </div>
@@ -524,7 +524,7 @@ export default function Settings() {
           <div className="rounded-xl border border-surface-200 p-4">
             <h4 className="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-3">Developer</h4>
             <div className="space-y-2">
-              <p className="text-sm font-medium text-surface-800">Workstation Meva Team</p>
+              <p className="text-sm font-medium text-surface-800">NEWS MEVA Team</p>
               <div className="flex items-center gap-2 text-xs text-surface-500">
                 <Globe className="w-3.5 h-3.5" />
                 <a href="https://marathimeva.com" target="_blank" rel="noopener noreferrer"
@@ -568,10 +568,10 @@ export default function Settings() {
           {/* Copyright */}
           <div className="text-center pt-3 border-t border-surface-200">
             <p className="text-xs text-surface-400 flex items-center justify-center gap-1">
-              Made with <Heart className="w-3 h-3 text-danger-400" /> by Workstation Meva Team
+              Made with <Heart className="w-3 h-3 text-danger-400" /> by NEWS MEVA Team
             </p>
             <p className="text-[11px] text-surface-300 mt-1">
-              &copy; {new Date().getFullYear()} Workstation Meva. All rights reserved.
+              &copy; {new Date().getFullYear()} NEWS MEVA. All rights reserved.
             </p>
             <p className="text-[11px] text-surface-300 mt-0.5">
               Powered by MarathiMevasa News Network

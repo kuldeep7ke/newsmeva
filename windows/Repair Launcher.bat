@@ -1,5 +1,5 @@
 @echo off
-title Workstation Meva - Repair Launcher
+title NEWS MEVA - Repair Launcher
 echo Checking and repairing the launcher files...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0start-server.ps1" -Mode repair
 if errorlevel 1 goto fail

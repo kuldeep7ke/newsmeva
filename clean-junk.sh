@@ -1,5 +1,5 @@
 #!/bin/bash
-# Workstation Meva - clean junk files (Mac/Linux)
+# NEWS MEVA - clean junk files (Mac/Linux)
 # Deletes temp/runtime junk older than 7 days:
 #   - runtime logs  (server.log, server-err.log, smoke2*.log, caddy-*.log)
 #   - TypeScript build cache (tsconfig.tsbuildinfo)

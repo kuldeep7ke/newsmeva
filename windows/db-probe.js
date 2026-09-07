@@ -1,4 +1,4 @@
-// Workstation Meva - lightweight database connectivity probe.
+// NEWS MEVA - lightweight database connectivity probe.
 // Used by the Control Panel. Run with:
 //   set DATABASE_URL=<connection string>
 //   node db-probe.js

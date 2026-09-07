@@ -1,5 +1,5 @@
 const APP_NAME_KEY = 'app_name';
-const DEFAULT_NAME = 'Workstation Meva';
+const DEFAULT_NAME = 'NEWS MEVA';
 const APP_NAME_EVENT = 'app-name-changed';
 
 export function getAppName(): string {

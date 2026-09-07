@@ -33,14 +33,14 @@
                 android:layout_height="72dp"
                 android:layout_gravity="center_horizontal"
                 android:src="@drawable/ic_launcher"
-                android:contentDescription="Workstation Meva" />
+                android:contentDescription="NEWS MEVA" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
-                android:text="Workstation Meva"
+                android:text="NEWS MEVA"
                 android:textColor="@color/text_primary"
                 android:textSize="28sp"
                 android:fontFamily="sans-serif-medium"

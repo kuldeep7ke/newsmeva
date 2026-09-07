@@ -39,7 +39,7 @@ android {
 }
 
 // ---------------------------------------------------------------------------
-// Bundle the Workstation Meva server + frontend + Node runtime into the APK.
+// Bundle the NEWS MEVA server + frontend + Node runtime into the APK.
 // Layout expected by NodeService (mirrored into filesDir on first start):
 //   assets/server/dist/...        backend build output (backend/dist)
 //   assets/server/node_modules/   backend dependencies

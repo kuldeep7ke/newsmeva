@@ -1,4 +1,4 @@
-# Workstation Meva - Control Panel (Windows)
+# NEWS MEVA - Control Panel (Windows)
 # ==================================================
 # A small native panel to manage the machine-level parts of the app:
 #   - Server start / stop / health / open app
@@ -19,7 +19,7 @@ $winDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $backend  = Join-Path $root 'backend'
 $envFile  = Join-Path $backend '.env'
 $logFile  = Join-Path $root 'server.log'
-$startupLnk = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup\Workstation Meva.lnk'
+$startupLnk = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup\NEWS MEVA.lnk'
 
 $nodeExe = Join-Path $root 'node\node.exe'
 if (-not (Test-Path -LiteralPath $nodeExe)) { $nodeExe = 'node' }
@@ -37,7 +37,7 @@ $script:dbText = 'Unknown'
 [xml]$xaml = @'
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Workstation Meva Control Panel"
+        Title="NEWS MEVA Control Panel"
         Width="640" MinWidth="600" MinHeight="720" SizeToContent="Height"
         Background="#0F172A" WindowStartupLocation="CenterScreen" FontFamily="Segoe UI">
   <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -47,7 +47,7 @@ $script:dbText = 'Unknown'
     <StackPanel Margin="2,0,2,10">
       <DockPanel>
         <StackPanel DockPanel.Dock="Left">
-          <TextBlock Text="Workstation Meva" FontSize="22" FontWeight="Bold" Foreground="#F8FAFC"/>
+          <TextBlock Text="NEWS MEVA" FontSize="22" FontWeight="Bold" Foreground="#F8FAFC"/>
           <TextBlock Text="Control Panel" FontSize="12" Foreground="#94A3B8" Margin="0,2,0,0"/>
         </StackPanel>
         <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Top">
@@ -455,7 +455,7 @@ function Toggle-Autostart {
     $q = [char]34
     $sc.Arguments = $q + (Join-Path $winDir 'Start Server Hidden.vbs') + $q
     $sc.WorkingDirectory = $winDir
-    $sc.Description = 'Workstation Meva server'
+    $sc.Description = 'NEWS MEVA server'
     $sc.Save()
     Set-Status 'Autostart enabled - will start at every login.'
   }

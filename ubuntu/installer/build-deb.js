@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Workstation Meva Online - Debian/Ubuntu .deb builder.
+ * NEWS MEVA Online - Debian/Ubuntu .deb builder.
  *
  * Produces a fully self-contained amd64 .deb:
  *   - prebuilt backend/frontend (no npm on the target)
@@ -306,11 +306,11 @@ function buildControl() {
     'Section: web',
     'Priority: optional',
     `Architecture: ${ARCH}`,
-    'Maintainer: Workstation Meva <support@workstation-meva.invalid>',
+    'Maintainer: NEWS MEVA <support@workstation-meva.invalid>',
     `Installed-Size: ${size}`,
     'Suggests: openssl',
-    'Description: Workstation Meva Online - Marathi newsroom office suite (offline, self-contained)',
-    ' A single .deb that installs the Workstation Meva Online server on Ubuntu/Debian',
+    'Description: NEWS MEVA Online - Marathi newsroom office suite (offline, self-contained)',
+    ' A single .deb that installs the NEWS MEVA Online server on Ubuntu/Debian',
     ' together with a bundled Node.js runtime and the Caddy reverse proxy. The install',
     ' is fully offline: no npm, compiler, package downloads or internet needed.',
     ' The backend connects to your own Supabase PostgreSQL database (DATABASE_URL in',
@@ -393,7 +393,7 @@ async function main() {
   console.log(`  size        : ${(deb.length / 1024 / 1024).toFixed(1)} MB`);
   console.log(`  control arc : ${controlGz.length} bytes, data arc: ${dataGz.length} bytes`);
   console.log(`  Installed   : ${INSTALL_DIR} (data preserved on upgrade; .env one-time)`);
-  console.log(`  Services    : workstation-meva.service + workstation-meva-caddy.service`);
+  console.log(`  Services    : workstation-meva.service + workstation-meva-caddy.service (NEWS MEVA)`);
   fs.rmSync(BUILD, { recursive: true, force: true });
 }
 

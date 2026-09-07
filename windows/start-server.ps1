@@ -1,4 +1,4 @@
-# Workstation Meva - robust launcher (single source of truth)
+# NEWS MEVA - robust launcher (single source of truth)
 # ============================================================
 # Replaces the fragile cmd.bat logic with PowerShell so launcher
 # failures (cmd paren/escape parse errors) cannot happen again.
@@ -75,7 +75,7 @@ function IsListening($port) {
 $canonical = @{
   'Start Server.bat' = @'
 @echo off
-title Workstation Meva Server
+title NEWS MEVA Server
 cd /d "%~dp0..\backend"
 if "%~1"=="-open" goto open
 if "%~1"=="-hidden" goto hidden
@@ -92,8 +92,8 @@ exit /b 0
 
   'Stop Server.bat' = @'
 @echo off
-title Stop Workstation Meva Server
-echo Stopping the Workstation Meva server...
+title Stop NEWS MEVA Server
+echo Stopping the NEWS MEVA server...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$p = Get-CimInstance Win32_Process -Filter 'Name=''powershell.exe''' | Where-Object { $_.CommandLine -match '-File\s+.*start-server-core\.ps1' }; if ($p) { $p | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue } }"
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$c = Get-NetTCPConnection -LocalPort 3002 -State Listen -ErrorAction SilentlyContinue; if ($c) { $c | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue } }"
 taskkill /F /IM caddy.exe >nul 2>nul
@@ -102,7 +102,7 @@ pause
 '@
 
   'Start Server Hidden.vbs' = @'
-' Starts the Workstation Meva server silently (no console window).
+' Starts the NEWS MEVA server silently (no console window).
 ' Calls start-server.ps1 directly (the .bat files are repaired by it,
 ' so even a broken Start Server.bat cannot break the autostart).
 ' Run with "-open" to also open the app in the default browser when ready.
@@ -120,23 +120,23 @@ sh.Run "powershell -NoProfile -ExecutionPolicy Bypass -File """ & scriptDir & "\
 
   'firewall-heal.bat' = @'
 @echo off
-REM Elevated helper: adds/repairs the Workstation Meva inbound firewall rule.
+REM Elevated helper: adds/repairs the NEWS MEVA inbound firewall rule.
 REM Called from start-server.ps1 when the rule is missing. Covers ALL network
 REM profiles (Domain/Private/Public) so LAN access keeps working even if
 REM Windows reclassifies the network type.
-netsh advfirewall firewall add rule name="Workstation Meva 3002" dir=in action=allow protocol=TCP localport=3002 profile=any
-netsh advfirewall firewall show rule name="Workstation Meva 3002"
+netsh advfirewall firewall add rule name="NEWS MEVA 3002" dir=in action=allow protocol=TCP localport=3002 profile=any
+netsh advfirewall firewall show rule name="NEWS MEVA 3002"
 '@
 
   'Install Autostart.bat' = @'
 @echo off
-title Install Workstation Meva Autostart
+title Install NEWS MEVA Autostart
 cd /d "%~dp0"
 
 set "STARTUP_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
-set "LNK=%STARTUP_DIR%\Workstation Meva.lnk"
+set "LNK=%STARTUP_DIR%\NEWS MEVA.lnk"
 
-powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $sc = $ws.CreateShortcut('%LNK%'); $sc.TargetPath = 'wscript.exe'; $q = [char]34; $sc.Arguments = $q + '%~dp0Start Server Hidden.vbs' + $q; $sc.WorkingDirectory = '%~dp0'; $sc.Description = 'Workstation Meva server'; $sc.Save()"
+powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $sc = $ws.CreateShortcut('%LNK%'); $sc.TargetPath = 'wscript.exe'; $q = [char]34; $sc.Arguments = $q + '%~dp0Start Server Hidden.vbs' + $q; $sc.WorkingDirectory = '%~dp0'; $sc.Description = 'NEWS MEVA server'; $sc.Save()"
 
 if errorlevel 1 (
   echo.
@@ -242,9 +242,9 @@ try {
 # ============================================================
 
 try {
-  $hasRule = netsh advfirewall firewall show rule name="Workstation Meva 3002" 2>&1 | Select-String '^Rule Name:'
+  $hasRule = netsh advfirewall firewall show rule name="NEWS MEVA 3002" 2>&1 | Select-String '^Rule Name:'
   if (-not $hasRule) {
-    Write-Log "Firewall rule 'Workstation Meva 3002' missing - healing."
+    Write-Log "Firewall rule 'NEWS MEVA 3002' missing - healing."
     Start-Process -FilePath (Join-Path $winDir 'firewall-heal.bat') -Verb RunAs 2>$null
   }
 } catch {

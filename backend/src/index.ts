@@ -43,7 +43,7 @@ const PORT = parseInt(process.env.PORT || '3002', 10);
 // Node.js process silently (no log, no restart).
 process.on('uncaughtException', (err) => {
   console.error('[FATAL] Uncaught exception:', err);
-  // Give logs a moment to flush, then exit — the auto-restart wrapper
+  // Give logs a moment to flush, then exit â€” the auto-restart wrapper
   // (Start Server.command / systemd) will bring the server back up.
   setTimeout(() => process.exit(1), 500);
 });
@@ -182,7 +182,7 @@ app.use(express.static(distPath, {
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/')) return next();
   // The build can be missing on a fresh clone (or while `vite build` swaps the
-  // folder during an auto-restart) — answer with guidance instead of the
+  // folder during an auto-restart) â€” answer with guidance instead of the
   // default "Cannot GET /" so the fix is obvious.
   if (!fs.existsSync(distIndex)) {
     return res.status(503).send(
@@ -228,7 +228,7 @@ function startServer() {
   server.on('error', (err: any) => {
     if (err && err.code === 'EADDRINUSE') {
       console.error('');
-      console.error(`Port ${PORT} is already in use. The Workstation Meva server may already be running.`);
+      console.error(`Port ${PORT} is already in use. The NEWS MEVA server may already be running.`);
       console.error('  - The running server stays active at http://localhost:' + PORT);
       console.error('  - For development use:  npm run dev  (listens on port 3003)');
       console.error('  - To stop the running server:  windows\\Stop Server.bat  (or kill the node process)');
@@ -243,6 +243,6 @@ function startServer() {
   // (http://n24s1:3002 via LLMNR/mDNS/hosts) works no matter which address
   // family the client resolves first.
   server.listen(PORT, '::', () => {
-    console.log(`Workstation Meva API running on http://0.0.0.0:${PORT} (dual-stack)`);
+    console.log(`NEWS MEVA API running on http://0.0.0.0:${PORT} (dual-stack)`);
   });
 }

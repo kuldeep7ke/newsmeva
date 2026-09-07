@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Workstation Meva Online - Caddy reverse-proxy watchdog (shared by the
+# NEWS MEVA Online - Caddy reverse-proxy watchdog (shared by the
 # Ubuntu, RedHat-family and macOS launchers; Windows has its own embedded
 # watchdog inside windows/start-server-core.ps1).
 #
 # Keeps the Caddy reverse proxy (port 80) alive: checks every 5 seconds and
 # restarts it when it has crashed or been killed, so the site never drops
-# silently. Best-effort and quiet — exits cleanly when Caddy is not installed,
+# silently. Best-effort and quiet â€” exits cleanly when Caddy is not installed,
 # not configured, or is managed by systemd (Linux).
 #
 # Usage:  bash caddy-watchdog.sh [REPO_ROOT]     (started in the background by start.sh)
@@ -38,7 +38,7 @@ port_busy() {
   elif command -v lsof >/dev/null 2>&1; then
     lsof -ti tcp:80 >/dev/null 2>&1
   else
-    # No tool to check the port — assume it is up so we never fight an
+    # No tool to check the port â€” assume it is up so we never fight an
     # existing proxy we cannot see.
     return 0
   fi

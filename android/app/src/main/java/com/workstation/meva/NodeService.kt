@@ -127,7 +127,7 @@ class NodeService : Service() {
         try {
             val files = assetManager.list(assetPath) ?: return
             if (files.isEmpty()) {
-                // It's a file — copy it
+                // It's a file â€” copy it
                 val outFile = File(targetDir, assetPath)
                 outFile.parentFile?.mkdirs()
                 assetManager.open(assetPath).use { input ->
@@ -136,7 +136,7 @@ class NodeService : Service() {
                     }
                 }
             } else {
-                // It's a directory — recurse
+                // It's a directory â€” recurse
                 val outDir = File(targetDir, assetPath)
                 outDir.mkdirs()
                 for (file in files) {
@@ -216,7 +216,7 @@ class NodeService : Service() {
                     Log.d(TAG, line)
                 }
 
-                // Process exited — check exit code
+                // Process exited â€” check exit code
                 val exitCode = nodeProcess?.waitFor() ?: -1
                 Log.e(TAG, "Node process exited with code $exitCode")
                 isRunning = false
@@ -246,7 +246,7 @@ class NodeService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Workstation Meva Server",
+                "NEWS MEVA Server",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Shows the server status"
@@ -263,7 +263,7 @@ class NodeService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Workstation Meva")
+            .setContentTitle("NEWS MEVA")
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(openIntent)

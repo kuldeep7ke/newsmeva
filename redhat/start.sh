@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Workstation Meva Online - start the server hidden in the background and
+# NEWS MEVA Online - start the server hidden in the background and
 # open the app in the browser (desktop sessions only).
 # For a production background service, use:  sudo bash install.sh  (systemd)
 #
@@ -82,12 +82,12 @@ lan_url() {
     if [[ -n "$ip" ]]; then
         echo "  LAN users:   http://$ip:$PORT   (firewall port $PORT/tcp opened by this script)"
         echo "               http://$ip        (when the bundled Caddy proxy is running)"
-        echo "               http://$(hostname -s)   (computer name — resolves from most LAN machines)"
+        echo "               http://$(hostname -s)   (computer name â€” resolves from most LAN machines)"
     fi
 }
 
 # Firewall self-heal: open PORT so LAN users can reach the server (needs root;
-# best-effort — skips silently when no privileges).
+# best-effort â€” skips silently when no privileges).
 firewall_heal() {
     if command -v firewall-cmd >/dev/null 2>&1 && sudo -n firewall-cmd --state 2>/dev/null | grep -qi "running"; then
         if ! sudo -n firewall-cmd --list-ports 2>/dev/null | grep -q "^$PORT/tcp"; then
@@ -106,7 +106,7 @@ start_caddy() {
             return 0
         fi
         if systemctl is-active --quiet caddy 2>/dev/null; then
-            echo "Caddy is running as a systemd service — leaving it alone."
+            echo "Caddy is running as a systemd service â€” leaving it alone."
             return 0
         fi
         echo "Starting Caddy reverse proxy..."
@@ -137,7 +137,7 @@ start_caddy
 # Caddy watchdog keeps the reverse proxy alive (port 80) in the background.
 nohup bash "$SCRIPT_DIR/../caddy-watchdog.sh" "$BASE" >> "$LOG" 2>&1 &
 
-echo "Starting Workstation Meva Online hidden in the background... (node: $NODE_BIN)"
+echo "Starting NEWS MEVA Online hidden in the background... (node: $NODE_BIN)"
 echo "URL: $URL"
 lan_url
 echo "Logs: $LOG"

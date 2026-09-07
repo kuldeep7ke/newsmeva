@@ -1,4 +1,4 @@
-# Workstation Meva Online - auto-restart wrapper (Windows)
+# NEWS MEVA Online - auto-restart wrapper (Windows)
 # Runs the node server and restarts it if it crashes (up to MAX_RESTARTS
 # within RESET_WINDOW_SEC; the counter resets after the server runs stably).
 #

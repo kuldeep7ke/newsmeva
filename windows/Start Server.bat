@@ -1,5 +1,5 @@
 @echo off
-title Workstation Meva Server
+title NEWS MEVA Server
 cd /d "%~dp0..\backend"
 if "%~1"=="-open" goto open
 if "%~1"=="-hidden" goto hidden

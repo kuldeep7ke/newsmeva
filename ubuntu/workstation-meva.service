@@ -1,5 +1,5 @@
 [Unit]
-Description=Workstation Meva Online server
+Description=NEWS MEVA Online server
 After=network.target caddy.service
 Wants=caddy.service
 
