@@ -1,6 +1,7 @@
 #!/bin/bash
-# Workstation Meva - add "workstation" hostname so http://workstation:3002 works
+# NEWS MEVA - add "newsmeva" hostname so http://newsmeva:3002 works
 # 192.168.1.14 is the server's current IP - re-run this if the server's IP changes.
+# (Legacy "workstation" entries are cleaned up too.)
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "Administrator rights needed - you will be asked for your Mac password."
@@ -8,14 +9,14 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 HOSTS=/etc/hosts
-sed -i.bak "/ workstation$/d" "$HOSTS"
-echo "192.168.1.14 workstation" >> "$HOSTS"
+sed -i.bak "/ newsmeva$/d;/ workstation$/d" "$HOSTS"
+echo "192.168.1.14 newsmeva" >> "$HOSTS"
 rm -f "$HOSTS.bak"
 dscacheutil -flushcache 2>/dev/null
 killall -HUP mDNSResponder 2>/dev/null
 
 echo
 echo "Done. This Mac can now open:"
-echo "  http://workstation:3002"
+echo "  http://newsmeva:3002"
 echo
 exit 0
