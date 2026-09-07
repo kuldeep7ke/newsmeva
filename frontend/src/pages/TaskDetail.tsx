@@ -259,7 +259,7 @@ export default function TaskDetail() {
   const handleAssignEditor = async (editorId: number) => {
     try {
       await api.put(`/tasks/${id}/assign-editor`, { video_editor_id: editorId });
-      toast('Video editor assigned — task sent to editing', 'success');
+      toast('Video editor assigned â€” task sent to editing', 'success');
       setAssignEditorModal(false);
       navigate('/dashboard/tasks');
     } catch (err: any) {
@@ -271,7 +271,7 @@ export default function TaskDetail() {
     setConfirmVerify(false);
     try {
       await api.put(`/tasks/${id}`, { status: 'editing' });
-      toast('Task approved — sent to editing', 'success');
+      toast('Task approved â€” sent to editing', 'success');
       if (user?.role === 'video_editor' && (user?.access_level || 3) === 2) {
         await handleAssignEditor(user.profile_id!);
       } else {
@@ -325,7 +325,7 @@ export default function TaskDetail() {
     setConfirmMarkUploaded(false);
     try {
       await api.put(`/tasks/${id}`, { status: 'uploading' });
-      toast('Production marked as complete — uploading...', 'success');
+      toast('Production marked as complete â€” uploading...', 'success');
       fetchTask();
     } catch (err: any) {
       toast(err.response?.data?.error || 'Failed to update', 'error');
@@ -376,7 +376,7 @@ export default function TaskDetail() {
       await navigator.clipboard.writeText(text);
       toast(`${label} copied`, 'success');
     } catch {
-      toast('Copy failed — select and copy manually', 'error');
+      toast('Copy failed â€” select and copy manually', 'error');
     }
   };
 
@@ -519,7 +519,7 @@ export default function TaskDetail() {
       }
       if (!next) { toast('No next step available', 'info'); return; }
       await api.put(`/tasks/${id}`, { status: next });
-      toast(`Task submitted — ${STATUS_LABELS[next] || next}`, 'success');
+      toast(`Task submitted â€” ${STATUS_LABELS[next] || next}`, 'success');
       navigate('/dashboard/tasks');
     } catch (err: any) {
       toast(err.response?.data?.error || 'Failed to submit', 'error');
@@ -641,6 +641,17 @@ export default function TaskDetail() {
     { value: 'stock', label: 'Archive' },
   ];
 
+  // Bulletin news_level â†’ reporter regions that should be offered in the news form.
+  // world â‡’ no filter (all reporters), same for unknown/missing levels.
+  const NEWS_LEVEL_REGIONS: Record<string, string[]> = {
+    local: ['local'],
+    district: ['taluka'],
+    state: ['district'],
+    national: ['state'],
+  };
+  const allowedReporterRegions = (task?.bulletin_news_level ? NEWS_LEVEL_REGIONS[task.bulletin_news_level] : undefined) || null;
+  const reporterMatchesLevel = (r: any) => !allowedReporterRegions || allowedReporterRegions.includes(r.region);
+
   return (
     <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
       {/* Back + Workflow Stepper */}
@@ -737,11 +748,11 @@ export default function TaskDetail() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 text-sm">
           <div>
             <p className="text-[11px] text-surface-400 uppercase tracking-wider">Assigned To</p>
-            <p className="font-medium text-surface-700">{task.assigned_to_name || '—'}</p>
+            <p className="font-medium text-surface-700">{task.assigned_to_name || 'â€”'}</p>
           </div>
           <div>
             <p className="text-[11px] text-surface-400 uppercase tracking-wider">Assigned By</p>
-            <p className="font-medium text-surface-700">{task.assigned_by_name || '—'}</p>
+            <p className="font-medium text-surface-700">{task.assigned_by_name || 'â€”'}</p>
           </div>
           <div>
             <p className="text-[11px] text-surface-400 uppercase tracking-wider">Type</p>
@@ -768,7 +779,7 @@ export default function TaskDetail() {
           )}
           <div>
             <p className="text-[11px] text-surface-400 uppercase tracking-wider">Created</p>
-            <p className="font-medium text-surface-700">{task.created_at ? formatDate(task.created_at) : '—'}</p>
+            <p className="font-medium text-surface-700">{task.created_at ? formatDate(task.created_at) : 'â€”'}</p>
           </div>
           {task.video_editor_name && (
             <div>
@@ -1063,10 +1074,10 @@ export default function TaskDetail() {
           <h3 className="text-sm font-semibold text-surface-700 mb-4 flex items-center gap-2">
             <Camera className="w-4 h-4 text-accent-500" /> Stage 7: Recording Complete
           </h3>
-          <p className="text-xs text-surface-400 mb-4">Recording finished — confirm to send the task to editing.</p>
+          <p className="text-xs text-surface-400 mb-4">Recording finished â€” confirm to send the task to editing.</p>
           <div className="mt-4 flex justify-end">
             <button onClick={async () => {
-              try { await api.put(`/tasks/${id}`, { status: 'editing' }); toast('Recording marked complete — sent to editing', 'success'); fetchTask(); }
+              try { await api.put(`/tasks/${id}`, { status: 'editing' }); toast('Recording marked complete â€” sent to editing', 'success'); fetchTask(); }
               catch { toast('Failed to save', 'error'); }
             }} className="flat-btn-brand text-sm">
               <ArrowRight className="w-4 h-4" /> Mark Recording Complete
@@ -1075,13 +1086,13 @@ export default function TaskDetail() {
         </div>
       )}
 
-      {/* Stage 10: Review & Mark Complete — admin only */}
+      {/* Stage 10: Review & Mark Complete â€” admin only */}
       {isAdmin && task.status === 'under_review' && (
         <div className="flat-card">
           <h3 className="text-sm font-semibold text-surface-700 mb-4 flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-accent-500" /> Stage 10: Review & Mark Complete
           </h3>
-          <p className="text-xs text-surface-400 mb-4">Final quality check before completing the task — all fields optional.</p>
+          <p className="text-xs text-surface-400 mb-4">Final quality check before completing the task â€” all fields optional.</p>
           <div className="space-y-4 mb-4">
             <div>
               <label className="flat-label">Rating</label>
@@ -1168,16 +1179,22 @@ export default function TaskDetail() {
                       onBlur={() => setTimeout(() => setShowReporterDropdown(false), 200)} />
                     {showReporterDropdown && (
                       <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-surface-200 rounded-xl shadow-dropdown z-10 max-h-48 overflow-y-auto">
-                        {(reporters.filter((r: any) => r.status !== 'inactive' && (!newsForm.reporter_name || r.name.toLowerCase().includes(newsForm.reporter_name.toLowerCase())))
+                        {(reporters.filter((r: any) => r.status !== 'inactive' && reporterMatchesLevel(r) && (!newsForm.reporter_name || r.name.toLowerCase().includes(newsForm.reporter_name.toLowerCase())))
                           .slice(0, newsForm.reporter_name ? undefined : 3)
                           .map((r: any) => (
-                          <button key={r.id} type="button" onMouseDown={() => { setNewsForm({ ...newsForm, reporter_id: String(r.id), reporter_name: '' }); setShowReporterDropdown(false); }}
+                          <button key={r.id} type="button" onMouseDown={() => { setNewsForm({ ...newsForm, reporter_id: String(r.id), reporter_name: '', location: r.location ? r.location : newsForm.location }); setShowReporterDropdown(false); }}
                             className="block w-full text-left px-3 py-2 text-sm text-surface-700 hover:bg-surface-50">
-                            {r.name}{r.location ? ` (${r.location})` : ''}
+                            {r.name}{r.location ? ` (${r.location})` : ''}{r.region ? ` Â· ${r.region}` : ''}
                           </button>
                         )))}
-                        {reporters.filter((r: any) => r.status !== 'inactive' && (!newsForm.reporter_name || r.name.toLowerCase().includes(newsForm.reporter_name.toLowerCase()))).length === 0 && (
+                        {task?.bulletin_news_level && !allowedReporterRegions && (
+                          <p className="px-3 py-2 text-[11px] text-surface-400">{task.bulletin_news_level} news level â€” all reporters shown</p>
+                        )}
+                        {reporters.filter((r: any) => r.status !== 'inactive' && reporterMatchesLevel(r) && (!newsForm.reporter_name || r.name.toLowerCase().includes(newsForm.reporter_name.toLowerCase()))).length === 0 && (
                           <p className="px-3 py-2 text-sm text-surface-400">No matching reporters</p>
+                        )}
+                        {allowedReporterRegions && reporters.some((r: any) => r.status !== 'inactive' && reporterMatchesLevel(r)) && (
+                          <p className="px-3 py-2 text-[11px] text-surface-400 border-t border-surface-100">Showing {allowedReporterRegions.join(', ')} reporters for the {task?.bulletin_news_level || 'bulletin'} news level</p>
                         )}
                       </div>
                     )}
@@ -1394,7 +1411,7 @@ export default function TaskDetail() {
                             ? 'bg-success-50 text-success-700 ring-1 ring-success-300'
                             : 'text-surface-400 hover:text-success-600 hover:bg-success-50'
                         }`}
-                        title={correctedNews.includes(item.id) ? 'Marked as corrected — click to undo' : 'Mark this news as corrected'}>
+                        title={correctedNews.includes(item.id) ? 'Marked as corrected â€” click to undo' : 'Mark this news as corrected'}>
                         <CheckCircle className={`w-3.5 h-3.5 ${correctedNews.includes(item.id) ? 'fill-success-500 text-white' : ''}`} />
                         {correctedNews.includes(item.id) ? 'Corrected' : 'Mark Corrected'}
                       </button>
@@ -1461,7 +1478,7 @@ export default function TaskDetail() {
                           if (task.status === 'waiting_confirmation' || task.status === 'under_review') {
                             await updateTaskStatus('correction_required');
                           } else {
-                            toast('Correction flagged — send the task back to the anchor', 'success');
+                            toast('Correction flagged â€” send the task back to the anchor', 'success');
                             fetchTask();
                           }
                         } catch { toast('Failed to mark correction', 'error'); }
@@ -1668,7 +1685,7 @@ export default function TaskDetail() {
       {showNewsCreated && (
         <div className="fixed bottom-6 right-6 z-50 bg-white rounded-xl shadow-lg border border-success-200 p-4 flex items-center gap-3 animate-slide-up">
           <CheckCircle className="w-5 h-5 text-success-500" />
-          <p className="text-sm text-surface-700">News created below — verify it.</p>
+          <p className="text-sm text-surface-700">News created below â€” verify it.</p>
         </div>
       )}
 
@@ -1720,7 +1737,7 @@ export default function TaskDetail() {
                     const filteredSlugs = slugs.filter((s: string) => !metaText.includes(s.toLowerCase()));
                     const slugSection = filteredSlugs.length > 0 ? filteredSlugs.slice(0, 3).join('\n------------\n') + '\n------------\n' : '';
                     const ch = channelMeta || {} as any;
-                    const channelName = ch.channel_name || 'Workstation Meva';
+                    const channelName = ch.channel_name || 'NEWS MEVA';
                     const channelDisplay = ch.channel_display_name || channelName;
                     const website = ch.website_url || '';
                     const editorName = ch.editor_name || '';
@@ -1732,9 +1749,9 @@ export default function TaskDetail() {
                       slugSection,
                       task.youtube_url,
                       '------------',
-                      `महत्वाच्या घडामोडींचे अपडेट्स मिळवण्यासाठी "${channelDisplay}" चॅनलला *SUBSCRIBE* करा`,
+                      `à¤®à¤¹à¤¤à¥à¤µà¤¾à¤šà¥à¤¯à¤¾ à¤˜à¤¡à¤¾à¤®à¥‹à¤¡à¥€à¤‚à¤šà¥‡ à¤…à¤ªà¤¡à¥‡à¤Ÿà¥à¤¸ à¤®à¤¿à¤³à¤µà¤£à¥à¤¯à¤¾à¤¸à¤¾à¤ à¥€ "${channelDisplay}" à¤šà¥…à¤¨à¤²à¤²à¤¾ *SUBSCRIBE* à¤•à¤°à¤¾`,
                       website,
-                      'या संकेतस्थळाला भेट द्या',
+                      'à¤¯à¤¾ à¤¸à¤‚à¤•à¥‡à¤¤à¤¸à¥à¤¥à¤³à¤¾à¤²à¤¾ à¤­à¥‡à¤Ÿ à¤¦à¥à¤¯à¤¾',
                       `${editorName}, ${editorPosition}, ${channelDisplay}`,
                     ].filter(Boolean).join('\n');
                     navigator.clipboard.writeText(msg);
@@ -1784,7 +1801,7 @@ export default function TaskDetail() {
         </div>
       )}
 
-      {/* Content Reuse Check — only when news items exist */}
+      {/* Content Reuse Check â€” only when news items exist */}
       {newsItems.length > 0 && ['draft', 'script_writing', 'footage_collection', 'waiting_confirmation', 'correction_required', 'approved', 'editor_assigned', 'teleprompter_ready', 'prompting', 'recording_done', 'editing', 'uploading', 'under_review', 'completed', 'cancelled'].includes(task.status) && (
         <div className="flat-card">
           <div className="flex items-center justify-between gap-2 mb-3">
@@ -1819,7 +1836,7 @@ export default function TaskDetail() {
                     <div key={m.task_id} className="flex items-center justify-between p-2 rounded-lg border border-surface-100 hover:border-accent-100 transition-colors">
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-surface-700 truncate">{m.title}</p>
-                        <p className="text-[11px] text-surface-400">{m.created_at?.slice(0, 10)} — {m.match_percent}% match</p>
+                        <p className="text-[11px] text-surface-400">{m.created_at?.slice(0, 10)} â€” {m.match_percent}% match</p>
                       </div>
                       <button onClick={async () => {
                         setReusePopupTask(m);
@@ -1944,9 +1961,9 @@ export default function TaskDetail() {
                       style={{ width: `${reuseResults.overall_percent}%` }} />
                   </div>
                   <p className="text-xs text-surface-400 mt-2">
-                    {reuseResults.overall_percent >= 50 ? 'High similarity — consider rewriting' :
-                     reuseResults.overall_percent >= 30 ? 'Moderate similarity — review matches below' :
-                     'Low similarity — content appears fresh'}
+                    {reuseResults.overall_percent >= 50 ? 'High similarity â€” consider rewriting' :
+                     reuseResults.overall_percent >= 30 ? 'Moderate similarity â€” review matches below' :
+                     'Low similarity â€” content appears fresh'}
                   </p>
                 </div>
                 <p className="text-xs font-medium text-surface-500 mb-2">Matched in {reuseResults.matches.length} recent task{reuseResults.matches.length !== 1 ? 's' : ''}:</p>
@@ -1956,7 +1973,7 @@ export default function TaskDetail() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-surface-800 truncate">{m.title}</p>
                         <div className="flex items-center gap-2 text-[11px] text-surface-400 mt-0.5">
-                          <span>{m.created_at?.slice(0, 10) || '—'}</span>
+                          <span>{m.created_at?.slice(0, 10) || 'â€”'}</span>
                           <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
                             m.status === 'completed' || m.status === 'published' || m.status === 'under_review' ? 'bg-success-50 text-success-600' : 'bg-surface-100 text-surface-500'
                           }`}>{m.status}</span>
@@ -2041,7 +2058,7 @@ export default function TaskDetail() {
                   <div className={`w-2 h-2 rounded-full shrink-0 ${ed.is_online ? 'bg-green-500' : 'bg-surface-300'}`}></div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-surface-700">{ed.full_name}</p>
-                    <p className="text-xs text-surface-400">{ed.is_online ? 'Online' : 'Offline'}{ed.access_level ? ` · Level ${ed.access_level}` : ''}</p>
+                    <p className="text-xs text-surface-400">{ed.is_online ? 'Online' : 'Offline'}{ed.access_level ? ` Â· Level ${ed.access_level}` : ''}</p>
                   </div>
                   <span className="text-xs text-accent-600 font-medium">Assign</span>
                 </button>
@@ -2337,7 +2354,7 @@ export default function TaskDetail() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-sm font-semibold text-surface-800">{reusePopupTask.title}</h3>
-                <p className="text-[11px] text-surface-400">{reusePopupTask.created_at?.slice(0, 10)} — {reusePopupTask.match_percent}% match</p>
+                <p className="text-[11px] text-surface-400">{reusePopupTask.created_at?.slice(0, 10)} â€” {reusePopupTask.match_percent}% match</p>
               </div>
               <button onClick={() => setReusePopupTask(null)} className="p-1.5 rounded-lg text-surface-400 hover:text-surface-600 hover:bg-surface-100">
                 <XCircle className="w-5 h-5" />

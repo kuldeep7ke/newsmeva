@@ -492,6 +492,7 @@ router.get('/:id', authenticate, async (req: AuthRequest, res: Response) => {
       ar.name as archive_name, ar.details as archive_details, ar.location as archive_location,
       lc.name as location_name, lc.region as location_region,
       bl.title as bulletin_title, bt.name as bulletin_template_name, bt.publish_time as bulletin_template_time,
+      bt.news_level as bulletin_news_level,
       (SELECT COUNT(*) FROM task_collaborators tc JOIN profiles cp ON cp.id = tc.profile_id WHERE tc.task_id = t.id AND (cp.access_level IS NULL OR cp.access_level > 1)) as collaborator_count
     FROM tasks t
     LEFT JOIN profiles a ON t.assigned_to = a.id

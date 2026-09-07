@@ -94,6 +94,7 @@ export default function Ads() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [err, setErr] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: number; title: string } | null>(null);
+  const [filter, setFilter] = useState('total');
 
   const canCreate = (user?.access_level || 3) <= 3;
   const canManage = (user?.access_level || 3) <= 2;
@@ -143,6 +144,23 @@ export default function Ads() {
       lastMonthExpired,
     };
   }, [ads, now]);
+
+  const isExpiredAd = (a: any) => a.status === 'active' && !!a.end_date && new Date(a.end_date).getTime() < now.getTime();
+  const isExpiringSoonAd = (a: any) => a.status === 'active' && !!a.end_date && (() => { const end = new Date(a.end_date); return end >= now && end <= sevenDaysFromNow; })();
+
+  const filterAd = (a: any): boolean => {
+    switch (filter) {
+      case 'active': return a.status === 'active';
+      case 'expiring_soon': return isExpiringSoonAd(a);
+      case 'auto_renew': return a.renewal_type === 'auto_renew' || a.renewal_type === 'loop';
+      case 'last_month': { const created = parseDate(a.created_at); return !!created && created >= lastMonthStart && created <= lastMonthEnd; }
+      case 'inactive_expired': return a.status === 'inactive' || isExpiredAd(a);
+      default: return true;
+    }
+  };
+
+  const filteredAds = filter === 'total' ? ads : ads.filter(filterAd);
+  const toggleFilter = (key: string) => setFilter((prev) => prev === key ? 'total' : key);
 
   const fetch = () => {
     setLoading(true);
@@ -283,9 +301,10 @@ export default function Ads() {
         )}
       </div>
 
-      {/* Summary Dashboard */}
+      {/* Summary Dashboard - click a card to filter the ads below */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-4">
-        <div className="flat-card p-4 border-l-4 border-l-accent-500">
+        <button type="button" onClick={() => toggleFilter('total')}
+          className={`flat-card p-4 border-l-4 border-l-accent-500 text-left transition-shadow ${filter === 'total' ? 'ring-2 ring-accent-500' : 'cursor-pointer hover:shadow-md'}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-surface-400 uppercase tracking-wide">Total Ads</p>
@@ -295,9 +314,10 @@ export default function Ads() {
               <Megaphone className="w-5 h-5 text-accent-600" />
             </div>
           </div>
-        </div>
+        </button>
 
-        <div className="flat-card p-4 border-l-4 border-l-success-500">
+        <button type="button" onClick={() => toggleFilter('active')}
+          className={`flat-card p-4 border-l-4 border-l-success-500 text-left transition-shadow ${filter === 'active' ? 'ring-2 ring-success-500' : 'cursor-pointer hover:shadow-md'}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-surface-400 uppercase tracking-wide">Running Now</p>
@@ -307,9 +327,10 @@ export default function Ads() {
               <Shield className="w-5 h-5 text-success-600" />
             </div>
           </div>
-        </div>
+        </button>
 
-        <div className="flat-card p-4 border-l-4 border-l-warning-500">
+        <button type="button" onClick={() => toggleFilter('expiring_soon')}
+          className={`flat-card p-4 border-l-4 border-l-warning-500 text-left transition-shadow ${filter === 'expiring_soon' ? 'ring-2 ring-warning-500' : 'cursor-pointer hover:shadow-md'}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-surface-400 uppercase tracking-wide">Expiring Soon</p>
@@ -320,9 +341,10 @@ export default function Ads() {
               <Clock className="w-5 h-5 text-warning-600" />
             </div>
           </div>
-        </div>
+        </button>
 
-        <div className="flat-card p-4 border-l-4 border-l-purple-500">
+        <button type="button" onClick={() => toggleFilter('auto_renew')}
+          className={`flat-card p-4 border-l-4 border-l-purple-500 text-left transition-shadow ${filter === 'auto_renew' ? 'ring-2 ring-purple-500' : 'cursor-pointer hover:shadow-md'}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-surface-400 uppercase tracking-wide">Auto Renew / Loop</p>
@@ -333,9 +355,10 @@ export default function Ads() {
               <RefreshCw className="w-5 h-5 text-purple-600" />
             </div>
           </div>
-        </div>
+        </button>
 
-        <div className="flat-card p-4 border-l-4 border-l-blue-500">
+        <button type="button" onClick={() => toggleFilter('last_month')}
+          className={`flat-card p-4 border-l-4 border-l-blue-500 text-left transition-shadow ${filter === 'last_month' ? 'ring-2 ring-blue-500' : 'cursor-pointer hover:shadow-md'}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-surface-400 uppercase tracking-wide">Last Month</p>
@@ -346,9 +369,10 @@ export default function Ads() {
               <Calendar className="w-5 h-5 text-blue-600" />
             </div>
           </div>
-        </div>
+        </button>
 
-        <div className="flat-card p-4 border-l-4 border-l-emerald-500">
+        <button type="button" onClick={() => toggleFilter('inactive_expired')}
+          className={`flat-card p-4 border-l-4 border-l-emerald-500 text-left transition-shadow ${filter === 'inactive_expired' ? 'ring-2 ring-emerald-500' : 'cursor-pointer hover:shadow-md'}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-surface-400 uppercase tracking-wide">Inactive / Expired</p>
@@ -359,7 +383,7 @@ export default function Ads() {
               <AlertTriangle className="w-5 h-5 text-surface-400" />
             </div>
           </div>
-        </div>
+        </button>
       </div>
 
       {showCreate && (
@@ -570,8 +594,26 @@ export default function Ads() {
           <p className="text-surface-400">No advertisements</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {ads.map((ad) => (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-surface-400">
+              {filter === 'total' ? `All ${ads.length} ad${ads.length !== 1 ? 's' : ''}` : `Showing ${filteredAds.length} of ${ads.length} ad${ads.length !== 1 ? 's' : ''}`}
+            </p>
+            {filter !== 'total' && (
+              <button type="button" onClick={() => setFilter('total')}
+                className="text-xs font-medium text-accent-600 hover:text-accent-700 transition-colors">
+                Clear filter (show all)
+              </button>
+            )}
+          </div>
+          {filteredAds.length === 0 ? (
+            <div className="flat-card-static text-center py-12">
+              <Megaphone className="w-10 h-10 text-surface-300 mx-auto mb-3" />
+              <p className="text-surface-500">No ads match this filter</p>
+            </div>
+          ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {filteredAds.map((ad) => (
             <div key={ad.id} className="flat-card">
               <div className="flex items-center justify-between mb-2">
                 <span className={`flat-badge ${
@@ -639,6 +681,8 @@ export default function Ads() {
               <p className="text-[11px] text-surface-400 mt-1.5">By {ad.created_by_name}</p>
             </div>
           ))}
+          </div>
+          )}
         </div>
       )}
 
