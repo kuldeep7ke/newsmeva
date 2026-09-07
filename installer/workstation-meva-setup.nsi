@@ -41,7 +41,7 @@ VIAddVersionKey "LegalCopyright" "Free & public domain (Unlicense)"
 !define MUI_FINISHPAGE_RUN "$INSTDIR\windows\Control Panel.bat"
 !define MUI_FINISHPAGE_RUN_TEXT "Open the Control Panel (set up your database)"
 !define MUI_FINISHPAGE_LINK "Open documentation"
-!define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/kuldeep7ke/workstationmeva-setup"
+!define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/kuldeep7ke/newsmeva"
 
 ; ---------------------------------------------------------------------------
 ; Terms & Conditions acceptance
@@ -291,7 +291,7 @@ Section "Install" SecMain
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "InstallLocation" "$INSTDIR"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "DisplayIcon" "$INSTDIR\Uninstall.exe"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "Publisher" "kuldeep7ke"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "URLInfoAbout" "https://github.com/kuldeep7ke/workstationmeva-setup"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "URLInfoAbout" "https://github.com/kuldeep7ke/newsmeva"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "NoRepair" 1
 

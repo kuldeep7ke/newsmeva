@@ -25,7 +25,7 @@ app served over LAN (or internet), backed by **Supabase PostgreSQL**, with an
 | Frontend | React SPA (Vite), Socket.IO client, utility-class CSS |
 | Database | PostgreSQL via Supabase pooler (`pg`, port 6543) |
 | Offline mirror | SQLite via `sql.js` → `backend/workstation.db` + outbox sync engine |
-| Repo | `https://github.com/kuldeep7ke/workstationmeva-setup` (public; local branch `main` pushes to `main`) |
+| Repo | `https://github.com/kuldeep7ke/newsmeva` (public; local branch `main` pushes to `main`) |
 
 ## 2. Project Snapshot (verified 2026-08-15)
 
@@ -766,3 +766,5 @@ v24.19.0 has only arm64, so a bump silently breaks 32-bit devices.
 | 87 | **LAN hostname: `workstation`/`N24S1` → `newsmeva` 2026-09-07** - the friendly LAN hostname is now `newsmeva`. Hosts-file scripts (`lan/Add Workstation Hosts.bat`/`.command`) map `192.168.1.14 newsmeva` (and clean up legacy `workstation` entries); `lan/Open App.bat`/`.command` probe and open `http://newsmeva`; `lan/README.md` references updated end-to-end | `lan/*` |
 
 | 88 | **Rebrand: app name "Workstation Meva" → "NEWS MEVA" 2026-09-07** - display-name rename everywhere: default app name + legacy-value fallback (`appConfig.ts`), `index.html` title, logo SVGs, login/MobileApp titles, FAQ/Settings/About strings, channel-name fallback, Windows launcher titles + startup shortcut name + firewall rule `NEWS MEVA 3002` (legacy rule still cleaned up), NSIS installer text/shortcuts/Start-Menu folder/registry DisplayName, .deb maintainer+description, GCP/backend log lines, systemd unit Description, Mac/Linux/RedHat/RHEL scripts, Android app strings + titles. Internal identifiers kept (package.json name, `workstation-meva.service`, `.deb`/`.exe` filenames, repo URL, DB filenames) so existing installs keep working; installers now also remove old-name autostart/firewall/Start-Menu/desktop artifacts | repo-wide display strings |
+
+| 89 | **GitHub repo renamed to `kuldeep7ke/newsmeva` 2026-09-07** - the GitHub repository was renamed from `workstationmeva-setup` to `newsmeva` (the old URL auto-redirects). The local `origin` remote now points at `https://github.com/kuldeep7ke/newsmeva.git`. All in-repo references to the old URL (frontend `APP_REPO_URL`, NSIS finish-page link + uninstall `URLInfoAbout`, README clone/web links, docs setup guides, Windows Control Panel dev-guide link, FAQ/About project links) were updated to the new URL; the historical changelog entry 69 was left untouched for accuracy | `frontend/src/utils/appMeta.ts`, `installer/workstation-meva-setup.nsi`, `README.md`, `docs/*`, `windows/Control Panel.ps1`, `.git/config` |

@@ -95,7 +95,7 @@ released (your `.env` and data are preserved). To fully remove: `sudo apt remove
 sudo apt update && sudo apt install -y git curl
 
 # Clone the repository
-git clone https://github.com/kuldeep7ke/workstationmeva-setup.git
+git clone https://github.com/kuldeep7ke/newsmeva.git
 cd workstation
 
 # Run the installer (installs Node.js, builds, installs the service)
