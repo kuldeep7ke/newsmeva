@@ -482,13 +482,13 @@ router.post('/clean-all-data', authenticate, authorize(1), async (req: AuthReque
     // Seed default admin
     const password_hash = bcrypt.hashSync('P@ssw0rd', 10);
     const userResult = await prepare("INSERT INTO users (username, password_hash, is_active) VALUES (?,?,?)")
-      .run('dev@workstation.local', password_hash, 1);
+      .run('dev@newsmeva.local', password_hash, 1);
     const userId = userResult.lastInsertRowid as number;
     await prepare("INSERT INTO profiles (uid, user_id, full_name, role, access_level, email, is_active, status) VALUES (?,?,?,?,?,?,?,?)")
-      .run('PRF-0001', userId, 'Workstation Dev', 'admin', 1, 'dev@workstation.local', 1, 'active');
+      .run('PRF-0001', userId, 'News Meva Dev', 'admin', 1, 'dev@newsmeva.local', 1, 'active');
 
     console.log('[clean-all-data] by user', req.user?.username, '- full reset with default admin seeded');
-    res.json({ message: 'All data cleared. Default admin account (dev@workstation.local / P@ssw0rd) has been created.' });
+    res.json({ message: 'All data cleared. Default admin account (dev@newsmeva.local / P@ssw0rd) has been created.' });
   } catch (err: any) {
     console.error('[clean-all-data] error:', err);
     res.status(500).json({ error: err.message || 'Failed to clean all data.' });

@@ -17,8 +17,8 @@ initSqlJs().then((SQL) => {
   // Reset admin user
   db.run(`UPDATE users SET 
     username = 'admin', 
-    email = 'dev@workstation.local',
-    full_name = 'Workstation Dev',
+    email = 'dev@newsmeva.local',
+    full_name = 'News Meva Dev',
     role = 'admin',
     access_level = 1,
     status = 'active',
@@ -27,7 +27,7 @@ initSqlJs().then((SQL) => {
   WHERE id = 1`);
 
   fs.writeFileSync(dbPath, Buffer.from(db.export()));
-  console.log('Database cleaned. Only admin user remains (dev@workstation.local).');
+  console.log('Database cleaned. Only admin user remains (dev@newsmeva.local).');
 }).catch(err => {
   console.error('Error:', err);
   process.exit(1);

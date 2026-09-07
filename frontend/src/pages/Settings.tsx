@@ -329,7 +329,7 @@ channel_name: '', channel_display_name: '', website_url: 'www.newsmeva.com',
                 </div>
                 <div>
                   <label className="flat-label">Website URL</label>
-                  <input className="flat-input" placeholder="e.g. www.workstation.com"
+                  <input className="flat-input" placeholder="e.g. www.newsmeva.com"
                     value={channelMeta.website_url}
                     onChange={(e) => setChannelMeta({ ...channelMeta, website_url: e.target.value })} />
                 </div>
@@ -432,7 +432,7 @@ channel_name: '', channel_display_name: '', website_url: 'www.newsmeva.com',
                 <p className="text-sm font-semibold text-surface-800">Done</p>
                 <p className="text-xs text-surface-400 mt-1">
 {cleanMode === 'all-data'
-                     ? 'All data cleared. Default admin account (dev@workstation.local / P@ssw0rd) is ready.'
+                     ? 'All data cleared. Default admin account (dev@newsmeva.local / P@ssw0rd) is ready.'
                     : `${cleanResult.total || 0} rows removed. User accounts preserved.`}
                 </p>
               </div>
@@ -440,7 +440,7 @@ channel_name: '', channel_display_name: '', website_url: 'www.newsmeva.com',
               <div className="py-4 space-y-3">
                 <p className="text-sm text-surface-600 leading-relaxed">
 {cleanMode === 'all-data'
-                     ? 'This will erase all users, profiles, tasks, bulletins, slots, and every record in the database. A default admin account (dev@workstation.local / P@ssw0rd) will be created after cleanup.'
+                     ? 'This will erase all users, profiles, tasks, bulletins, slots, and every record in the database. A default admin account (dev@newsmeva.local / P@ssw0rd) will be created after cleanup.'
                     : 'This will remove tasks, bulletins, notifications, leaves, stories, ads, activity logs, and reporters. User accounts, profiles, and bulletin slots are kept.'}
                 </p>
 
@@ -454,7 +454,7 @@ channel_name: '', channel_display_name: '', website_url: 'www.newsmeva.com',
                 {cleanMode === 'all-data' && (
                   <div className="bg-danger-50 border border-danger-200 rounded-xl px-3 py-2.5 flex items-start gap-2">
                     <AlertTriangle className="w-3.5 h-3.5 text-danger-500 shrink-0 mt-0.5" />
-                    <p className="text-xs text-danger-700">All accounts including admins will be deleted. You will need to log in again using <strong>dev@workstation.local / P@ssw0rd</strong>.</p>
+                    <p className="text-xs text-danger-700">All accounts including admins will be deleted. You will need to log in again using <strong>dev@newsmeva.local / P@ssw0rd</strong>.</p>
                   </div>
                 )}
 
@@ -574,7 +574,7 @@ channel_name: '', channel_display_name: '', website_url: 'www.newsmeva.com',
               &copy; {new Date().getFullYear()} NEWS MEVA. All rights reserved.
             </p>
             <p className="text-[11px] text-surface-300 mt-0.5">
-              Powered by MarathiMevasa News Network
+              Powered by NEWS MEVA
             </p>
           </div>
         </div>
