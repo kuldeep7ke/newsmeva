@@ -18,17 +18,17 @@
 ; Configuration
 ; ---------------------------------------------------------------------------
 Name "NEWS MEVA Online"
-OutFile "newsmeva-setup-v3.1.1.exe"
+OutFile "newsmeva-setup-v3.1.2.exe"
 InstallDir "C:\NewsMeva"
 InstallDirRegKey HKLM "Software\NewsMeva" "InstallDir"
 RequestExecutionLevel admin
 Unicode True
 
 ; Version info shown in Explorer properties
-VIProductVersion "3.1.1.0"
+VIProductVersion "3.1.2.0"
 VIAddVersionKey "ProductName" "NEWS MEVA Online"
-VIAddVersionKey "ProductVersion" "3.1.1"
-VIAddVersionKey "FileVersion" "3.1.1"
+VIAddVersionKey "ProductVersion" "3.1.2"
+VIAddVersionKey "FileVersion" "3.1.2"
 VIAddVersionKey "FileDescription" "NEWS MEVA Online Installer (Beta)"
 VIAddVersionKey "LegalCopyright" "Free & public domain (Unlicense)"
 
@@ -39,7 +39,7 @@ VIAddVersionKey "LegalCopyright" "Free & public domain (Unlicense)"
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 !define MUI_WELCOMEPAGE_TITLE "NEWS MEVA Online Setup"
-!define MUI_WELCOMEPAGE_TEXT "This wizard will install NEWS MEVA Online on your computer.$\r$\n$\r$\nINSTALLER NOTES:$\r$\n  - BETA release (v3.1.1) - testing mode$\r$\n  - Free & open source - public domain (Unlicense)$\r$\n  - Requires Windows 10 or Windows 11 (64-bit)$\r$\n  - Node.js + Caddy are bundled - no internet needed$\r$\n  - Always installs a FRESH copy: NO user data, NO database, NO previous settings$\r$\n$\r$\nThe installer will:$\r$\n  - Check your system requirements$\r$\n  - Copy the application files$\r$\n  - Open port 3002 in the Windows Firewall$\r$\n  - Create Start Menu shortcuts$\r$\n$\r$\nClick Next to continue."
+!define MUI_WELCOMEPAGE_TEXT "This wizard will install NEWS MEVA Online on your computer.$\r$\n$\r$\nINSTALLER NOTES:$\r$\n  - BETA release (v3.1.2) - testing mode$\r$\n  - Free & open source - public domain (Unlicense)$\r$\n  - Requires Windows 10 or Windows 11 (64-bit)$\r$\n  - Node.js + Caddy are bundled - no internet needed$\r$\n  - Always installs a FRESH copy: NO user data, NO database, NO previous settings$\r$\n$\r$\nThe installer will:$\r$\n  - Check your system requirements$\r$\n  - Copy the application files$\r$\n  - Open port 3002 in the Windows Firewall$\r$\n  - Create Start Menu shortcuts$\r$\n$\r$\nClick Next to continue."
 !define MUI_FINISHPAGE_RUN "$INSTDIR\windows\Control Panel.bat"
 !define MUI_FINISHPAGE_RUN_TEXT "Open the Control Panel (set up your database)"
 !define MUI_FINISHPAGE_LINK "Open documentation"
