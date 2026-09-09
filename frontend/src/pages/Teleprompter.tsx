@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import { formatDateTime } from '../utils/dates';
 import { getCustomScript } from '../utils/tpCustom';
 import { ArrowLeft, Play, Pause, RotateCcw, Loader2, AlertTriangle, History, FlipHorizontal2, CheckCircle2, X, Flag, Settings2, BookOpen, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
@@ -617,7 +618,7 @@ export default function Teleprompter() {
                     <span>·</span>
                     <span className="px-1.5 py-0.5 rounded bg-white/10 text-white/60">{STATUS_LABEL[h.status] || h.status}</span>
                     <span>·</span>
-                    <span>{h.script_imported_at ? new Date(h.script_imported_at.replace(' ', 'T')).toLocaleString() : ''}</span>
+                    <span>{formatDateTime(h.script_imported_at)}</span>
                   </div>
                 </Link>
               ))}

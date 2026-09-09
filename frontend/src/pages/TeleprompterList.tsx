@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Monitor, Loader2, AlertTriangle, ExternalLink, History, Radio, Archive, PenLine, Trash2, Play } from 'lucide-react';
 import { formatLabel } from '../utils/roles';
-import { formatDate } from '../utils/dates';
+import { formatDate, formatDateTime } from '../utils/dates';
 import { listCustomScripts, saveCustomScript, deleteCustomScript, TpCustomScript } from '../utils/tpCustom';
 
 export default function TeleprompterList() {
@@ -173,7 +173,7 @@ export default function TeleprompterList() {
                         <div className="min-w-0">
                           <h3 className="text-base font-semibold text-white/90">{t.task_title}</h3>
                           <p className="text-sm text-white/40 mt-1">
-                            {t.anchor_name || 'Unknown anchor'} · {t.script_imported_at ? `Loaded ${new Date(t.script_imported_at.replace(' ', 'T')).toLocaleString()}` : 'Not imported'}
+                            {t.anchor_name || 'Unknown anchor'} · {t.script_imported_at ? `Loaded ${formatDateTime(t.script_imported_at)}` : 'Not imported'}
                           </p>
                         </div>
                         <span className="px-2 py-0.5 rounded text-xs font-medium shrink-0 mt-1 bg-green-500/20 text-green-400">Ready</span>
@@ -226,7 +226,7 @@ export default function TeleprompterList() {
                   <div className="min-w-0">
                     <h3 className="text-base font-semibold text-white/90">{h.task_title}</h3>
                     <p className="text-sm text-white/40 mt-1">
-                      {h.anchor_name || 'Unknown anchor'} · {h.script_imported_at ? new Date(h.script_imported_at.replace(' ', 'T')).toLocaleString() : ''}
+                      {h.anchor_name || 'Unknown anchor'} · {formatDateTime(h.script_imported_at)}
                     </p>
                   </div>
                   <span className="px-2 py-0.5 rounded text-xs font-medium shrink-0 mt-1 bg-white/10 text-white/60">
@@ -254,7 +254,7 @@ export default function TeleprompterList() {
                   <div className="min-w-0">
                     <h3 className="text-base font-semibold text-white/90">{h.task_title}</h3>
                     <p className="text-sm text-white/40 mt-1">
-                      {h.anchor_name || 'Unknown anchor'} · {h.script_imported_at ? new Date(h.script_imported_at.replace(' ', 'T')).toLocaleString() : ''}
+                      {h.anchor_name || 'Unknown anchor'} · {formatDateTime(h.script_imported_at)}
                     </p>
                   </div>
                   <span className="px-2 py-0.5 rounded text-xs font-medium shrink-0 mt-1 bg-white/10 text-white/60">

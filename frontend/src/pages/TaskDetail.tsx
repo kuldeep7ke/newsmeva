@@ -1051,7 +1051,7 @@ export default function TaskDetail() {
           </div>
           {task.script_imported_at ? (
             <div className="bg-success-50 border border-success-200 rounded-xl p-3 mb-4">
-              <p className="text-xs text-success-700">Script imported at {new Date(task.script_imported_at.replace(' ', 'T')).toLocaleString()}</p>
+              <p className="text-xs text-success-700">Script imported at {formatDateTime(task.script_imported_at)}</p>
             </div>
           ) : (
             <button onClick={async () => {
@@ -1134,7 +1134,7 @@ export default function TaskDetail() {
             <CheckCircle className="w-12 h-12 text-success-500 mx-auto mb-2" />
             <h3 className="text-lg font-bold text-success-700">Task Completed</h3>
             <p className="text-sm text-surface-500 mt-1">This task has been completed and archived.</p>
-            {task.completed_at && <p className="text-xs text-surface-400 mt-1">Completed at: {new Date(task.completed_at.replace(' ', 'T') + 'Z').toLocaleString()}</p>}
+            {task.completed_at && <p className="text-xs text-surface-400 mt-1">Completed at: {formatDateTime(task.completed_at)}</p>}
             {task.published_at && <p className="text-xs text-surface-400">Published at: {formatDateTime(task.published_at)}</p>}
           </div>
         </div>
