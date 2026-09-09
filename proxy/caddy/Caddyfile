@@ -1,6 +1,6 @@
-# NEWS MEVA â€” Caddy reverse proxy (LAN)
+# NEWS MEVA — Caddy reverse proxy (LAN)
 # ==================================================
-# The Node backend stays on 127.0.0.1:3002 â€” Caddy makes it available on
+# The Node backend stays on 127.0.0.1:3002 — Caddy makes it available on
 # port 80 for every address of this machine (http://<LAN-IP> and
 # http://newsmeva / http://localhost), so LAN users never need :3002.
 #

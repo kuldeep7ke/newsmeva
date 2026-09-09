@@ -4,7 +4,7 @@ import path from 'path';
 import initSqlJs from 'sql.js';
 import { Pool } from 'pg';
 
-const FULL_DB_PATH = 'C:/Users/Admin/Documents/Money Meva/Meva/Workstation Meva/backend/workstation.db';
+const FULL_DB_PATH = 'C:/Users/Admin/Documents/Money Meva/Meva/NEWS Meva/backend/workstation.db';
 
 interface TableData {
   name: string;

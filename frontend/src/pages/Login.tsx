@@ -54,7 +54,7 @@ const handleSubmit = async (e: FormEvent) => {
             <img src="/favicon.svg" alt={getAppName()} className="w-16 h-16 drop-shadow-lg" />
           </div>
           <h1 className="text-2xl font-bold text-surface-800">{getAppName()}</h1>
-          <p className="text-surface-400 mt-1">WorkStation Online</p>
+          <p className="text-surface-400 mt-1">News Meva Online</p>
           <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full bg-warning-500/15 text-warning-600 text-[11px] font-semibold border border-warning-500/25">
             <span className="w-1.5 h-1.5 rounded-full bg-warning-500 animate-pulse" />
             Beta Release &middot; Testing Mode

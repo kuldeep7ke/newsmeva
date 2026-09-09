@@ -32,9 +32,9 @@ http://newsmeva
 
 ## Optional: friendly name `newsmeva` (once per machine)
 
-- **Windows** — run `Add Workstation Hosts.bat` (click **Yes** on UAC) →
+- **Windows** — run `Add NewsMeva Hosts.bat` (click **Yes** on UAC) →
   afterwards `Open App.bat` and the browser URL use `http://newsmeva`
-- **Mac** — run `Add Workstation Hosts.command` (enter your password)
+- **Mac** — run `Add NewsMeva Hosts.command` (enter your password)
 
 > If you previously ran the script and it mapped the old `workstation` name,
 > re-run it once — it cleans up the old entry and replaces it with `newsmeva`.

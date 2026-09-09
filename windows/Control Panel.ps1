@@ -27,8 +27,8 @@ $probe   = Join-Path $winDir 'db-probe.js'
 
 $script:cfg = @{ PORT = 3002; DATABASE_URL = '' }
 
-# Friendly LAN hostname - same name mapped by lan\Add Workstation Hosts.bat /
-# lan\Add Workstation Hosts.command (192.168.1.9 newsmeva). The machine's OS
+# Friendly LAN hostname - same name mapped by lan\Add NewsMeva Hosts.bat /
+# lan\Add NewsMeva Hosts.command (192.168.1.9 newsmeva). The machine's OS
 # name may still carry the old brand; the panel shows the friendly name so LAN
 # users copy a URL that actually works.
 $script:appHost = 'newsmeva'

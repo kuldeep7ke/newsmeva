@@ -43,7 +43,7 @@ const PORT = parseInt(process.env.PORT || '3002', 10);
 // Node.js process silently (no log, no restart).
 process.on('uncaughtException', (err) => {
   console.error('[FATAL] Uncaught exception:', err);
-  // Give logs a moment to flush, then exit â€” the auto-restart wrapper
+  // Give logs a moment to flush, then exit — the auto-restart wrapper
   // (Start Server.command / systemd) will bring the server back up.
   setTimeout(() => process.exit(1), 500);
 });
@@ -182,7 +182,7 @@ app.use(express.static(distPath, {
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/')) return next();
   // The build can be missing on a fresh clone (or while `vite build` swaps the
-  // folder during an auto-restart) â€” answer with guidance instead of the
+  // folder during an auto-restart) — answer with guidance instead of the
   // default "Cannot GET /" so the fix is obvious.
   if (!fs.existsSync(distIndex)) {
     return res.status(503).send(
@@ -224,7 +224,7 @@ function startServer() {
   });
 
   // Friendly error when the port is already in use (e.g. dev server started
-  // while the deployed Workstation server is already running on the same port)
+  // while the deployed newsmeva server is already running on the same port)
   server.on('error', (err: any) => {
     if (err && err.code === 'EADDRINUSE') {
       console.error('');

@@ -241,8 +241,8 @@ Section "Install" SecMain
 
   ; --- LAN helpers ---
   SetOutPath "$INSTDIR\lan"
-  File /nonfatal "..\lan\Add Workstation Hosts.bat"
-  File /nonfatal "..\lan\Add Workstation Hosts.command"
+  File /nonfatal "..\lan\Add NewsMeva Hosts.bat"
+  File /nonfatal "..\lan\Add NewsMeva Hosts.command"
 
 ; --- Launcher scripts + Control Panel ---
   SetOutPath "$INSTDIR\windows"

@@ -401,7 +401,7 @@ export default function Developer() {
                   <li>The server is restarting (takes ~10 seconds) — wait and click "Run check" again.</li>
                   <li>The server app is not running on the computer that hosts it. Start it and retry.</li>
                   <li>Your computer's internet/network is down — check WiFi or LAN.</li>
-                  <li>Wrong address — this app is normally opened as <span className="font-mono">http://localhost</span> (or <span className="font-mono">http://workstation</span> / your computer's LAN IP on the network).</li>
+                  <li>Wrong address — this app is normally opened as <span className="font-mono">http://localhost</span> (or <span className="font-mono">http://newsmeva</span> / your computer's LAN IP on the network).</li>
                 </ul>
                 <p className="pt-1 text-danger-600">Error detail: <span className="font-mono text-[10px] break-all">{diag.apiError}</span></p>
               </div>

@@ -1,8 +1,8 @@
-# WorkStation Online â€” From Scratch: Complete App Creation Guide
+# NEWS MEVA — From Scratch: Complete App Creation Guide
 
-> This document is a complete blueprint for building WorkStation Online (or a
+> This document is a complete blueprint for building NEWS MEVA (or a
 > similar newsroom management suite) from an idea to a fully working app. It
-> covers every decision, structure, type, workflow, and pattern needed â€” written
+> covers every decision, structure, type, workflow, and pattern needed — written
 > so a developer can follow it start-to-finish.
 
 ---
@@ -31,7 +31,7 @@
 
 ### What This App Is
 
-A **newsroom office suite** â€” a single web app that handles the entire news
+A **newsroom office suite** — a single web app that handles the entire news
 production lifecycle: from assigning a story idea to publishing it on air.
 Built for Marathi TV newsrooms but applicable to any broadcast news operation.
 
@@ -46,15 +46,15 @@ Built for Marathi TV newsrooms but applicable to any broadcast news operation.
 
 ### Core Requirements
 
-1. **17-stage task workflow** â€” draft â†’ script â†’ footage â†’ approved â†’ editing â†’
-   published â†’ completed (with admin overrides)
-2. **Stories pipeline** â€” data gathering â†’ confirmation â†’ send-to-tasks
-3. **Bulletins** â€” hourly news bulletins with slot management
-4. **Offline-first** â€” full read/write during internet outages, auto-sync on reconnect
-5. **Real-time** â€” multi-device updates via WebSocket (Socket.IO)
-6. **Self-hosted** â€” runs on LAN, no cloud dependency beyond the database
-7. **Multi-OS** â€” Windows, macOS, Linux, Android
-8. **No browser popups** â€” all dialogs are in-app
+1. **17-stage task workflow** — draft → script → footage → approved → editing →
+   published → completed (with admin overrides)
+2. **Stories pipeline** — data gathering → confirmation → send-to-tasks
+3. **Bulletins** — hourly news bulletins with slot management
+4. **Offline-first** — full read/write during internet outages, auto-sync on reconnect
+5. **Real-time** — multi-device updates via WebSocket (Socket.IO)
+6. **Self-hosted** — runs on LAN, no cloud dependency beyond the database
+7. **Multi-OS** — Windows, macOS, Linux, Android
+8. **No browser popups** — all dialogs are in-app
 
 ---
 
@@ -75,32 +75,32 @@ Built for Marathi TV newsrooms but applicable to any broadcast news operation.
 ### Key Architectural Patterns
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                   BROWSER                       â”‚
-â”‚  React SPA + Socket.IO client + localStorage    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                   â”‚ HTTP + WebSocket
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚              EXPRESS SERVER                      â”‚
-â”‚  Routes â†’ Middleware â†’ Sync Engine â†’ Database    â”‚
-â”‚                                                  â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”  â”‚
-â”‚  â”‚ Auth    â”‚  â”‚ Socket.IOâ”‚  â”‚ Sync Engine   â”‚  â”‚
-â”‚  â”‚ (JWT)   â”‚  â”‚ Events   â”‚  â”‚ (outbox+ping) â”‚  â”‚
-â”‚  â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”˜  â”‚
-â”‚       â”‚            â”‚                â”‚            â”‚
-â”‚  â”Œâ”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”   â”‚
-â”‚  â”‚          Database Adapter Layer           â”‚   â”‚
-â”‚  â”‚  prepare() â†’ SyncStatement                â”‚   â”‚
-â”‚  â”‚  .run() â†’ mirror + outbox + PG            â”‚   â”‚
-â”‚  â”‚  .get()/.all() â†’ PG â†’ mirror fallback     â”‚   â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
-â”‚               â”‚              â”‚                   â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”  â”Œâ”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”      â”‚
-â”‚  â”‚ SQLite Mirror â”‚  â”‚ Supabase PostgreSQLâ”‚      â”‚
-â”‚  â”‚ (sql.js)      â”‚  â”‚ (pg, pooler:6543) â”‚      â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────────────┐
+│                   BROWSER                       │
+│  React SPA + Socket.IO client + localStorage    │
+└──────────────────┬──────────────────────────────┘
+                   │ HTTP + WebSocket
+┌──────────────────▼──────────────────────────────┐
+│              EXPRESS SERVER                      │
+│  Routes → Middleware → Sync Engine → Database    │
+│                                                  │
+│  ┌─────────┐  ┌──────────┐  ┌───────────────┐  │
+│  │ Auth    │  │ Socket.IO│  │ Sync Engine   │  │
+│  │ (JWT)   │  │ Events   │  │ (outbox+ping) │  │
+│  └────┬────┘  └────┬─────┘  └───────┬───────┘  │
+│       │            │                │            │
+│  ┌────▼────────────▼────────────────▼───────┐   │
+│  │          Database Adapter Layer           │   │
+│  │  prepare() → SyncStatement                │   │
+│  │  .run() → mirror + outbox + PG            │   │
+│  │  .get()/.all() → PG → mirror fallback     │   │
+│  └────────────┬──────────────┬──────────────┘   │
+│               │              │                   │
+│  ┌────────────▼──┐  ┌───────▼───────────┐      │
+│  │ SQLite Mirror │  │ Supabase PostgreSQL│      │
+│  │ (sql.js)      │  │ (pg, pooler:6543) │      │
+│  └───────────────┘  └──────────────────┘      │
+└─────────────────────────────────────────────────┘
 ```
 
 ---
@@ -146,100 +146,100 @@ Built for Marathi TV newsrooms but applicable to any broadcast news operation.
 
 ```
 newsmeva/
-â”œâ”€â”€ backend/
-â”‚   â”œâ”€â”€ src/
-â”‚   â”‚   â”œâ”€â”€ index.ts              # Entry point: init DB, start server
-â”‚   â”‚   â”œâ”€â”€ config/
-â”‚   â”‚   â”‚   â”œâ”€â”€ roles.ts          # Role definitions, access levels
-â”‚   â”‚   â”‚   â””â”€â”€ devCredentials.ts # Dev login (file-based)
-â”‚   â”‚   â”œâ”€â”€ database/
-â”‚   â”‚   â”‚   â”œâ”€â”€ schema.ts         # PG + SQLite table definitions, migrations
-â”‚   â”‚   â”‚   â”œâ”€â”€ postgres.ts       # PG adapter, SQL translation
-â”‚   â”‚   â”‚   â””â”€â”€ sync.ts           # Offline sync engine (outbox, dual-write)
-â”‚   â”‚   â”œâ”€â”€ middleware/
-â”‚   â”‚   â”‚   â”œâ”€â”€ auth.ts           # JWT verify, role gates, token generation
-â”‚   â”‚   â”‚   â””â”€â”€ rateLimit.ts      # IP-based rate limiting
-â”‚   â”‚   â”œâ”€â”€ routes/
-â”‚   â”‚   â”‚   â”œâ”€â”€ auth.ts           # Login, signup, approve/reject
-â”‚   â”‚   â”‚   â”œâ”€â”€ tasks.ts          # Task CRUD, workflow, teleprompter
-â”‚   â”‚   â”‚   â”œâ”€â”€ stories.ts        # Story pipeline, confirm, send-to-tasks
-â”‚   â”‚   â”‚   â”œâ”€â”€ bulletins.ts      # Bulletin CRUD
-â”‚   â”‚   â”‚   â”œâ”€â”€ bulletinTemplates.ts # Slot management
-â”‚   â”‚   â”‚   â”œâ”€â”€ users.ts          # User/seat/profile management
-â”‚   â”‚   â”‚   â”œâ”€â”€ profiles.ts       # PIN management
-â”‚   â”‚   â”‚   â”œâ”€â”€ ads.ts            # Ad CRUD, recycle bin
-â”‚   â”‚   â”‚   â”œâ”€â”€ programs.ts       # Special programs, recycle bin
-â”‚   â”‚   â”‚   â”œâ”€â”€ archives.ts       # Archive stock, folder import
-â”‚   â”‚   â”‚   â”œâ”€â”€ locations.ts      # Location CRUD, recycle bin
-â”‚   â”‚   â”‚   â”œâ”€â”€ reporters.ts      # Reporter CRUD, stats
-â”‚   â”‚   â”‚   â”œâ”€â”€ leaves.ts         # Leave requests, approve/reject
-â”‚   â”‚   â”‚   â”œâ”€â”€ notifications.ts  # In-app notifications
-â”‚   â”‚   â”‚   â”œâ”€â”€ analytics.ts      # Dashboard stats
-â”‚   â”‚   â”‚   â”œâ”€â”€ activity.ts       # Activity logs, toast history
-â”‚   â”‚   â”‚   â”œâ”€â”€ settings.ts       # Database connection management
-â”‚   â”‚   â”‚   â”œâ”€â”€ backups.ts        # Backup/restore
-â”‚   â”‚   â”‚   â”œâ”€â”€ sync.ts           # Sync status, replay
-â”‚   â”‚   â”‚   â”œâ”€â”€ developer.ts      # Dev tools (clean-all-data)
-â”‚   â”‚   â”‚   â”œâ”€â”€ telemetry.ts      # Error capture, research export
-â”‚   â”‚   â”‚   â”œâ”€â”€ channelMetadata.ts # Channel branding
-â”‚   â”‚   â”‚   â”œâ”€â”€ news.ts           # Task news items
-â”‚   â”‚   â”‚   â”œâ”€â”€ pendingRequests.ts # Pending approvals summary
-â”‚   â”‚   â”‚   â””â”€â”€ roles.ts          # Role definitions endpoint
-â”‚   â”‚   â”œâ”€â”€ utils/
-â”‚   â”‚   â”‚   â”œâ”€â”€ username.ts       # Username generation
-â”‚   â”‚   â”‚   â”œâ”€â”€ pin.ts            # PIN hashing/verification
-â”‚   â”‚   â”‚   â”œâ”€â”€ dbAdmin.ts        # DB admin helpers
-â”‚   â”‚   â”‚   â”œâ”€â”€ savedConnections.ts # Saved DB connections
-â”‚   â”‚   â”‚   â””â”€â”€ asyncErrors.ts    # Error handling
-â”‚   â”‚   â””â”€â”€ socket.ts             # Socket.IO setup, event handlers
-â”‚   â”œâ”€â”€ scripts/                  # Dev tools (reset-db, etc.)
-â”‚   â”œâ”€â”€ workstation.db            # SQLite mirror (git-ignored)
-â”‚   â”œâ”€â”€ saved-connections.json    # Saved DB links (git-ignored)
-â”‚   â””â”€â”€ .env                      # Secrets (git-ignored)
-â”œâ”€â”€ frontend/
-â”‚   â”œâ”€â”€ src/
-â”‚   â”‚   â”œâ”€â”€ main.tsx              # Entry point
-â”‚   â”‚   â”œâ”€â”€ App.tsx               # Router, auth, Suspense
-â”‚   â”‚   â”œâ”€â”€ context/
-â”‚   â”‚   â”‚   â”œâ”€â”€ AuthContext.tsx    # Login state, token, user
-â”‚   â”‚   â”‚   â”œâ”€â”€ ToastContext.tsx   # Toast notifications
-â”‚   â”‚   â”‚   â””â”€â”€ DialogContext.tsx  # Modal dialogs
-â”‚   â”‚   â”œâ”€â”€ components/
-â”‚   â”‚   â”‚   â”œâ”€â”€ Layout.tsx        # Sidebar, header, bottom nav
-â”‚   â”‚   â”‚   â”œâ”€â”€ DatabasePanels.tsx # DB connection/status panels
-â”‚   â”‚   â”‚   â”œâ”€â”€ SplashLoader.tsx  # Boot splash screen
-â”‚   â”‚   â”‚   â”œâ”€â”€ Skeleton.tsx      # Loading skeleton primitives
-â”‚   â”‚   â”‚   â”œâ”€â”€ PageSkeletons.tsx # Page-level skeletons
-â”‚   â”‚   â”‚   â”œâ”€â”€ OfflineBanner.tsx # Offline mode banner
-â”‚   â”‚   â”‚   â”œâ”€â”€ NotificationBell.tsx # Notification icon
-â”‚   â”‚   â”‚   â”œâ”€â”€ AnimatedLogo.tsx  # Animated logo
-â”‚   â”‚   â”‚   â”œâ”€â”€ PasswordInput.tsx # Password with show/hide
-â”‚   â”‚   â”‚   â”œâ”€â”€ LeavesTab.tsx     # Leaves in profile view
-â”‚   â”‚   â”‚   â””â”€â”€ YouTubeEmbed.tsx  # YouTube embed
-â”‚   â”‚   â”œâ”€â”€ pages/                # 31 pages (see Â§4.1)
-â”‚   â”‚   â”œâ”€â”€ utils/
-â”‚   â”‚   â”‚   â”œâ”€â”€ api.ts            # Axios instance, auth interceptor
-â”‚   â”‚   â”‚   â”œâ”€â”€ dates.ts          # Timezone-safe date formatting
-â”‚   â”‚   â”‚   â”œâ”€â”€ roles.ts          # Role helpers, priority labels
-â”‚   â”‚   â”‚   â”œâ”€â”€ quickLogin.ts     # Saved login management
-â”‚   â”‚   â”‚   â””â”€â”€ appConfig.ts      # App name, channel name
-â”‚   â”‚   â””â”€â”€ lib/
-â”‚   â”‚       â””â”€â”€ telemetry.ts      # Client error capture
-â”‚   â””â”€â”€ index.html
-â”œâ”€â”€ android/                      # Android wrapper
-â”œâ”€â”€ windows/                      # Windows launchers
-â”œâ”€â”€ mac/                          # macOS launchers
-â”œâ”€â”€ ubuntu/                       # Ubuntu/Debian installer + scripts
-â”œâ”€â”€ redhat/                       # RHEL installer + scripts
-â”œâ”€â”€ lan/                          # LAN hostname helpers
-â”œâ”€â”€ proxy/                        # Caddy reverse proxy
-â”œâ”€â”€ tools/node/                   # Bundled Node.js installers
-â”œâ”€â”€ docs/                         # Guides + this file
-â”œâ”€â”€ render.yaml                   # Render.com config
-â””â”€â”€ create-env.sh                 # .env creator (Mac/Linux)
+├── backend/
+│   ├── src/
+│   │   ├── index.ts              # Entry point: init DB, start server
+│   │   ├── config/
+│   │   │   ├── roles.ts          # Role definitions, access levels
+│   │   │   └── devCredentials.ts # Dev login (file-based)
+│   │   ├── database/
+│   │   │   ├── schema.ts         # PG + SQLite table definitions, migrations
+│   │   │   ├── postgres.ts       # PG adapter, SQL translation
+│   │   │   └── sync.ts           # Offline sync engine (outbox, dual-write)
+│   │   ├── middleware/
+│   │   │   ├── auth.ts           # JWT verify, role gates, token generation
+│   │   │   └── rateLimit.ts      # IP-based rate limiting
+│   │   ├── routes/
+│   │   │   ├── auth.ts           # Login, signup, approve/reject
+│   │   │   ├── tasks.ts          # Task CRUD, workflow, teleprompter
+│   │   │   ├── stories.ts        # Story pipeline, confirm, send-to-tasks
+│   │   │   ├── bulletins.ts      # Bulletin CRUD
+│   │   │   ├── bulletinTemplates.ts # Slot management
+│   │   │   ├── users.ts          # User/seat/profile management
+│   │   │   ├── profiles.ts       # PIN management
+│   │   │   ├── ads.ts            # Ad CRUD, recycle bin
+│   │   │   ├── programs.ts       # Special programs, recycle bin
+│   │   │   ├── archives.ts       # Archive stock, folder import
+│   │   │   ├── locations.ts      # Location CRUD, recycle bin
+│   │   │   ├── reporters.ts      # Reporter CRUD, stats
+│   │   │   ├── leaves.ts         # Leave requests, approve/reject
+│   │   │   ├── notifications.ts  # In-app notifications
+│   │   │   ├── analytics.ts      # Dashboard stats
+│   │   │   ├── activity.ts       # Activity logs, toast history
+│   │   │   ├── settings.ts       # Database connection management
+│   │   │   ├── backups.ts        # Backup/restore
+│   │   │   ├── sync.ts           # Sync status, replay
+│   │   │   ├── developer.ts      # Dev tools (clean-all-data)
+│   │   │   ├── telemetry.ts      # Error capture, research export
+│   │   │   ├── channelMetadata.ts # Channel branding
+│   │   │   ├── news.ts           # Task news items
+│   │   │   ├── pendingRequests.ts # Pending approvals summary
+│   │   │   └── roles.ts          # Role definitions endpoint
+│   │   ├── utils/
+│   │   │   ├── username.ts       # Username generation
+│   │   │   ├── pin.ts            # PIN hashing/verification
+│   │   │   ├── dbAdmin.ts        # DB admin helpers
+│   │   │   ├── savedConnections.ts # Saved DB connections
+│   │   │   └── asyncErrors.ts    # Error handling
+│   │   └── socket.ts             # Socket.IO setup, event handlers
+│   ├── scripts/                  # Dev tools (reset-db, etc.)
+│   ├── workstation.db            # SQLite mirror (git-ignored)
+│   ├── saved-connections.json    # Saved DB links (git-ignored)
+│   └── .env                      # Secrets (git-ignored)
+├── frontend/
+│   ├── src/
+│   │   ├── main.tsx              # Entry point
+│   │   ├── App.tsx               # Router, auth, Suspense
+│   │   ├── context/
+│   │   │   ├── AuthContext.tsx    # Login state, token, user
+│   │   │   ├── ToastContext.tsx   # Toast notifications
+│   │   │   └── DialogContext.tsx  # Modal dialogs
+│   │   ├── components/
+│   │   │   ├── Layout.tsx        # Sidebar, header, bottom nav
+│   │   │   ├── DatabasePanels.tsx # DB connection/status panels
+│   │   │   ├── SplashLoader.tsx  # Boot splash screen
+│   │   │   ├── Skeleton.tsx      # Loading skeleton primitives
+│   │   │   ├── PageSkeletons.tsx # Page-level skeletons
+│   │   │   ├── OfflineBanner.tsx # Offline mode banner
+│   │   │   ├── NotificationBell.tsx # Notification icon
+│   │   │   ├── AnimatedLogo.tsx  # Animated logo
+│   │   │   ├── PasswordInput.tsx # Password with show/hide
+│   │   │   ├── LeavesTab.tsx     # Leaves in profile view
+│   │   │   └── YouTubeEmbed.tsx  # YouTube embed
+│   │   ├── pages/                # 31 pages (see §4.1)
+│   │   ├── utils/
+│   │   │   ├── api.ts            # Axios instance, auth interceptor
+│   │   │   ├── dates.ts          # Timezone-safe date formatting
+│   │   │   ├── roles.ts          # Role helpers, priority labels
+│   │   │   ├── quickLogin.ts     # Saved login management
+│   │   │   └── appConfig.ts      # App name, channel name
+│   │   └── lib/
+│   │       └── telemetry.ts      # Client error capture
+│   └── index.html
+├── android/                      # Android wrapper
+├── windows/                      # Windows launchers
+├── mac/                          # macOS launchers
+├── ubuntu/                       # Ubuntu/Debian installer + scripts
+├── redhat/                       # RHEL installer + scripts
+├── lan/                          # LAN hostname helpers
+├── proxy/                        # Caddy reverse proxy
+├── tools/node/                   # Bundled Node.js installers
+├── docs/                         # Guides + this file
+├── render.yaml                   # Render.com config
+└── create-env.sh                 # .env creator (Mac/Linux)
 ```
 
-### Â§4.1 Frontend Pages
+### §4.1 Frontend Pages
 
 | Page | Purpose |
 |------|---------|
@@ -282,12 +282,12 @@ newsmeva/
 
 ### Design Principles
 
-1. **PG for production, SQLite for offline** â€” same schema, different SQL dialects
-2. **Mirror every write** â€” every PG write also goes to SQLite
-3. **No foreign keys in SQLite** â€” SQLite has limited FK support; enforce in code
-4. **TIMESTAMPTZ for dates** â€” never use TEXT for dates in PG
-5. **SERIAL for IDs** â€” auto-increment primary keys
-6. **Soft delete** â€” `deleted_at` column for recycle bin (tasks, programs, ads, locations, reporters)
+1. **PG for production, SQLite for offline** — same schema, different SQL dialects
+2. **Mirror every write** — every PG write also goes to SQLite
+3. **No foreign keys in SQLite** — SQLite has limited FK support; enforce in code
+4. **TIMESTAMPTZ for dates** — never use TEXT for dates in PG
+5. **SERIAL for IDs** — auto-increment primary keys
+6. **Soft delete** — `deleted_at` column for recycle bin (tasks, programs, ads, locations, reporters)
 
 ### Table Definitions
 
@@ -823,7 +823,7 @@ The key innovation is the `prepare()` function that returns a `SyncStatement`:
 ```typescript
 // database/postgres.ts
 export function prepare(sql: string, params?: any[]): SyncStatement {
-  // Translates SQLite syntax â†’ PG syntax
+  // Translates SQLite syntax → PG syntax
   const pgSql = convertSyntax(sql);
   return new SyncStatement(pgSql, params);
 }
@@ -856,7 +856,7 @@ class SyncStatement {
 
 ### SQL Translation (`convertSyntax()`)
 
-Converts SQLite SQL â†’ PostgreSQL:
+Converts SQLite SQL → PostgreSQL:
 
 | SQLite | PostgreSQL |
 |--------|-----------|
@@ -981,7 +981,7 @@ export const authorizeAdminOrDev = (req, res, next) => {
 - Credentials stored in `backend/.dev-credentials` (bcrypt hash)
 - Works when DB is missing/corrupt
 - Token: `access_level 3` + `is_dev: true`
-- **Not an admin** â€” cannot manage users, change settings, or access Database tab
+- **Not an admin** — cannot manage users, change settings, or access Database tab
 - Can access: Developer page, Backups tab, `clean-all-data`
 
 ### Role System
@@ -1058,22 +1058,22 @@ export function emitEvent(eventName: string, data: any, excludeProfileId?: numbe
 
 ### Event Categories
 
-**Inbound (client â†’ server):**
-- `status:update` â€” presence tracking
-- `login:request` / `login:approve` / `login:reject` â€” quick-login flow
-- `tasks:pending-approval` / `task:approve` â€” task approval flow
-- `task:auto-approve-countdown` â€” auto-approve timer
+**Inbound (client → server):**
+- `status:update` — presence tracking
+- `login:request` / `login:approve` / `login:reject` — quick-login flow
+- `tasks:pending-approval` / `task:approve` — task approval flow
+- `task:auto-approve-countdown` — auto-approve timer
 
-**Outbound (server â†’ client):**
-- `user:login`, `user:logout`, `user:changed` â€” auth events
-- `task:created`, `task:updated`, `task:deleted` â€” task events
-- `story:created`, `story:updated`, `story:deleted` â€” story events
-- `bulletin:created`, `bulletin:updated`, `bulletin:deleted` â€” bulletin events
-- `leave:created`, `leave:updated` â€” leave events
-- `notification:new` â€” new notification
-- `db:synced`, `db:offline`, `db:online` â€” sync status
-- `users:online` â€” presence list
-- `force:logout` â€” admin forces logout
+**Outbound (server → client):**
+- `user:login`, `user:logout`, `user:changed` — auth events
+- `task:created`, `task:updated`, `task:deleted` — task events
+- `story:created`, `story:updated`, `story:deleted` — story events
+- `bulletin:created`, `bulletin:updated`, `bulletin:deleted` — bulletin events
+- `leave:created`, `leave:updated` — leave events
+- `notification:new` — new notification
+- `db:synced`, `db:offline`, `db:online` — sync status
+- `users:online` — presence list
+- `force:logout` — admin forces logout
 
 ### Toast Coverage
 
@@ -1088,53 +1088,53 @@ the actor). This gives instant feedback across all connected devices.
 ### How It Works
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚            ONLINE MODE                   â”‚
-â”‚                                          â”‚
-â”‚  User action â†’ prepare().run()           â”‚
-â”‚    â”œâ†’ 1. Write to SQLite mirror          â”‚
-â”‚    â”œâ†’ 2. INSERT into sync_outbox         â”‚
-â”‚    â””â†’ 3. Fire-and-forget to PG           â”‚
-â”‚         â”œâ†’ Success: mark applied_pg=1    â”‚
-â”‚         â””â†’ Failure: pg_error logged      â”‚
-â”‚                                          â”‚
-â”‚  Health monitor: ping PG every 5s        â”‚
-â”‚    â”œâ†’ Online: replay pending + bootstrap â”‚
-â”‚    â””â†’ Offline: switch to mirror engine   â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────┐
+│            ONLINE MODE                   │
+│                                          │
+│  User action → prepare().run()           │
+│    ├→ 1. Write to SQLite mirror          │
+│    ├→ 2. INSERT into sync_outbox         │
+│    └→ 3. Fire-and-forget to PG           │
+│         ├→ Success: mark applied_pg=1    │
+│         └→ Failure: pg_error logged      │
+│                                          │
+│  Health monitor: ping PG every 5s        │
+│    ├→ Online: replay pending + bootstrap │
+│    └→ Offline: switch to mirror engine   │
+└─────────────────────────────────────────┘
 
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚            OFFLINE MODE                  â”‚
-â”‚                                          â”‚
-â”‚  User action â†’ prepare().run()           â”‚
-â”‚    â”œâ†’ 1. Write to SQLite mirror          â”‚
-â”‚    â”œâ†’ 2. INSERT into sync_outbox         â”‚
-â”‚    â””â†’ 3. Skip PG (engine = mirror)       â”‚
-â”‚                                          â”‚
-â”‚  Reads: mirror only                      â”‚
-â”‚  Outbox rows wait for reconnect          â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────┐
+│            OFFLINE MODE                  │
+│                                          │
+│  User action → prepare().run()           │
+│    ├→ 1. Write to SQLite mirror          │
+│    ├→ 2. INSERT into sync_outbox         │
+│    └→ 3. Skip PG (engine = mirror)       │
+│                                          │
+│  Reads: mirror only                      │
+│  Outbox rows wait for reconnect          │
+└─────────────────────────────────────────┘
 
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚            RECONNECT                     â”‚
-â”‚                                          â”‚
-â”‚  Health ping succeeds â†’                  â”‚
-â”‚    â”œâ†’ 1. replayPending():               â”‚
-â”‚    â”‚     SELECT WHERE applied_pg = 0     â”‚
-â”‚    â”‚     â†’ apply to PG                   â”‚
-â”‚    â”œâ†’ 2. bootstrapMirror():             â”‚
-â”‚    â”‚     Copy PG â†’ SQLite (INSERT OR     â”‚
-â”‚    â”‚     REPLACE, idempotent)            â”‚
-â”‚    â””â†’ 3. Emit db:synced event           â”‚
-â”‚                                          â”‚
-â”‚  Banner shows "synced N changes"         â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌─────────────────────────────────────────┐
+│            RECONNECT                     │
+│                                          │
+│  Health ping succeeds →                  │
+│    ├→ 1. replayPending():               │
+│    │     SELECT WHERE applied_pg = 0     │
+│    │     → apply to PG                   │
+│    ├→ 2. bootstrapMirror():             │
+│    │     Copy PG → SQLite (INSERT OR     │
+│    │     REPLACE, idempotent)            │
+│    └→ 3. Emit db:synced event           │
+│                                          │
+│  Banner shows "synced N changes"         │
+└─────────────────────────────────────────┘
 ```
 
 ### Key Code Patterns
 
 ```typescript
-// sync.ts â€” SyncStatement.run()
+// sync.ts — SyncStatement.run()
 async run(...params: any[]) {
   const entryId = recordOutbox(this.table, 'run', this.sql, params);
 
@@ -1154,17 +1154,17 @@ async run(...params: any[]) {
 
 ### Critical Invariants
 
-1. **Engine-internal statements never replicate** â€” only outbox-backed rows
-2. **Replay selects `applied_pg = 0`** â€” regardless of mirror flag
-3. **Bulk ops disable persist** â€” must `flush()` after re-enabling
-4. **`synced` event only when `synced > 0`** â€” prevents reload loops
-5. **Bootstrap is idempotent** â€” `INSERT OR REPLACE` handles duplicates
-6. **Reset clears everything** â€” `resetMirrorAndQueue()` resets `bootstrapped`
+1. **Engine-internal statements never replicate** — only outbox-backed rows
+2. **Replay selects `applied_pg = 0`** — regardless of mirror flag
+3. **Bulk ops disable persist** — must `flush()` after re-enabling
+4. **`synced` event only when `synced > 0`** — prevents reload loops
+5. **Bootstrap is idempotent** — `INSERT OR REPLACE` handles duplicates
+6. **Reset clears everything** — `resetMirrorAndQueue()` resets `bootstrapped`
 
 ### API Endpoints
 
-- `GET /api/sync/status` â€” `{mode, engine, online, queuePending, syncedWrites, failedWrites, lastSyncAt, lastError}`
-- `POST /api/sync/replay` â€” force replay past backoff
+- `GET /api/sync/status` — `{mode, engine, online, queuePending, syncedWrites, failedWrites, lastSyncAt, lastError}`
+- `POST /api/sync/replay` — force replay past backoff
 
 ### Frontend: OfflineBanner
 
@@ -1333,31 +1333,31 @@ export default function Layout() {
 
 ---
 
-## 11. Entity CRUD â€” Complete Reference
+## 11. Entity CRUD — Complete Reference
 
 ### Tasks (33 endpoints)
 
 **Core workflow: 17 statuses**
 
 ```
-draft â†’ script_writing â†’ footage_collection â†’ waiting_confirmation
-    â†“                                              â†“
-    â””â”€â”€ correction_required â†â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                              â†“
-                                        approved â†’ editor_assigned
-                                              â†“
-                                    teleprompter_ready â†’ prompting
-                                              â†“
-                                        recording_done â†’ editing
-                                              â†“
-                                        uploading â†’ published
-                                              â†“
-                                        under_review â†’ completed
+draft → script_writing → footage_collection → waiting_confirmation
+    ↓                                              ↓
+    └── correction_required ←──────────────────────┘
+                                              ↓
+                                        approved → editor_assigned
+                                              ↓
+                                    teleprompter_ready → prompting
+                                              ↓
+                                        recording_done → editing
+                                              ↓
+                                        uploading → published
+                                              ↓
+                                        under_review → completed
 
 Special transitions:
-- approved â†’ cancelled (admin override)
-- any â†’ trashed (soft delete)
-- trashed â†’ restored / permanent delete
+- approved → cancelled (admin override)
+- any → trashed (soft delete)
+- trashed → restored / permanent delete
 ```
 
 **Endpoints:**
@@ -1408,11 +1408,11 @@ Special transitions:
 **Workflow: 9 statuses**
 
 ```
-data_gathering â†’ script_writing â†’ plotting â†’ add_ons â†’ confirmation
-    â†“                                              â†“
-    â””â”€â”€ send_to_tasks (creates task) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â†’ approved
-                                                       â†“
-                                                  completed â†’ archived
+data_gathering → script_writing → plotting → add_ons → confirmation
+    ↓                                              ↓
+    └── send_to_tasks (creates task) ──────────────→ approved
+                                                       ↓
+                                                  completed → archived
 ```
 
 **Endpoints:**
@@ -1523,7 +1523,7 @@ data_gathering â†’ script_writing â†’ plotting â†’ add_ons â†�
 
 **Archive categories:** footage, photo, audio, graphics
 **Stock statuses:** online/offline, available/not_available
-**Stock age:** tracked via `stock_updated_at`, warning at â‰¥30 days
+**Stock age:** tracked via `stock_updated_at`, warning at ≥30 days
 
 ---
 
@@ -1571,7 +1571,7 @@ data_gathering â†’ script_writing â†’ plotting â†’ add_ons â†�
 | PUT | `/leaves/:id` | auth(1,2) | Approve/reject leave (status: approved/rejected) |
 | DELETE | `/leaves/:id` | auth | Cancel own pending leave |
 
-**Leave statuses:** pending â†’ approved/rejected/cancelled
+**Leave statuses:** pending → approved/rejected/cancelled
 
 ---
 
@@ -1601,7 +1601,7 @@ data_gathering â†’ script_writing â†’ plotting â†’ add_ons â†�
 | PUT | `/users/:id/password` | auth(1) | Change user password |
 | GET | `/users/:id/workload` | auth | Get user workload (tasks by status) |
 
-**Profile statuses:** active â†’ inactive/archived â†’ terminated/reactivated
+**Profile statuses:** active → inactive/archived → terminated/reactivated
 **First-admin protection:** the only active admin cannot be offlined, archived, terminated, or deactivated
 
 ---
@@ -1722,7 +1722,7 @@ data_gathering â†’ script_writing â†’ plotting â†’ add_ons â†�
 1. Level-3 user clicks their name on Landing page
 2. Sends login:request via socket
 3. All higher-level users see approval request
-4. Higher-level approves â†’ login:approved via socket
+4. Higher-level approves → login:approved via socket
 5. Level-3 user is logged in with their token
 ```
 
@@ -1730,13 +1730,13 @@ data_gathering â†’ script_writing â†’ plotting â†’ add_ons â†�
 
 | Entity | Soft-delete | Restore | Permanent Delete | Bulk Delete | Empty Trash |
 |--------|------------|---------|-----------------|-------------|-------------|
-| Tasks | âœ“ | âœ“ | âœ“ (cascades children) | âœ“ | âœ“ |
-| Programs | âœ“ | âœ“ | âœ“ | âœ“ | âœ“ |
-| Ads | âœ“ | âœ“ | âœ“ | âœ“ | âœ“ |
-| Locations | âœ“ | âœ“ | âœ“ (unlinks tasks.location_id) | âœ“ | âœ“ |
-| Reporters | âœ“ | âœ“ | âœ“ | âœ“ | âœ“ |
+| Tasks | ✓ | ✓ | ✓ (cascades children) | ✓ | ✓ |
+| Programs | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Ads | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Locations | ✓ | ✓ | ✓ (unlinks tasks.location_id) | ✓ | ✓ |
+| Reporters | ✓ | ✓ | ✓ | ✓ | ✓ |
 
-**RecycleBin.tsx** page has 5 tabs (Tasks/Programs/Ads/Locations/Reporters) with delete UI only when `access_level â‰¤ 2`.
+**RecycleBin.tsx** page has 5 tabs (Tasks/Programs/Ads/Locations/Reporters) with delete UI only when `access_level ≤ 2`.
 
 ---
 
@@ -1793,7 +1793,7 @@ router.delete('/:id/permanent', authenticate, authorize(1, 2), async (req, res) 
 ### Database Connection Management
 
 ```typescript
-// POST /settings/database â€” test + connect
+// POST /settings/database — test + connect
 router.post('/database', authenticate, authorize(1), async (req, res) => {
   const { url, action } = req.body;  // action: 'fresh' | 'restore'
 
@@ -1823,16 +1823,16 @@ router.post('/database', authenticate, authorize(1), async (req, res) => {
 ### Loading States
 
 ```tsx
-// SplashLoader â€” boot/Suspense/full-page
+// SplashLoader — boot/Suspense/full-page
 <SplashLoader />
 
-// SkeletonTable â€” list/table pages
+// SkeletonTable — list/table pages
 loading ? <SkeletonTable rows={10} cols={5} /> : <Table data={items} />
 
-// SkeletonList â€” detail/sidebar pages
+// SkeletonList — detail/sidebar pages
 loading ? <SkeletonList items={5} /> : <List items={items} />
 
-// SkeletonStatCards â€” dashboard
+// SkeletonStatCards — dashboard
 loading ? <SkeletonStatCards count={4} /> : <StatCards stats={stats} />
 ```
 
@@ -1887,7 +1887,7 @@ addToast({ type: 'info', message: 'New notification' });
 
 - Tailwind `dark:` prefix throughout
 - CSS variables for theme colors
-- Toggle in Settings â†’ Appearance
+- Toggle in Settings → Appearance
 - Stored in localStorage
 
 ---
@@ -1932,10 +1932,10 @@ NODE_ENV=production
 
 ```bash
 # Backend
-cd backend && npm ci && npm run build  # tsc â†’ dist/
+cd backend && npm ci && npm run build  # tsc → dist/
 
 # Frontend
-cd frontend && npm ci && npm run build  # vite build â†’ dist/
+cd frontend && npm ci && npm run build  # vite build → dist/
 
 # Run
 node backend/dist/index.js  # Serves API + SPA on :3002
@@ -1963,7 +1963,7 @@ services:
 
 ```bash
 curl http://localhost:3002/api/health
-# â†’ {"status":"ok","timestamp":"...","uptime":...}
+# → {"status":"ok","timestamp":"...","uptime":...}
 ```
 
 ### Sync Status
@@ -1971,7 +1971,7 @@ curl http://localhost:3002/api/health
 ```bash
 # After login (admin):
 GET /api/sync/status
-# â†’ {"mode":"pg","engine":"pg","online":true,"queuePending":0,...}
+# → {"mode":"pg","engine":"pg","online":true,"queuePending":0,...}
 ```
 
 ### Smoke Test Pattern
@@ -1979,11 +1979,11 @@ GET /api/sync/status
 ```
 1. Login (admin + dev + level-3)
 2. CRUD each entity (tasks, stories, bulletins, ads, programs, archives, locations, reporters)
-3. Verify recycle bin (soft-delete â†’ restore â†’ permanent)
+3. Verify recycle bin (soft-delete → restore → permanent)
 4. Test access gates (level-3 gets 403 on admin routes)
-5. Test PIN flow (set â†’ verify â†’ request â†’ remove)
-6. Test leave flow (create â†’ approve â†’ cancel)
-7. Test sync (offline â†’ create data â†’ reconnect â†’ verify PG)
+5. Test PIN flow (set → verify → request → remove)
+6. Test leave flow (create → approve → cancel)
+7. Test sync (offline → create data → reconnect → verify PG)
 8. Test backup/restore
 ```
 
@@ -1991,9 +1991,9 @@ GET /api/sync/status
 
 ```bash
 # 1. Set DATABASE_URL to unreachable host
-# 2. Restart â†’ log shows "starting OFFLINE on the local database"
-# 3. Create data â†’ sync status shows queuePending > 0
-# 4. Restore .env â†’ restart â†’ "Startup replay: synced:N, failed:0"
+# 2. Restart → log shows "starting OFFLINE on the local database"
+# 3. Create data → sync status shows queuePending > 0
+# 4. Restore .env → restart → "Startup replay: synced:N, failed:0"
 # 5. Verify data in Supabase
 ```
 
@@ -2007,51 +2007,51 @@ cd frontend && npm run build
 
 ---
 
-## 16. OS Launchers â€” Complete File Inventory
+## 16. OS Launchers — Complete File Inventory
 
 ### Windows (8 files)
 
 | File | Purpose |
 |------|---------|
-| `windows/Start Server.bat` | Thin dispatcher â†’ calls `start-server.ps1 -Mode visible` (double-click) |
+| `windows/Start Server.bat` | Thin dispatcher → calls `start-server.ps1 -Mode visible` (double-click) |
 | `windows/Stop Server.bat` | Kills wrapper PowerShell FIRST, then node on :3002, then caddy.exe |
-| `windows/Start Server Hidden.vbs` | Silent launcher (no console) â†’ calls `start-server.ps1 -Mode open` or `-Mode hidden` |
+| `windows/Start Server Hidden.vbs` | Silent launcher (no console) → calls `start-server.ps1 -Mode open` or `-Mode hidden` |
 | `windows/Repair Launcher.bat` | Runs `start-server.ps1 -Mode repair` to restore corrupted launcher files |
 | `windows/Install Autostart.bat` | Creates `.lnk` shortcut in Windows Startup folder pointing to `Start Server Hidden.vbs` |
 | `windows/Remove Autostart.bat` | Deletes the Startup shortcut |
-| `windows/firewall-heal.bat` | Elevated helper â€” adds inbound rule "NEWS MEVA 3002" (TCP, all profiles) |
+| `windows/firewall-heal.bat` | Elevated helper — adds inbound rule "NEWS MEVA 3002" (TCP, all profiles) |
 | `windows/Create .env.bat` | Creates `backend/.env` from `.env.example` with random JWT_SECRET; `silent` arg skips pauses |
 | `windows/Clean Junk.bat` | Deletes `server.log`, `*.tsbuildinfo`, `smoke2*.log`, `caddy-out/err.log` older than 7 days |
-| `windows/Control Panel.bat` | Launches the **Control Panel** (WPF: `Control Panel.ps1`) â€” server start/stop + live health, database URL + `db-probe.js` live test, autostart toggle, Caddy proxy toggle, LAN copy buttons, repair/heal/clean tools. Reads/writes the same state as the `.bat` files; `.ps1` also exposes a `WM_PANEL_TEST=1` headless smoke-test hook |
+| `windows/Control Panel.bat` | Launches the **Control Panel** (WPF: `Control Panel.ps1`) — server start/stop + live health, database URL + `db-probe.js` live test, autostart toggle, Caddy proxy toggle, LAN copy buttons, repair/heal/clean tools. Reads/writes the same state as the `.bat` files; `.ps1` also exposes a `WM_PANEL_TEST=1` headless smoke-test hook |
 
 ### macOS (5 .command + 2 .sh files)
 
 | File | Purpose |
 |------|---------|
-| `mac/Start Server.command` | Main launcher â€” checks Node, installs deps, builds, creates .env, starts Caddy, starts server background, health check, opens browser, prints LAN URL |
+| `mac/Start Server.command` | Main launcher — checks Node, installs deps, builds, creates .env, starts Caddy, starts server background, health check, opens browser, prints LAN URL |
 | `mac/Stop Server.command` | Unloads LaunchAgent (`launchctl bootout`), kills node, kills Caddy |
-| `mac/Install AutoStart.command` | Creates `~/Library/LaunchAgents/com.workstation.meva.plist` â€” runs `start-server-core.sh` with KeepAlive |
+| `mac/Install AutoStart.command` | Creates `~/Library/LaunchAgents/com.newsmeva-online.server.plist` — runs `start-server-core.sh` with KeepAlive |
 | `mac/Remove AutoStart.command` | Removes the LaunchAgent plist |
 | `mac/Fix Permissions.command` | `chmod +x` all `.command`/`.sh` files, clears quarantine (`xattr -dr com.apple.quarantine`) |
 | `mac/Fix Permissions.sh` | Terminal version of the above |
-| `mac/start-server-core.sh` | Auto-restart watchdog â€” restarts `node dist/index.js` on crash, max 5 within 60s, honors `$LOG` env var |
+| `mac/start-server-core.sh` | Auto-restart watchdog — restarts `node dist/index.js` on crash, max 5 within 60s, honors `$LOG` env var |
 
 ### Ubuntu/Debian (4 files)
 
 | File | Purpose |
 |------|---------|
-| `ubuntu/install.sh` | Full installer â€” deploys to `/opt/newsmeva`, creates `meva` user, installs Node (bundled offline â†’ NodeSource fallback), builds, registers systemd service |
-| `ubuntu/start.sh` | Manual launcher â€” firewall self-heal (ufw), .env creation, Caddy auto-start, hidden background with `start-server-core.sh`, health check, browser open |
+| `ubuntu/install.sh` | Full installer — deploys to `/opt/newsmeva`, creates `meva` user, installs Node (bundled offline → NodeSource fallback), builds, registers systemd service |
+| `ubuntu/start.sh` | Manual launcher — firewall self-heal (ufw), .env creation, Caddy auto-start, hidden background with `start-server-core.sh`, health check, browser open |
 | `ubuntu/stop.sh` | Kills wrapper FIRST, then node, then Caddy |
 | `ubuntu/start-server-core.sh` | Auto-restart watchdog (bash) |
-| `ubuntu/newsmeva.service` | systemd unit â€” `User=meva`, `Restart=always`, `Wants=caddy.service`, loads `.env` |
+| `ubuntu/newsmeva.service` | systemd unit — `User=meva`, `Restart=always`, `Wants=caddy.service`, loads `.env` |
 
 ### RHEL/CentOS/Rocky/AlmaLinux/Fedora (4 files)
 
 | File | Purpose |
 |------|---------|
-| `redhat/install.sh` | Full installer â€” same as Ubuntu but uses `dnf` + `firewalld` |
-| `redhat/start.sh` | Manual launcher â€” same as Ubuntu but `firewalld` port 3002 |
+| `redhat/install.sh` | Full installer — same as Ubuntu but uses `dnf` + `firewalld` |
+| `redhat/start.sh` | Manual launcher — same as Ubuntu but `firewalld` port 3002 |
 | `redhat/stop.sh` | Same as Ubuntu |
 | `redhat/start-server-core.sh` | Auto-restart watchdog (bash) |
 | `redhat/newsmeva.service` | systemd unit (identical to Ubuntu) |
@@ -2060,8 +2060,8 @@ cd frontend && npm run build
 
 | File | Purpose |
 |------|---------|
-| `create-env.sh` | One-time .env creator (Mac/Linux) â€” idempotent, `silent` arg, JWT_SECRET via `openssl rand -hex 32` â†’ `node crypto` â†’ `uuidgen` fallback |
-| `clean-junk.sh` | Cross-platform junk cleanup â€” deletes logs/tsbuildinfo older than 7 days |
+| `create-env.sh` | One-time .env creator (Mac/Linux) — idempotent, `silent` arg, JWT_SECRET via `openssl rand -hex 32` → `node crypto` → `uuidgen` fallback |
+| `clean-junk.sh` | Cross-platform junk cleanup — deletes logs/tsbuildinfo older than 7 days |
 
 ### Proxy (4 files)
 
@@ -2070,30 +2070,30 @@ cd frontend && npm run build
 | `proxy/Start Caddy.bat` | Starts `caddy.exe run --config Caddyfile` in background |
 | `proxy/Stop Caddy.bat` | Kills caddy.exe process |
 | `proxy/caddy/caddy.exe` | Bundled Caddy binary (Windows) |
-| `proxy/caddy/Caddyfile` | Reverse proxy config â€” `:80` â†’ `127.0.0.1:3002`, gzip+zstd, WebSocket upgrade |
+| `proxy/caddy/Caddyfile` | Reverse proxy config — `:80` → `127.0.0.1:3002`, gzip+zstd, WebSocket upgrade |
 
 ### LAN (5 files)
 
 | File | Purpose |
 |------|---------|
-| `lan/Add Workstation Hosts.bat` | Windows: adds `192.168.100.156 workstation` to hosts file (admin) |
-| `lan/Add Workstation Hosts.command` | Mac: same |
-| `lan/Open App.bat` | Windows: opens `http://workstation:3002` in browser |
+| `lan/Add NewsMeva Hosts.bat` | Windows: adds `192.168.1.9 newsmeva` to hosts file (admin) |
+| `lan/Add NewsMeva Hosts.command` | Mac: same |
+| `lan/Open App.bat` | Windows: opens `http://newsmeva:3002` in browser |
 | `lan/Open App.command` | Mac: same |
 | `lan/README.md` | LAN setup guide |
 
 ---
 
-## 17. Auto Functions â€” Complete List
+## 17. Auto Functions — Complete List
 
 ### Auto-Start (on boot/login)
 
 | OS | Mechanism | What Runs |
 |----|-----------|-----------|
-| Windows | `Install Autostart.bat` â†’ `.lnk` in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` | `Start Server Hidden.vbs` â†’ `start-server.ps1 -Mode hidden` |
-| macOS | `Install AutoStart.command` â†’ `~/Library/LaunchAgents/com.workstation.meva.plist` | `start-server-core.sh` â†’ `node dist/index.js` (KeepAlive) |
-| Ubuntu | `install.sh` â†’ `systemctl enable newsmeva` | systemd `Restart=always` |
-| RHEL | `install.sh` â†’ `systemctl enable newsmeva` | systemd `Restart=always` |
+| Windows | `Install Autostart.bat` → `.lnk` in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` | `Start Server Hidden.vbs` → `start-server.ps1 -Mode hidden` |
+| macOS | `Install AutoStart.command` → `~/Library/LaunchAgents/com.newsmeva-online.server.plist` | `start-server-core.sh` → `node dist/index.js` (KeepAlive) |
+| Ubuntu | `install.sh` → `systemctl enable newsmeva` | systemd `Restart=always` |
+| RHEL | `install.sh` → `systemctl enable newsmeva` | systemd `Restart=always` |
 
 ### Auto-Restart (on crash)
 
@@ -2107,13 +2107,13 @@ cd frontend && npm run build
 ### Auto-Repair (Windows only)
 
 `start-server.ps1` runs on every start:
-1. Detects the layout: bundled portable Node goes on `PATH`, and `app.installed` (written by the installer at `$INSTDIR`) marks a **packaged layout** â†’ skips `npm install`/builds (pre-built dist + `backend/node_modules` are bundled). Source checkouts build/install as needed.
+1. Detects the layout: bundled portable Node goes on `PATH`, and `app.installed` (written by the installer at `$INSTDIR`) marks a **packaged layout** → skips `npm install`/builds (pre-built dist + `backend/node_modules` are bundled). Source checkouts build/install as needed.
 2. Embeds canonical content for 5 files in `$canonical` hash
-3. Compares each file (CRLFâ†’LF + `.Trim()`)
-4. Restores if missing/drifted â†’ `REPAIR:` line in `server.log`
+3. Compares each file (CRLF→LF + `.Trim()`)
+4. Restores if missing/drifted → `REPAIR:` line in `server.log`
 5. Files protected: `Start Server.bat`, `Stop Server.bat`, `Start Server Hidden.vbs`, `firewall-heal.bat`, `start-server-core.ps1`
 6. `Repair Launcher.bat` provides manual `-Mode repair` entry
-7. The **Control Panel** (`Control Panel.ps1`) is a utility, deliberately NOT self-repaired â€” reinstall or re-copy it from git if it gets corrupted
+7. The **Control Panel** (`Control Panel.ps1`) is a utility, deliberately NOT self-repaired — reinstall or re-copy it from git if it gets corrupted
 
 ### Auto-Cleanup (junk)
 
@@ -2128,15 +2128,15 @@ cd frontend && npm run build
 
 | OS | Script | Behavior |
 |----|--------|----------|
-| Windows | `Create .env.bat` or `start-server.ps1` | Copies `.env.example` â†’ `backend/.env`, generates random 64-hex JWT_SECRET via `[guid]::NewGuid()` pair |
-| macOS | `Start Server.command` | Calls `create-env.sh` (or manual `openssl rand -hex 32` â†’ `node crypto` â†’ `uuidgen`) |
+| Windows | `Create .env.bat` or `start-server.ps1` | Copies `.env.example` → `backend/.env`, generates random 64-hex JWT_SECRET via `[guid]::NewGuid()` pair |
+| macOS | `Start Server.command` | Calls `create-env.sh` (or manual `openssl rand -hex 32` → `node crypto` → `uuidgen`) |
 | Ubuntu | `start.sh` / `install.sh` | Calls `create-env.sh` or generates via `openssl rand` |
 | RHEL | `start.sh` / `install.sh` | Same as Ubuntu |
 
 ### Auto-Firewall (Windows)
 
 `start-server.ps1` checks if rule "NEWS MEVA 3002" exists:
-- If missing â†’ relaunches `firewall-heal.bat` elevated (UAC `-Verb RunAs`)
+- If missing → relaunches `firewall-heal.bat` elevated (UAC `-Verb RunAs`)
 - `firewall-heal.bat` adds inbound TCP rule for port 3002 on all profiles (Domain/Private/Public)
 
 ### Auto-Caddy (all OS)
@@ -2152,17 +2152,17 @@ cd frontend && npm run build
 
 | OS | Trigger | Behavior |
 |----|---------|----------|
-| Windows | `Start Server.bat` (visible/open modes) | Polls `GET /api/health` up to 60s â†’ `Start-Process http://localhost:3002` |
-| macOS | `Start Server.command` | Polls health â†’ `open http://localhost:3002` |
-| Ubuntu | `start.sh` (desktop only, `$DISPLAY` set) | Polls health â†’ `xdg-open http://localhost:3002` |
+| Windows | `Start Server.bat` (visible/open modes) | Polls `GET /api/health` up to 60s → `Start-Process http://localhost:3002` |
+| macOS | `Start Server.command` | Polls health → `open http://localhost:3002` |
+| Ubuntu | `start.sh` (desktop only, `$DISPLAY` set) | Polls health → `xdg-open http://localhost:3002` |
 | RHEL | Same as Ubuntu | Same |
 
 ### Auto-Already-Running Check
 
 All launchers check if the server is already running before starting:
-- **HTTP check** (not just port) â€” a port can show LISTENING while process is shutting down
-- If up â†’ just open browser (skip start)
-- If listening but not answering â†’ kill stale listener, start fresh
+- **HTTP check** (not just port) — a port can show LISTENING while process is shutting down
+- If up → just open browser (skip start)
+- If listening but not answering → kill stale listener, start fresh
 
 ---
 
@@ -2172,29 +2172,29 @@ All launchers check if the server is already running before starting:
 
 ```
 android/
-â”œâ”€â”€ build.gradle              # Root Gradle build
-â”œâ”€â”€ settings.gradle           # Gradle settings
-â”œâ”€â”€ gradle.properties         # Gradle properties
-â”œâ”€â”€ gradlew / gradlew.bat    # Gradle wrapper
-â”œâ”€â”€ gradle/wrapper/           # Gradle wrapper JAR + properties
-â””â”€â”€ app/
-    â”œâ”€â”€ build.gradle          # App module config
-    â””â”€â”€ src/main/
-        â”œâ”€â”€ AndroidManifest.xml
-        â”œâ”€â”€ java/com/workstation/meva/
-        â”‚   â”œâ”€â”€ MainActivity.kt    # WebView wrapper + control panel
-        â”‚   â””â”€â”€ NodeService.kt     # Foreground service running Node.js
-        â””â”€â”€ res/
-            â”œâ”€â”€ layout/activity_main.xml
-            â”œâ”€â”€ values/ (themes.xml, strings.xml, colors.xml)
-            â””â”€â”€ drawable/ (icons, status indicators, badges)
+├── build.gradle              # Root Gradle build
+├── settings.gradle           # Gradle settings
+├── gradle.properties         # Gradle properties
+├── gradlew / gradlew.bat    # Gradle wrapper
+├── gradle/wrapper/           # Gradle wrapper JAR + properties
+└── app/
+    ├── build.gradle          # App module config
+    └── src/main/
+        ├── AndroidManifest.xml
+        ├── java/com/newsmeva/
+        │   ├── MainActivity.kt    # WebView wrapper + control panel
+        │   └── NodeService.kt     # Foreground service running Node.js
+        └── res/
+            ├── layout/activity_main.xml
+            ├── values/ (themes.xml, strings.xml, colors.xml)
+            └── drawable/ (icons, status indicators, badges)
 ```
 
 ### App Config
 
 | Setting | Value |
 |---------|-------|
-| Package | `com.workstation.meva` |
+| Package | `com.newsmeva` |
 | Min SDK | 24 (Android 7.0) |
 | Target SDK | 34 (Android 14) |
 | Java/Kotlin | JVM target 17 |
@@ -2204,14 +2204,14 @@ android/
 ### How It Works
 
 1. **First launch:** `NodeService.extractAssets()` copies bundled files from APK assets to `filesDir`:
-   - `assets/server/dist/` â†’ backend build output
-   - `assets/server/node_modules/` â†’ backend dependencies
-   - `assets/frontend/dist/` â†’ frontend build output
-   - `assets/node/bin/node-arm64` or `node-armv7l` â†’ Node runtime (detected by `os.arch`)
+   - `assets/server/dist/` → backend build output
+   - `assets/server/node_modules/` → backend dependencies
+   - `assets/frontend/dist/` → frontend build output
+   - `assets/node/bin/node-arm64` or `node-armv7l` → Node runtime (detected by `os.arch`)
 
 2. **Start Server:** `NodeService.startNode()` runs `node dist/index.js` as a foreground service with notification
 
-3. **WebView:** `MainActivity.showWorkstation()` loads `http://127.0.0.1:3002` in a full-screen WebView
+3. **WebView:** `MainActivity.showNewsmeva()` loads `http://127.0.0.1:3002` in a full-screen WebView
 
 4. **Control Panel:** Start/Stop/Open buttons with status indicator (green pulse = running)
 
@@ -2230,18 +2230,18 @@ android/
 ### NodeService Features
 
 - **Foreground service** with persistent notification ("Server running on port 3002")
-- **3-method executable fix:** tries `setExecutable()` â†’ `chmod +x` â†’ copy-to-cache fallback
+- **3-method executable fix:** tries `setExecutable()` → `chmod +x` → copy-to-cache fallback
 - **Environment variables:** `NODE_ENV=production`, `PORT=3002`, `ANDROID=true`
 - **Status persistence:** SharedPreferences (`server_status`, `server_status_message`)
 - **Exit handling:** detects process exit, updates notification, stops self
 
 ### MainActivity Features
 
-- **Control panel:** Start Server, Stop Server, Open Workstation buttons
+- **Control panel:** Start Server, Stop Server, Open NEWS MEVA buttons
 - **Status indicator:** colored dot (green=running, yellow=starting, red=error, gray=stopped) with pulse animation
 - **Uptime counter:** shows elapsed time while server is running
 - **WebView:** JavaScript enabled, DOM storage, file access, auto-reload on error
-- **Back button:** exits WebView â†’ control panel â†’ "Stop & Exit" / "Keep Running" dialog
+- **Back button:** exits WebView → control panel → "Stop & Exit" / "Keep Running" dialog
 - **Health check:** polls `GET /api/health` to detect server status
 - **Notification permission:** requested on Android 13+ before starting service
 
@@ -2250,7 +2250,7 @@ android/
 - `android/app/src/main/assets/node/` is git-ignored (~173 MB)
 - Gradle re-downloads on fresh builds
 - The app works offline (Node runs locally on the device)
-- **Do NOT bump to Node v24** â€” it dropped armv7l support; many budget tablets are armv7l
+- **Do NOT bump to Node v24** — it dropped armv7l support; many budget tablets are armv7l
 
 ---
 
@@ -2258,7 +2258,7 @@ android/
 
 ### Overview
 
-The teleprompter is a **public-facing studio screen** â€” no login required. It
+The teleprompter is a **public-facing studio screen** — no login required. It
 displays scripts (from tasks or approved stories) in a black-background fullscreen
 view with **velocity-based auto-scroll** (one signed speed axis controlling both
 speed and direction, modeled on Imaginary Teleprompter), adjustable
@@ -2281,17 +2281,17 @@ stage.
 
 ### TeleprompterList Features
 
-- **New Script** â€” paste/type a title + text and prompt it instantly; custom
+- **New Script** — paste/type a title + text and prompt it instantly; custom
   scripts are stored device-local in localStorage (`tp_custom_scripts`, ids
   `custom-<ts>`, newest 50 kept) and can be re-opened or deleted from the list
-- **Ready to Record** â€” tasks with status `teleprompter_ready` (from task workflow)
-- **Approved Stories** â€” stories with status `approved` (from story pipeline)
-- **Today's Scripts** â€” scripts loaded today (from `script_imported_at` timestamp)
-- Click any script â†’ opens `/teleprompter/:id`
+- **Ready to Record** — tasks with status `teleprompter_ready` (from task workflow)
+- **Approved Stories** — stories with status `approved` (from story pipeline)
+- **Today's Scripts** — scripts loaded today (from `script_imported_at` timestamp)
+- Click any script → opens `/teleprompter/:id`
 
 ### Velocity Control Model (the core design)
 
-One **signed speed value** (-10â€¦+10, 0.5 steps, persisted in localStorage as
+One **signed speed value** (-10…+10, 0.5 steps, persisted in localStorage as
 `tp_speed`) drives everything. Positive scrolls down, negative scrolls back up,
 zero holds position. There are no separate "scroll position" and "speed" modes.
 
@@ -2308,28 +2308,28 @@ animate(frame):                // requestAnimationFrame loop
 - **Eased velocity** (`currentVelRef`, ~150 ms time constant): speed changes
   and zero-crossing reversals glide instead of jumping.
 - **Float position accumulator** (`posRef`): `element.scrollTop` truncates
-  fractions, which made speeds â‰¤ 2.0 appear dead; keeping our own float fixes
+  fractions, which made speeds ≤ 2.0 appear dead; keeping our own float fixes
   it. Synced on nudges, start, and boundary clamps.
 
 ### Controls
 
 | Input | Action |
 |-------|--------|
-| Wheel up / â†‘ / W | `adjustSpeed(+0.5)` â€” faster forward |
-| Wheel down / â†“ / S | `adjustSpeed(-0.5)` â€” slower â†’ reverse |
+| Wheel up / ↑ / W | `adjustSpeed(+0.5)` — faster forward |
+| Wheel down / ↓ / S | `adjustSpeed(-0.5)` — slower → reverse |
 | Space | Play / pause |
 | Middle click | Reset speed to default (+3.0) |
-| Shift + wheel | Free reposition Â±90 px (auto-scroll holds 1.5 s via `manualHoldUntilRef`) |
-| PgUp / PgDn | Jump Â±0.8 Ã— viewport |
-| â† / â†’ | Font size âˆ’/+ 2 px |
-| R | Reset to top (speed â†’ +3.0) |
+| Shift + wheel | Free reposition ±90 px (auto-scroll holds 1.5 s via `manualHoldUntilRef`) |
+| PgUp / PgDn | Jump ±0.8 × viewport |
+| ← / → | Font size −/+ 2 px |
+| R | Reset to top (speed → +3.0) |
 | M | Mirror toggle |
 | Escape | Close popups / show controls |
 
 - **Wheel deltas accumulate** (`wheelAccumRef`, step = 100 deltaY per 0.5) so
   trackpads and free-spinning wheels ramp smoothly.
 - **Adjusting speed while paused auto-resumes motion** via
-  `beginScroll(false)` â€” no forced fullscreen (only the Start button requests
+  `beginScroll(false)` — no forced fullscreen (only the Start button requests
   fullscreen).
 - Buttons blur themselves after click (`document.activeElement.blur()`) so
   keyboard shortcuts never die on stuck focus.
@@ -2340,25 +2340,25 @@ animate(frame):                // requestAnimationFrame loop
 
 | Event | Behavior |
 |-------|----------|
-| Reach bottom while moving down | **Park**: stop, speed â†’ **-3.0 â—€**, flash badge. One wheel roll / Space instantly reverses at full reverse speed. After a dwell (~2 s + font factor) the "Script Ended" popup appears â€” cancelled automatically if the operator reverses away first. |
-| Reach top while reversing | **Park**: stop, speed â†’ **+3.0 â–¶**, flash badge. Restart button and R behave the same. |
+| Reach bottom while moving down | **Park**: stop, speed → **-3.0 ◀**, flash badge. One wheel roll / Space instantly reverses at full reverse speed. After a dwell (~2 s + font factor) the "Script Ended" popup appears — cancelled automatically if the operator reverses away first. |
+| Reach top while reversing | **Park**: stop, speed → **+3.0 ▶**, flash badge. Restart button and R behave the same. |
 
-The end popup offers **Finished** (`POST /tasks/teleprompter/finish/:id` â†’ task
+The end popup offers **Finished** (`POST /tasks/teleprompter/finish/:id` → task
 advances to `recording_done`, related bulletin tasks advance too), **Restart**
 (top + resume), and **Close**.
 
 ### UI Details
 
-- **Signed readouts everywhere:** badge and slider show `-3.0 â—€` style values,
+- **Signed readouts everywhere:** badge and slider show `-3.0 ◀` style values,
   never absolute-with-arrow.
 - **Close button** (top-left X): rendered whenever `!scrolling && finishState
-  !== 'done'` â€” i.e. always visible when not actively prompting (never driven
+  !== 'done'` — i.e. always visible when not actively prompting (never driven
   by a ref, which caused a "sometimes missing" bug).
 - **Speed badge:** subtle toast (top-right, ~4 % white bg, 30 % text opacity).
 - **Fullscreen:** only the explicit Start button enters fullscreen; velocity
   resumes do not.
 - **Auto-hide controls bar**, scripts drawer (Today/Archived), built-in 7-section
-  operating guide â€” all unchanged.
+  operating guide — all unchanged.
 - Settings persist in localStorage: `tp_speed`, `tp_fontSize`, `tp_spacing`,
   `tp_mirror`, `tp_align`.
 
@@ -2366,14 +2366,14 @@ advances to `recording_done`, related bulletin tasks advance too), **Restart**
 
 ```
 1. Task reaches "teleprompter_ready" status (or story is "approved")
-2. Operator opens /teleprompter â†’ sees script in "Ready to Record" list
-3. Clicks script â†’ opens /teleprompter/:id
-4. Presses Start (or Space) â†’ fullscreen + auto-scroll begins
+2. Operator opens /teleprompter → sees script in "Ready to Record" list
+3. Clicks script → opens /teleprompter/:id
+4. Presses Start (or Space) → fullscreen + auto-scroll begins
 5. Wheel/arrows adjust velocity live; rolling down past zero reverses
-6. Bottom reached â†’ parks at -3.0 â—€ â†’ popup after dwell (or instant reverse)
-7. Operator clicks "Finished" â†’ POST /tasks/teleprompter/finish/:id
-   â†’ Task status advances to "recording_done" â†’ sent to editor
-   â†’ Related bulletin tasks also advance
+6. Bottom reached → parks at -3.0 ◀ → popup after dwell (or instant reverse)
+7. Operator clicks "Finished" → POST /tasks/teleprompter/finish/:id
+   → Task status advances to "recording_done" → sent to editor
+   → Related bulletin tasks also advance
 ```
 
 ### Backend Teleprompter Endpoints
@@ -2393,7 +2393,7 @@ advances to `recording_done`, related bulletin tasks advance too), **Restart**
 ## 19. Frontend Context Providers (5 total)
 
 ```tsx
-// 1. AuthContext.tsx â€” login state, token, user
+// 1. AuthContext.tsx — login state, token, user
 interface AuthContextType {
   user: User | null;
   token: string | null;
@@ -2402,14 +2402,14 @@ interface AuthContextType {
   isLoading: boolean;
 }
 
-// 2. ToastContext.tsx â€” toast notifications
+// 2. ToastContext.tsx — toast notifications
 interface ToastContextType {
   toasts: Toast[];
   addToast: (toast: Omit<Toast, 'id'>) => void;
   removeToast: (id: string) => void;
 }
 
-// 3. DialogContext.tsx â€” modal dialogs (no browser popups)
+// 3. DialogContext.tsx — modal dialogs (no browser popups)
 interface DialogContextType {
   confirm: (message: string) => Promise<boolean>;
   alert: (message: string) => Promise<void>;
@@ -2417,14 +2417,14 @@ interface DialogContextType {
   choose: (options: { key: string; label: string; description?: string }[]) => Promise<string | null>;
 }
 
-// 4. SocketContext.tsx â€” Socket.IO connection, online users
+// 4. SocketContext.tsx — Socket.IO connection, online users
 interface SocketContextType {
   socket: Socket | null;
   onlineUsers: OnlineUser[];
   isConnected: boolean;
 }
 
-// 5. UndoContext.tsx â€” undo-toasts with countdown timers
+// 5. UndoContext.tsx — undo-toasts with countdown timers
 interface UndoContextType {
   showUndo: (message: string, onUndo: () => void, duration?: number) => void;
 }
@@ -2450,25 +2450,25 @@ interface UndoContextType {
 
 ## 20. Backend Scripts & Dev Tools
 
-### `backend/scripts/` (JS â€” run with `node`)
+### `backend/scripts/` (JS — run with `node`)
 
 | Script | Purpose |
 |--------|---------|
 | `check-admins.js` | Lists all users + admin users from SQLite DB |
-| `reset-db.js` | Resets SQLite â€” deletes all except admin (id=1), resets admin credentials |
+| `reset-db.js` | Resets SQLite — deletes all except admin (id=1), resets admin credentials |
 | `reset-fixed.js` | Same as reset-db + clears bulletin_templates |
 | `db-reset.js` | Truncates ALL PostgreSQL tables in dependency order |
 | `drop-tables.js` | Drops ALL PostgreSQL tables (nuclear option) |
 | `inspect-db.js` | Reads SQLite schema, tables, structures, user data |
-| `test-db.js` | Quick DB connectivity test â€” initializes and lists users |
+| `test-db.js` | Quick DB connectivity test — initializes and lists users |
 
-### `backend/src/scripts/` (TS â€” run with `npx tsx`)
+### `backend/src/scripts/` (TS — run with `npx tsx`)
 
 | Script | Purpose |
 |--------|---------|
-| `check-state.ts` | Diagnostic â€” prints Bulletin Templates, Profiles, active Stories |
+| `check-state.ts` | Diagnostic — prints Bulletin Templates, Profiles, active Stories |
 | `clear-tasks.ts` | Clears task-related data (with backup), resets bulletin templates |
-| `import-full-version.ts` | One-time migration â€” imports users/profiles/templates from SQLite â†’ PG |
+| `import-full-version.ts` | One-time migration — imports users/profiles/templates from SQLite → PG |
 
 ---
 
@@ -2480,7 +2480,7 @@ interface UndoContextType {
 | `frontend/tsconfig.json` | Frontend TypeScript config |
 | `frontend/vite.config.ts` | Vite build config (dev proxy to :3003) |
 | `frontend/tailwind.config.js` | Tailwind CSS config |
-| `frontend/postcss.config.js` | PostCSS â€” tailwindcss + autoprefixer |
+| `frontend/postcss.config.js` | PostCSS — tailwindcss + autoprefixer |
 | `package.json` (root) | Monorepo scripts: `build`, `start`, `dev` |
 | `render.yaml` | Render.com deployment blueprint |
 | `.env.example` (root + backend/) | Environment template |
@@ -2536,15 +2536,15 @@ CREATE TABLE notifications (
 ```
 
 **Notification creation points:**
-- Leave request â†’ notify admins
-- Leave approve/reject â†’ notify staff
-- Task assigned â†’ notify assignee
-- Task status change â†’ notify creator
-- Signup request â†’ notify admins
-- PIN request â†’ notify admins
+- Leave request → notify admins
+- Leave approve/reject → notify staff
+- Task assigned → notify assignee
+- Task status change → notify creator
+- Signup request → notify admins
+- PIN request → notify admins
 - Custom scheduled notifications (via `scheduled_notifications` table)
 
-**Frontend:** `NotificationBell.tsx` â€” bell icon with unread count badge, dropdown list
+**Frontend:** `NotificationBell.tsx` — bell icon with unread count badge, dropdown list
 
 ### Activity Logs (Audit Trail)
 
@@ -2569,7 +2569,7 @@ CREATE TABLE activity_logs (
 2. User Activity (per-user)
 3. System Activity (system-level)
 4. Errors (telemetry)
-5. Toasts (LAN broadcast history â€” from `toast_logs` mirror-only table)
+5. Toasts (LAN broadcast history — from `toast_logs` mirror-only table)
 
 ### Telemetry (Client Errors)
 
@@ -2601,7 +2601,7 @@ initTelemetry();  // In main.tsx
 ```typescript
 // Export: downloads JSON with all user data
 GET /api/users/export
-// â†’ { users, profiles, bulletins, tasks, stories, ... }
+// → { users, profiles, bulletins, tasks, stories, ... }
 
 // Import: uploads JSON to restore user data
 POST /api/users/import
@@ -2613,7 +2613,7 @@ POST /api/users/import
 ```typescript
 // Export: downloads full database backup
 GET /api/backups/:id/export
-// â†’ JSON blob with all table data
+// → JSON blob with all table data
 
 // Import: uploads backup file
 POST /api/backups/import
@@ -2634,16 +2634,16 @@ interface RestoreSummary {
 }
 ```
 
-### Research Data Export (Backups page â†’ Research Data tab)
+### Research Data Export (Backups page → Research Data tab)
 
 ```typescript
 // Full report (JSON)
 GET /api/telemetry/export?format=json&since=90
-// â†’ { activity_logs, task_audit_log, sync_log, errors }
+// → { activity_logs, task_audit_log, sync_log, errors }
 
 // Per-table CSV
 GET /api/telemetry/export?format=csv&table=activity&since=90
-// â†’ CSV file download
+// → CSV file download
 ```
 
 ### Database Connection Export
@@ -2670,18 +2670,18 @@ Saved connections stored in `backend/saved-connections.json` (git-ignored):
 - Stored in `backend/.dev-credentials` (bcrypt hash, file-based)
 - Works when DB is missing/corrupt
 - Token: `access_level 3` + `is_dev: true`
-- **NOT an admin** â€” cannot manage users, change settings, access Database tab
+- **NOT an admin** — cannot manage users, change settings, access Database tab
 
 ### Developer Page (`pages/Developer.tsx`)
 
 **Combined card with sub-tabs:**
-1. **Dev Account tab** â€” login form, change password
-2. **Saved Passwords tab** â€” list of saved logins with PIN management
+1. **Dev Account tab** — login form, change password
+2. **Saved Passwords tab** — list of saved logins with PIN management
 
 **Other tabs on the page:**
-- Connection Help â€” database connection diagnostics
-- Dev Tools â€” `clean-all-data`, `fix-db`, `/auth/dev*` endpoints
-- App Settings â€” app name, channel name
+- Connection Help — database connection diagnostics
+- Dev Tools — `clean-all-data`, `fix-db`, `/auth/dev*` endpoints
+- App Settings — app name, channel name
 
 ### Backend Dev Routes
 
@@ -2699,11 +2699,11 @@ Saved connections stored in `backend/saved-connections.json` (git-ignored):
 const isAdmin = !user?.is_dev && access_level <= 1;
 
 // Non-admin devs see:
-// âœ“ Connection Help tab
-// âœ“ Dev Tools tab
-// âœ“ Saved Passwords tab
-// âœ— Activity Logs tab (hidden)
-// âœ— Users tab (hidden)
+// ✓ Connection Help tab
+// ✓ Dev Tools tab
+// ✓ Saved Passwords tab
+// ✗ Activity Logs tab (hidden)
+// ✗ Users tab (hidden)
 ```
 
 ---
@@ -2754,36 +2754,36 @@ All database panels are on the **Backups page** (not Settings):
 
 ```
 frontend/dist/
-â”œâ”€â”€ index.html
-â””â”€â”€ assets/
-    â”œâ”€â”€ index-[hash].js      (~300 KB)
-    â”œâ”€â”€ index-[hash].css     (~50 KB)
-    â””â”€â”€ [other hashed assets]
+├── index.html
+└── assets/
+    ├── index-[hash].js      (~300 KB)
+    ├── index-[hash].css     (~50 KB)
+    └── [other hashed assets]
 
 backend/dist/
-â”œâ”€â”€ index.js
-â”œâ”€â”€ config/
-â”œâ”€â”€ database/
-â”œâ”€â”€ middleware/
-â”œâ”€â”€ routes/
-â””â”€â”€ utils/
+├── index.js
+├── config/
+├── database/
+├── middleware/
+├── routes/
+└── utils/
 ```
 
 ### Data Flow
 
 ```
 User action
-    â†“
+    ↓
 Frontend (React)
-    â†“ HTTP request + Socket.IO event
+    ↓ HTTP request + Socket.IO event
 Backend (Express)
-    â†“ prepare(sql).run()
-    â”œâ”€â”€ SQLite mirror (immediate, always works)
-    â”œâ”€â”€ sync_outbox (queue entry)
-    â””â”€â”€ PostgreSQL (fire-and-forget)
-         â†“ on success
+    ↓ prepare(sql).run()
+    ├── SQLite mirror (immediate, always works)
+    ├── sync_outbox (queue entry)
+    └── PostgreSQL (fire-and-forget)
+         ↓ on success
     mark applied_pg = 1
-         â†“ on failure
+         ↓ on failure
     pg_error logged, retry on next health check
 ```
 
@@ -2847,16 +2847,16 @@ interface TelemetryItem {
 
 ## Appendix: Key Gotchas
 
-1. **`res.json(<Promise>)` silently serializes to `{}`** â€” always `await` before responding
-2. **PG `COUNT(*)` returns strings** â€” `"0"` not `0`; use `|| 0` in frontend
-3. **Never leave trailing `;` in SQL** â€” `RETURNING id` gets appended
-4. **`process.on('unhandledRejection')` must be log-only** â€” never exit
-5. **Bulk ops must `flush()` after re-enabling persist** â€” stale disk = resurrected data
-6. **SQLite `createTables()` must not use PG syntax** â€” no `SERIAL`, `TIMESTAMPTZ`, `DEFAULT NOW()`
-7. **`video_editor_id` must be awaited** â€” missing await passes Promise â†’ PG `22P02`
-8. **Stop wrapper FIRST** â€” else it respawns node
-9. **`Stop Server.bat` match must require `-File`** â€” bare LIKE matches itself
-10. **OfflineBanner reload only when `synced > 0`** â€” prevents infinite reload loops
+1. **`res.json(<Promise>)` silently serializes to `{}`** — always `await` before responding
+2. **PG `COUNT(*)` returns strings** — `"0"` not `0`; use `|| 0` in frontend
+3. **Never leave trailing `;` in SQL** — `RETURNING id` gets appended
+4. **`process.on('unhandledRejection')` must be log-only** — never exit
+5. **Bulk ops must `flush()` after re-enabling persist** — stale disk = resurrected data
+6. **SQLite `createTables()` must not use PG syntax** — no `SERIAL`, `TIMESTAMPTZ`, `DEFAULT NOW()`
+7. **`video_editor_id` must be awaited** — missing await passes Promise → PG `22P02`
+8. **Stop wrapper FIRST** — else it respawns node
+9. **`Stop Server.bat` match must require `-File`** — bare LIKE matches itself
+10. **OfflineBanner reload only when `synced > 0`** — prevents infinite reload loops
 
 ---
 

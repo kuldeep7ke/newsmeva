@@ -127,7 +127,7 @@ class NodeService : Service() {
         try {
             val files = assetManager.list(assetPath) ?: return
             if (files.isEmpty()) {
-                // It's a file â€” copy it
+                // It's a file — copy it
                 val outFile = File(targetDir, assetPath)
                 outFile.parentFile?.mkdirs()
                 assetManager.open(assetPath).use { input ->
@@ -136,7 +136,7 @@ class NodeService : Service() {
                     }
                 }
             } else {
-                // It's a directory â€” recurse
+                // It's a directory — recurse
                 val outDir = File(targetDir, assetPath)
                 outDir.mkdirs()
                 for (file in files) {
@@ -216,7 +216,7 @@ class NodeService : Service() {
                     Log.d(TAG, line)
                 }
 
-                // Process exited â€” check exit code
+                // Process exited — check exit code
                 val exitCode = nodeProcess?.waitFor() ?: -1
                 Log.e(TAG, "Node process exited with code $exitCode")
                 isRunning = false

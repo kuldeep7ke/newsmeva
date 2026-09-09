@@ -29,11 +29,11 @@ else
     echo "No running NEWS MEVA server found."
 fi
 
-# 3. Stop the Caddy proxy + its watchdog if WE started it (manual mode only â€”
+# 3. Stop the Caddy proxy + its watchdog if WE started it (manual mode only —
 #    never touches a Caddy running as a systemd service).
 pkill -f "caddy-watchdog.sh" 2>/dev/null || true
 if systemctl is-active --quiet caddy 2>/dev/null; then
-    echo "Caddy runs as a systemd service â€” leaving it running."
+    echo "Caddy runs as a systemd service — leaving it running."
 else
     CPIDS=$(pgrep -f "caddy run --config.*proxy/caddy/Caddyfile" || true)
     if [[ -n "$CPIDS" ]]; then

@@ -88,7 +88,7 @@ show_urls() {
   if [ -n "$LAN_IP" ]; then
     echo "  LAN users:     http://$LAN_IP:3002"
     echo "                 http://$LAN_IP        (when the bundled Caddy proxy is running)"
-    echo "                 http://$(hostname -s)   (computer name â€” resolves from most LAN machines)"
+    echo "                 http://$(hostname -s)   (computer name — resolves from most LAN machines)"
     echo ""
     echo "  Tip: the first time you start the server, macOS may ask whether to"
     echo "  allow 'node' to accept incoming connections - click Allow, or LAN"

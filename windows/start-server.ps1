@@ -24,8 +24,8 @@ $front   = Join-Path $root 'frontend'
 $log     = Join-Path $root 'server.log'
 $PORT    = 3002
 
-# Friendly LAN hostname - same value mapped by lan\Add Workstation Hosts.bat /
-# lan\Add Workstation Hosts.command. The OS computer name may carry the old
+# Friendly LAN hostname - same value mapped by lan\Add NewsMeva Hosts.bat /
+# lan\Add NewsMeva Hosts.command. The OS computer name may carry the old
 # brand; show the friendly name so LAN users use a URL that resolves.
 $appHost = 'newsmeva'
 
