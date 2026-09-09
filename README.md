@@ -10,7 +10,7 @@ Supabase PostgreSQL** database â€” with an **offline-first sync engine**: i
 internet goes down, the server keeps working on a local mirror and
 automatically syncs everything back the moment the connection returns.
 
-> **Status: Pre-release Beta (`v3.0.0`) â€” Testing Mode.** The app is
+> **Status: Pre-release Beta (`v3.1.0`) â€” Testing Mode.** The app is
 > **free & public domain (Unlicense)** and travels as a **fresh copy**: no user
 > data, no database, no previous settings â€” ready for new users only.
 >
@@ -206,7 +206,7 @@ render.yaml        Render.com cloud config
 ## Installer (Beta)
 
 The Windows `.exe` installer highlights:
-- **v3.0.0 (Beta â€” testing mode)**, free & public domain
+- **v3.1.0 (Beta â€” testing mode)**, free & public domain
 - **Always installs a fresh copy** â€” explicitly excludes any database, `.db`/`.sqlite`
   files, `.env`, logs, backups, and telemetry, so **no previous user data** ever ships
 - Bundles the Node.js runtime + Caddy proxy + launcher scripts for fully-offline setup
