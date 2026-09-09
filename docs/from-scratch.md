@@ -145,7 +145,7 @@ Built for Marathi TV newsrooms but applicable to any broadcast news operation.
 ## 4. Project Structure
 
 ```
-workstation-online/
+newsmeva/
 â”œâ”€â”€ backend/
 â”‚   â”œâ”€â”€ src/
 â”‚   â”‚   â”œâ”€â”€ index.ts              # Entry point: init DB, start server
@@ -1947,7 +1947,7 @@ node backend/dist/index.js  # Serves API + SPA on :3002
 # render.yaml
 services:
   - type: web
-    name: workstation-meva
+    name: newsmeva
     buildCommand: cd backend && npm install && npm run build
     startCommand: cd backend && node dist/index.js
     envVars:

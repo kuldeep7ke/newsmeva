@@ -39,7 +39,7 @@ PORT="${PORT:-3002}"
 
 if [[ ! -d "$REPO_ROOT/backend" || ! -d "$REPO_ROOT/frontend" ]]; then
     echo "Error: repo layout not found. Expected backend/ and frontend/ next to redhat/."
-    echo "Run this script from a full clone of the workstation-online repository."
+    echo "Run this script from a full clone of the newsmeva repository."
     exit 1
 fi
 
