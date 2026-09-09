@@ -56,7 +56,7 @@ Quick version:
 
 ### 3a. One-file `.deb` package (recommended)
 
-A prebuilt, **fully offline** Debian/Ubuntu package is available: `installer/newsmeva-online_3.1.0_amd64.deb`.
+A prebuilt, **fully offline** Debian/Ubuntu package is available: `installer/newsmeva-online_3.1.1_amd64.deb`.
 It bundles the built app, a Node.js runtime, and the Caddy reverse proxy, so **no Node.js, no npm, no compiler,
 and no internet are needed at install time**. To build it yourself from source run
 `node ubuntu/installer/build-deb.js` (produces the file above).
@@ -64,7 +64,7 @@ and no internet are needed at install time**. To build it yourself from source r
 Copy it to the Ubuntu machine and install:
 
 ```bash
-sudo apt install ./newsmeva-online_3.1.0_amd64.deb
+sudo apt install ./newsmeva-online_3.1.1_amd64.deb
 ```
 
 What `postinst` does automatically on first install:
@@ -83,7 +83,7 @@ sudo nano /opt/newsmeva/backend/.env
 sudo systemctl restart newsmeva.service
 ```
 
-Upgrading later = `sudo apt install ./newsmeva-online_3.1.0_amd64.deb` again when a new `.deb` is
+Upgrading later = `sudo apt install ./newsmeva-online_3.1.1_amd64.deb` again when a new `.deb` is
 released (your `.env` and data are preserved). To fully remove: `sudo apt remove --purge newsmeva-online`.
 
 ### 3b. Install from source

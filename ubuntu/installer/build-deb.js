@@ -31,7 +31,7 @@ const ROOT = path.resolve(__dirname, '..', '..');
 // ----------------------------------------------------------------------------
 const PKG = 'newsmeva-online';           // apt package identity (upgrade/remove)
 const DEB_PREFIX = 'newsmeva-online';    // .deb output filename prefix
-const VERSION = process.argv.find((a, i) => process.argv[i - 1] === '--version') || '3.1.0';
+const VERSION = process.argv.find((a, i) => process.argv[i - 1] === '--version') || '3.1.1';
 const ARCH = process.argv.find((a, i) => process.argv[i - 1] === '--arch') || 'amd64';
 const INSTALL_DIR = '/opt/newsmeva';
 const NODE_PREFIX = '/opt/newsmeva-node';

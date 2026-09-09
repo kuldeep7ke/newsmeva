@@ -51,7 +51,7 @@ If `tools/node/` is present on first run, Node is installed automatically from i
 
 ## 2. Quick Install (.exe Installer)
 
-> **Beta:** this is a pre-release beta (`v3.1.0`) running in **testing mode**, and the
+> **Beta:** this is a pre-release beta (`v3.1.1`) running in **testing mode**, and the
 > app is **free & public domain (Unlicense)**. The installer **never carries over user data** —
 > it always deploys a fresh copy (no database, no settings), ready for new users only.
 
@@ -86,7 +86,7 @@ The panel reads and writes the **same** state files the `.bat` launchers use —
 
 ### Install
 
-1. Run `installer\newsmeva-setup-v3.1.0.exe`
+1. Run `installer\newsmeva-setup-v3.1.1.exe`
 2. Click **Next** on the Welcome page
 3. Tick **"I accept the Terms and Conditions"** and click **Next** (the wizard will not continue without it)
 4. Choose the install folder (default: `C:\NewsMeva`)
@@ -106,7 +106,7 @@ The app opens at `http://localhost:3002`. Create your first account — it becom
 
 ### Re-run the installer (Maintenance)
 
-If the app is already installed, re-running `newsmeva-setup-v3.1.0.exe` shows a single **Maintenance** page (there is no separate Modify / Repair step anymore):
+If the app is already installed, re-running `newsmeva-setup-v3.1.1.exe` shows a single **Maintenance** page (there is no separate Modify / Repair step anymore):
 
 - **Reinstall / Repair** (default) — refreshes ALL application files, shortcuts and the firewall rule; your data in the install folder is kept
 - **Uninstall** — removes NEWS MEVA Online from this computer (see below)
@@ -499,7 +499,7 @@ cd ..
 "C:\Program Files (x86)\NSIS\Bin\makensis.exe" installer\newsmeva.nsi
 ```
 
-Output: `installer\newsmeva-setup-v3.1.0.exe` (~71 MB).
+Output: `installer\newsmeva-setup-v3.1.1.exe` (~71 MB).
 
 ### What gets bundled
 
@@ -562,8 +562,8 @@ The self-healing launcher (`windows\start-server.ps1`) runs these steps in order
 
 | Action | Command |
 |--------|---------|
-| **Install (no tech needed)** | `installer\newsmeva-setup-v3.1.0.exe` — accepts T&C, then installs |
-| **Repair / Reinstall** | Re-run `installer\newsmeva-setup-v3.1.0.exe` → **Reinstall / Repair** (keeps data) |
+| **Install (no tech needed)** | `installer\newsmeva-setup-v3.1.1.exe` — accepts T&C, then installs |
+| **Repair / Reinstall** | Re-run `installer\newsmeva-setup-v3.1.1.exe` → **Reinstall / Repair** (keeps data) |
 | **Uninstall** | Add/Remove Programs → NEWS MEVA Online, **or** Start Menu → Uninstall, **or** run installer → **Uninstall** (choose Keep data / Remove ALL) |
 | **Control Panel (setup & daily use)** | `windows\Control Panel.bat` — server start/stop + status, database URL + live test, autostart toggle, proxy toggle, LAN addresses, repair/heal/clean tools |
 | **Start server** | `windows\Start Server.bat` |
