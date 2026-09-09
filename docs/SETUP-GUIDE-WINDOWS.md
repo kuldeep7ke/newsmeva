@@ -86,18 +86,27 @@ The panel reads and writes the **same** state files the `.bat` launchers use â�
 
 ### Install
 
-1. Run `installer\newsmeva-setup.exe`
+1. Run `installer\newsmeva-setup-v3.0.0.exe`
 2. Click **Next** on the Welcome page
 3. Tick **"I accept the Terms and Conditions"** and click **Next** (the wizard will not continue without it)
 4. Choose the install folder (default: `C:\Workstation-Meva`)
 5. Click **Install**
 6. When finished, the **Control Panel opens** â€” paste your Supabase connection string into the Database card and click **Save** (or follow the guide), then click **Start** and **Open app**
 
+### System requirements check
+
+The installer checks your machine before copying anything:
+
+- **OS** â€” Windows 10 or Windows 11 (64-bit). On an older Windows it stops with a clear message.
+- **Architecture** â€” 64-bit only.
+
+Node.js, npm/npx and Caddy are all **bundled inside the installer** (portable Node runtime + `caddy.exe`), so no separate downloads or pre-installed tools are needed â€” the app works fully offline.
+
 The app opens at `http://localhost:3002`. Create your first account â€” it becomes the **admin**.
 
 ### Re-run the installer (Maintenance)
 
-If the app is already installed, re-running `newsmeva-setup.exe` shows a single **Maintenance** page (there is no separate Modify / Repair step anymore):
+If the app is already installed, re-running `newsmeva-setup-v3.0.0.exe` shows a single **Maintenance** page (there is no separate Modify / Repair step anymore):
 
 - **Reinstall / Repair** (default) â€” refreshes ALL application files, shortcuts and the firewall rule; your data in the install folder is kept
 - **Uninstall** â€” removes NEWS MEVA Online from this computer (see below)
@@ -118,6 +127,10 @@ When you start the uninstaller you are asked what to remove:
 > Your **online** data always stays safe in your Supabase database either way â€” these choices only affect files stored locally.
 
 The uninstaller then stops the server, removes the firewall rule, shortcuts and registry entries, deletes the chosen files (or the whole folder), and finally removes `Uninstall.exe` and the install directory itself.
+
+After uninstalling, the **README** opens automatically:
+- **Keep user data** â€” the bundled `README.md` still exists in the install folder, so the local file opens.
+- **Remove ALL data** â€” the folder is gone, so the GitHub readme page (https://github.com/kuldeep7ke/newsmeva) opens instead.
 
 ### Rebuild the installer
 
@@ -486,7 +499,7 @@ cd ..
 "C:\Program Files (x86)\NSIS\Bin\makensis.exe" installer\newsmeva.nsi
 ```
 
-Output: `installer\newsmeva-setup.exe` (~68 MB).
+Output: `installer\newsmeva-setup-v3.0.0.exe` (~71 MB).
 
 ### What gets bundled
 
@@ -549,8 +562,8 @@ The self-healing launcher (`windows\start-server.ps1`) runs these steps in order
 
 | Action | Command |
 |--------|---------|
-| **Install (no tech needed)** | `installer\newsmeva-setup.exe` â€” accepts T&C, then installs |
-| **Repair / Reinstall** | Re-run `installer\newsmeva-setup.exe` â†’ **Reinstall / Repair** (keeps data) |
+| **Install (no tech needed)** | `installer\newsmeva-setup-v3.0.0.exe` â€” accepts T&C, then installs |
+| **Repair / Reinstall** | Re-run `installer\newsmeva-setup-v3.0.0.exe` â†’ **Reinstall / Repair** (keeps data) |
 | **Uninstall** | Add/Remove Programs â†’ NEWS MEVA Online, **or** Start Menu â†’ Uninstall, **or** run installer â†’ **Uninstall** (choose Keep data / Remove ALL) |
 | **Control Panel (setup & daily use)** | `windows\Control Panel.bat` â€” server start/stop + status, database URL + live test, autostart toggle, proxy toggle, LAN addresses, repair/heal/clean tools |
 | **Start server** | `windows\Start Server.bat` |

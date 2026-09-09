@@ -11,12 +11,14 @@
 !include "FileFunc.nsh"
 !include "LogicLib.nsh"
 !include "nsDialogs.nsh"
+!include "WinVer.nsh"
+!include "x64.nsh"
 
 ; ---------------------------------------------------------------------------
 ; Configuration
 ; ---------------------------------------------------------------------------
 Name "NEWS MEVA Online"
-OutFile "newsmeva-setup.exe"
+OutFile "newsmeva-setup-v3.0.0.exe"
 InstallDir "C:\Workstation-Meva"
 InstallDirRegKey HKLM "Software\WorkstationMeva" "InstallDir"
 RequestExecutionLevel admin
@@ -37,7 +39,7 @@ VIAddVersionKey "LegalCopyright" "Free & public domain (Unlicense)"
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 !define MUI_WELCOMEPAGE_TITLE "NEWS MEVA Online Setup"
-!define MUI_WELCOMEPAGE_TEXT "This wizard will install NEWS MEVA Online on your computer.$\r$\n$\r$\nINSTALLER NOTES:$\r$\n  - BETA release (v3.0.0) - testing mode$\r$\n  - Free & open source - public domain (Unlicense)$\r$\n  - Always installs a FRESH copy: NO user data, NO database, NO previous settings$\r$\n$\r$\nThe installer will:$\r$\n  - Copy the application files$\r$\n  - Open port 3002 in the Windows Firewall$\r$\n  - Create Start Menu shortcuts$\r$\n$\r$\nClick Next to continue."
+!define MUI_WELCOMEPAGE_TEXT "This wizard will install NEWS MEVA Online on your computer.$\r$\n$\r$\nINSTALLER NOTES:$\r$\n  - BETA release (v3.0.0) - testing mode$\r$\n  - Free & open source - public domain (Unlicense)$\r$\n  - Requires Windows 10 or Windows 11 (64-bit)$\r$\n  - Node.js + Caddy are bundled - no internet needed$\r$\n  - Always installs a FRESH copy: NO user data, NO database, NO previous settings$\r$\n$\r$\nThe installer will:$\r$\n  - Check your system requirements$\r$\n  - Copy the application files$\r$\n  - Open port 3002 in the Windows Firewall$\r$\n  - Create Start Menu shortcuts$\r$\n$\r$\nClick Next to continue."
 !define MUI_FINISHPAGE_RUN "$INSTDIR\windows\Control Panel.bat"
 !define MUI_FINISHPAGE_RUN_TEXT "Open the Control Panel (set up your database)"
 !define MUI_FINISHPAGE_LINK "Open documentation"
@@ -165,6 +167,18 @@ FunctionEnd
 ; ---------------------------------------------------------------------------
 
 Section "Install" SecMain
+  ; --- Prerequisite / OS requirements check ---
+  ; Windows 10 or 11 (64-bit). Node.js, npx and Caddy are bundled inside this
+  ; installer so they are guaranteed present - nothing to download at setup time.
+  ${Unless} ${RunningX64}
+    MessageBox MB_ICONSTOP|MB_OK "NEWS MEVA Online requires a 64-bit version of Windows 10 or Windows 11. This computer is not 64-bit, so installation cannot continue."
+    Abort
+  ${EndUnless}
+  ${IfNot} ${AtLeastWin10}
+    MessageBox MB_ICONSTOP|MB_OK "NEWS MEVA Online requires Windows 10 or Windows 11. This computer is running an older version of Windows, so installation cannot continue."
+    Abort
+  ${EndIf}
+
   ; Ensure Autostart is OFF by default for fresh installs (user must enable
   ; explicitly via Install Autostart.bat or Control Panel). If a stale
   ; Startup lnk was left by an old uninstall that didn't clean it, remove
@@ -211,6 +225,10 @@ Section "Install" SecMain
   ; Backend env template
   SetOutPath "$INSTDIR\backend"
   File "..\backend\.env.example"
+
+  ; README for the installed app (opened by the uninstaller when it survives)
+  SetOutPath "$INSTDIR"
+  File "..\README.md"
 
   ; --- Bundled Node.js runtime (portable) ---
   SetOutPath "$INSTDIR\node"
@@ -446,5 +464,14 @@ Section "Uninstall"
   ; %TEMP% copy (we never launch with the in-place "_?=" flag).
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR"
+
+  ; After uninstall, open the readme. The bundled README.md survives the
+  ; keep-data path; on clean-all the folder is gone, so open the repo readme
+  ; page instead.
+  ${If} ${FileExists} "$INSTDIR\README.md"
+    ExecShell open "$INSTDIR\README.md"
+  ${Else}
+    ExecShell open "https://github.com/kuldeep7ke/newsmeva"
+  ${EndIf}
 
 SectionEnd
