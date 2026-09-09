@@ -22,8 +22,16 @@ if [ ! -f "$ENTRY" ]; then
   exit 1
 fi
 
-PLIST="$HOME/Library/LaunchAgents/com.workstation-meva-online.server.plist"
-LABEL="com.workstation-meva-online.server"
+PLIST="$HOME/Library/LaunchAgents/com.newsmeva-online.server.plist"
+LABEL="com.newsmeva-online.server"
+
+# Clean up the legacy "com.workstation-meva-online.server" agent from old installs.
+OLD_PLIST="$HOME/Library/LaunchAgents/com.workstation-meva-online.server.plist"
+if [ -f "$OLD_PLIST" ]; then
+  launchctl unload "$OLD_PLIST" >/dev/null 2>&1
+  launchctl bootout gui/$(id -u) "$OLD_PLIST" 2>/dev/null || true
+  rm -f "$OLD_PLIST"
+fi
 
 mkdir -p "$HOME/Library/LaunchAgents"
 

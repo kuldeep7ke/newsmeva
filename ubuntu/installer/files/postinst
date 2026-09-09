@@ -2,9 +2,9 @@
 # NEWS MEVA Online - Debian/Ubuntu package post-install
 set -e
 
-APP="/opt/workstation-online"
+APP="/opt/newsmeva"
 SERVICE_USER="meva"
-NODE_PREFIX="/opt/workstation-node"
+NODE_PREFIX="/opt/newsmeva-node"
 BUNDLE="$(ls "$APP"/tools/node/node-v*-linux-x64.tar.xz 2>/dev/null | head -1 || true)"
 
 case "$1" in

@@ -293,7 +293,7 @@ git clone https://github.com/kuldeep7ke/newsmeva.git
 cd workstation
 sudo bash ubuntu/install.sh        # installs Node (bundled offline v24.19.0, else NodeSource 20 LTS), builds, installs systemd service, creates .env (auto JWT_SECRET)
 # .env is created automatically (local database). To use Supabase later:
-sudo nano /opt/workstation-online/backend/.env   # set DATABASE_URL + JWT_SECRET
+sudo nano /opt/newsmeva/backend/.env   # set DATABASE_URL + JWT_SECRET
 sudo systemctl restart newsmeva.service
 ```
 
@@ -313,7 +313,7 @@ git clone https://github.com/kuldeep7ke/newsmeva.git
 cd workstation
 sudo bash redhat/install.sh        # dnf + firewalld, opens port 3002, installs Node (bundled offline v24.19.0, else NodeSource 20 LTS), creates .env (auto JWT_SECRET)
 # .env is created automatically (local database). To use Supabase later:
-sudo nano /opt/workstation-online/backend/.env   # set DATABASE_URL + JWT_SECRET
+sudo nano /opt/newsmeva/backend/.env   # set DATABASE_URL + JWT_SECRET
 sudo systemctl restart newsmeva.service
 ```
 

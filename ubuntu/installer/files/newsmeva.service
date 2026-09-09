@@ -6,9 +6,9 @@ Wants=newsmeva-caddy.service
 [Service]
 Type=simple
 User=meva
-WorkingDirectory=/opt/workstation-online/backend
-EnvironmentFile=/opt/workstation-online/backend/.env
-ExecStart=/opt/workstation-node/bin/node /opt/workstation-online/backend/dist/index.js
+WorkingDirectory=/opt/newsmeva/backend
+EnvironmentFile=/opt/newsmeva/backend/.env
+ExecStart=/opt/newsmeva-node/bin/node /opt/newsmeva/backend/dist/index.js
 Restart=always
 RestartSec=5
 Environment=NODE_ENV=production

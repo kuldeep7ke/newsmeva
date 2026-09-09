@@ -19,8 +19,8 @@
 ; ---------------------------------------------------------------------------
 Name "NEWS MEVA Online"
 OutFile "newsmeva-setup-v3.0.0.exe"
-InstallDir "C:\Workstation-Meva"
-InstallDirRegKey HKLM "Software\WorkstationMeva" "InstallDir"
+InstallDir "C:\NewsMeva"
+InstallDirRegKey HKLM "Software\NewsMeva" "InstallDir"
 RequestExecutionLevel admin
 Unicode True
 
@@ -262,7 +262,7 @@ Section "Install" SecMain
   File "..\windows\stop-app.ps1"
 
   ; --- Save install path for uninstaller ---
-  WriteRegStr HKLM "Software\WorkstationMeva" "InstallDir" "$INSTDIR"
+  WriteRegStr HKLM "Software\NewsMeva" "InstallDir" "$INSTDIR"
 
   ; --- Mark this as a packaged (installer) layout ---
   ; Tells the launcher this is a pre-built install: it must NOT run npm
@@ -301,17 +301,17 @@ Section "Install" SecMain
   ; --- Size estimate ---
   ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
   IntFmt $0 "0x%08X" $0
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "EstimatedSize" "$0"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NewsMeva" "EstimatedSize" "$0"
 
   ; --- Add/Remove Programs entry ---
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "DisplayName" "NEWS MEVA Online"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "UninstallString" '"$INSTDIR\Uninstall.exe"'
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "InstallLocation" "$INSTDIR"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "DisplayIcon" "$INSTDIR\Uninstall.exe"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "Publisher" "kuldeep7ke"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "URLInfoAbout" "https://github.com/kuldeep7ke/newsmeva"
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "NoModify" 1
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva" "NoRepair" 1
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NewsMeva" "DisplayName" "NEWS MEVA Online"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NewsMeva" "UninstallString" '"$INSTDIR\Uninstall.exe"'
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NewsMeva" "InstallLocation" "$INSTDIR"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NewsMeva" "DisplayIcon" "$INSTDIR\Uninstall.exe"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NewsMeva" "Publisher" "kuldeep7ke"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NewsMeva" "URLInfoAbout" "https://github.com/kuldeep7ke/newsmeva"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NewsMeva" "NoModify" 1
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NewsMeva" "NoRepair" 1
 
   ; The Finish page's "Open the Control Panel (set up your database)" checkbox
   ; (MUI_FINISHPAGE_RUN) runs only when the user clicks Finish - we do NOT
@@ -372,7 +372,7 @@ Section "Uninstall"
   nsExec::Exec 'netsh advfirewall firewall delete rule name="Workstation Meva 3002"'
 
   ; Remove Autostart entry (Startup folder) - otherwise next OS boot tries
-  ; to launch wscript.exe "C:\Workstation-Meva\windows\Start Server Hidden.vbs"
+  ; to launch wscript.exe "C:\NewsMeva\windows\Start Server Hidden.vbs"
   ; which no longer exists and shows an error. Autostart was created by
   ; windows\Install Autostart.bat or Control Panel -> Toggle-Autostart
   ; (same Startup .lnk). Do this BEFORE deleting the install folder so a
@@ -399,6 +399,7 @@ Section "Uninstall"
   DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "NEWS MEVA"
   DeleteRegValue HKLM "Software\Microsoft\Windows\CurrentVersion\Run" "NEWS MEVA"
   nsExec::Exec 'schtasks /Delete /TN "NEWS MEVA" /F 2>nul'
+  nsExec::Exec 'schtasks /Delete /TN "NewsMeva" /F 2>nul'
   nsExec::Exec 'schtasks /Delete /TN "WorkstationMeva" /F 2>nul'
   ; Legacy cleanup - remove old app-name autostart artifacts from prior installs.
   Delete "$SMSTARTUP\Workstation Meva.lnk"
@@ -423,8 +424,8 @@ Section "Uninstall"
   Delete "$DESKTOP\Workstation Meva Control Panel.lnk"
 
   ; Remove registry entries
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\WorkstationMeva"
-  DeleteRegKey HKLM "Software\WorkstationMeva"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NewsMeva"
+  DeleteRegKey HKLM "Software\NewsMeva"
 
   ${If} $UnKeepData = 1
     ; ---- KEEP USER DATA ------------------------------------------------

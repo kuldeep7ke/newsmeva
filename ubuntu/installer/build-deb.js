@@ -29,12 +29,12 @@ const ROOT = path.resolve(__dirname, '..', '..');
 // ----------------------------------------------------------------------------
 // package metadata
 // ----------------------------------------------------------------------------
-const PKG = 'workstation-meva-online';       // apt package identity (upgrade/remove)
-const DEB_PREFIX = 'newsmeva-online';        // .deb output filename prefix
+const PKG = 'newsmeva-online';           // apt package identity (upgrade/remove)
+const DEB_PREFIX = 'newsmeva-online';    // .deb output filename prefix
 const VERSION = process.argv.find((a, i) => process.argv[i - 1] === '--version') || '3.0.0';
 const ARCH = process.argv.find((a, i) => process.argv[i - 1] === '--arch') || 'amd64';
-const INSTALL_DIR = '/opt/workstation-online';
-const NODE_PREFIX = '/opt/workstation-node';
+const INSTALL_DIR = '/opt/newsmeva';
+const NODE_PREFIX = '/opt/newsmeva-node';
 const OUT_DIR = path.join(ROOT, 'installer');
 const OUT_DEB = path.join(OUT_DIR, `${DEB_PREFIX}_${VERSION}_${ARCH}.deb`);
 const BUILD = path.join(os.tmpdir(), `wm-deb-${Date.now()}`);
@@ -146,7 +146,7 @@ function copyTree(src, dest) {
 // assemble data payload under STAGING
 // ----------------------------------------------------------------------------
 async function assemble() {
-  const opt = path.join(STAGING, 'opt', 'workstation-online');
+  const opt = path.join(STAGING, 'opt', 'newsmeva');
   const npmModules = buildBackendRuntime();
 
   copyTree(path.join(ROOT, 'backend', 'dist'), path.join(opt, 'backend', 'dist'));
@@ -315,14 +315,14 @@ function buildControl() {
     ' together with a bundled Node.js runtime and the Caddy reverse proxy. The install',
     ' is fully offline: no npm, compiler, package downloads or internet needed.',
     ' The backend connects to your own Supabase PostgreSQL database (DATABASE_URL in',
-    ' /opt/workstation-online/backend/.env). The first user to sign up becomes admin.',
+    ' /opt/newsmeva/backend/.env). The first user to sign up becomes admin.',
     '',
   ].join('\n');
   fs.writeFileSync(path.join(CONTROL_DIR, 'control'), control);
 
   const conffiles = [
-    '/opt/workstation-online/proxy/caddy/Caddyfile',
-    '/opt/workstation-online/backend/.env.example',
+    '/opt/newsmeva/proxy/caddy/Caddyfile',
+    '/opt/newsmeva/backend/.env.example',
     '',
   ].join('\n');
   fs.writeFileSync(path.join(CONTROL_DIR, 'conffiles'), conffiles);

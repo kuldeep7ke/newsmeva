@@ -2040,7 +2040,7 @@ cd frontend && npm run build
 
 | File | Purpose |
 |------|---------|
-| `ubuntu/install.sh` | Full installer â€” deploys to `/opt/workstation-online`, creates `meva` user, installs Node (bundled offline â†’ NodeSource fallback), builds, registers systemd service |
+| `ubuntu/install.sh` | Full installer â€” deploys to `/opt/newsmeva`, creates `meva` user, installs Node (bundled offline â†’ NodeSource fallback), builds, registers systemd service |
 | `ubuntu/start.sh` | Manual launcher â€” firewall self-heal (ufw), .env creation, Caddy auto-start, hidden background with `start-server-core.sh`, health check, browser open |
 | `ubuntu/stop.sh` | Kills wrapper FIRST, then node, then Caddy |
 | `ubuntu/start-server-core.sh` | Auto-restart watchdog (bash) |

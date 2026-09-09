@@ -32,10 +32,10 @@ This version uses **your own Supabase PostgreSQL database** (free tier) instead 
 | App URL (local) | `http://localhost:3002` |
 | App URL (LAN) | `http://<SERVER-IP>:3002` â€” also `http://<SERVER-IP>` (port 80, bundled Caddy proxy) and `http://<HOSTNAME>` when the client can resolve the server's computer name |
 | Port | `3002` (TCP) |
-| Installed at | `/opt/workstation-online` (config in `backend/.env`) |
+| Installed at | `/opt/newsmeva` (config in `backend/.env`) |
 | Service | `newsmeva.service` under systemd |
 
-**Two ways to install:** (a) a one-file `.deb` package that is **fully offline** â€” it bundles the built app, a Node.js runtime, and Caddy, so the machine needs no Node.js/npm/compiler/internet (see Â§3a); or (b) the source-based route, where `ubuntu/install.sh` deploys the source to `/opt/workstation-online`, installs dependencies with `npm ci`, builds both packages, creates `backend/.env` from the template, and registers the systemd service. The database is **never** shipped â€” the first server start creates all tables automatically (empty), and the first signup becomes the admin.
+**Two ways to install:** (a) a one-file `.deb` package that is **fully offline** â€” it bundles the built app, a Node.js runtime, and Caddy, so the machine needs no Node.js/npm/compiler/internet (see Â§3a); or (b) the source-based route, where `ubuntu/install.sh` deploys the source to `/opt/newsmeva`, installs dependencies with `npm ci`, builds both packages, creates `backend/.env` from the template, and registers the systemd service. The database is **never** shipped â€” the first server start creates all tables automatically (empty), and the first signup becomes the admin.
 
 ---
 
@@ -70,21 +70,21 @@ sudo apt install ./newsmeva-online_3.0.0_amd64.deb
 What `postinst` does automatically on first install:
 
 1. Creates a `meva` system user
-2. Extracts the bundled Node.js to `/opt/workstation-node`
-3. Creates `/opt/workstation-online/backend/.env` (once, with a generated `JWT_SECRET`)
+2. Extracts the bundled Node.js to `/opt/newsmeva-node`
+3. Creates `/opt/newsmeva/backend/.env` (once, with a generated `JWT_SECRET`)
 4. Registers + starts two systemd services: `newsmeva.service` (the app) and `newsmeva-caddy.service` (proxy on port 80)
 5. Opens ports `80` and `3002` in `ufw` if it's active
 
-Then configure your database (same as below): edit `/opt/workstation-online/backend/.env`,
+Then configure your database (same as below): edit `/opt/newsmeva/backend/.env`,
 set `DATABASE_URL`, and restart:
 
 ```bash
-sudo nano /opt/workstation-online/backend/.env
+sudo nano /opt/newsmeva/backend/.env
 sudo systemctl restart newsmeva.service
 ```
 
 Upgrading later = `sudo apt install ./newsmeva-online_3.0.0_amd64.deb` again when a new `.deb` is
-released (your `.env` and data are preserved). To fully remove: `sudo apt remove --purge workstation-meva-online`.
+released (your `.env` and data are preserved). To fully remove: `sudo apt remove --purge newsmeva-online`.
 
 ### 3b. Install from source
 
@@ -110,7 +110,7 @@ sudo bash ubuntu/install.sh
 **What the installer does:**
 
 1. Checks/installs Node.js 18+ (bundled offline v24.19.0 when present, else Node 20 LTS via NodeSource)
-2. Deploys the source to `/opt/workstation-online`
+2. Deploys the source to `/opt/newsmeva`
 3. Runs `npm ci` + `npm run build` for backend and frontend
 4. Creates `backend/.env` from `.env.example` (if missing)
 5. Creates a system user `meva` and registers `newsmeva.service`
@@ -119,7 +119,7 @@ sudo bash ubuntu/install.sh
 **After installing â€” configure your database:**
 
 ```bash
-sudo nano /opt/workstation-online/backend/.env
+sudo nano /opt/newsmeva/backend/.env
 ```
 
 Set these two values:
@@ -175,7 +175,7 @@ Configure once â€” copy the repo's Caddyfile (it binds port `:80` on every
 interface, so **no IP editing needed** â€” works even if the IP changes):
 
 ```bash
-sudo cp /opt/workstation-online/proxy/caddy/Caddyfile /etc/caddy/Caddyfile
+sudo cp /opt/newsmeva/proxy/caddy/Caddyfile /etc/caddy/Caddyfile
 sudo systemctl restart caddy
 ```
 
@@ -242,7 +242,7 @@ sudo systemctl disable newsmeva.service  # disable autostart at boot
 Manual (foreground) mode â€” useful for debugging:
 
 ```bash
-sudo -u meva bash /opt/workstation-online/ubuntu/start.sh
+sudo -u meva bash /opt/newsmeva/ubuntu/start.sh
 ```
 
 ---
@@ -250,7 +250,7 @@ sudo -u meva bash /opt/workstation-online/ubuntu/start.sh
 ## 9. Updating the App
 
 ```bash
-cd ~/workstation-online        # your clone
+cd ~/newsmeva        # your clone
 git pull
 sudo bash ubuntu/install.sh    # redeploys, rebuilds, restarts (keeps .env + data)
 ```
@@ -279,11 +279,11 @@ Your `backend/.env` and all data in Supabase are preserved â€” they live ou
 
 ```
 Install:      sudo bash ubuntu/install.sh
-Configure:    sudo nano /opt/workstation-online/backend/.env
+Configure:    sudo nano /opt/newsmeva/backend/.env
 Restart:      sudo systemctl restart newsmeva.service
 Logs:         sudo journalctl -u newsmeva.service -f
-Manual run:   sudo -u meva bash /opt/workstation-online/ubuntu/start.sh
-Stop manual:  sudo -u meva bash /opt/workstation-online/ubuntu/stop.sh
+Manual run:   sudo -u meva bash /opt/newsmeva/ubuntu/start.sh
+Stop manual:  sudo -u meva bash /opt/newsmeva/ubuntu/stop.sh
 ```
 
 For RHEL/CentOS/Rocky/AlmaLinux/Fedora see **[SETUP-GUIDE-RHEL.md](SETUP-GUIDE-RHEL.md)**. For macOS use the `mac/` launchers. For Windows use the launchers in the `windows/` folder.

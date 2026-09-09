@@ -32,7 +32,7 @@ This version uses **your own Supabase PostgreSQL database** (free tier) instead 
 | App URL (local) | `http://localhost:3002` |
 | App URL (LAN) | `http://<SERVER-IP>:3002` â€” also `http://<SERVER-IP>` (port 80, bundled Caddy proxy) and `http://<HOSTNAME>` when the client can resolve the server's computer name |
 | Port | `3002` (TCP) |
-| Installed at | `/opt/workstation-online` (config in `backend/.env`) |
+| Installed at | `/opt/newsmeva` (config in `backend/.env`) |
 | Service | `newsmeva.service` under systemd |
 
 The app has no native modules, so the **same code** runs on Ubuntu and RedHat-family distros â€” only the Node.js install and firewall commands differ (this guide covers those: `dnf` + `firewalld`).
@@ -62,7 +62,7 @@ sudo dnf install -y git curl
 
 # Clone the repository
 git clone https://github.com/kuldeep7ke/newsmeva.git
-cd workstation-online
+cd newsmeva
 
 # Run the installer (installs Node.js, builds, installs the service)
 sudo bash redhat/install.sh
@@ -76,7 +76,7 @@ sudo bash redhat/install.sh
 **What the installer does:**
 
 1. Checks/installs Node.js 18+ (bundled offline v24.19.0 when present, else Node 20 LTS via NodeSource)
-2. Deploys the source to `/opt/workstation-online`
+2. Deploys the source to `/opt/newsmeva`
 3. Runs `npm ci` + `npm run build` for backend and frontend
 4. Creates `backend/.env` from `.env.example` (if missing)
 5. Creates a system user `meva` and registers `newsmeva.service`
@@ -86,7 +86,7 @@ sudo bash redhat/install.sh
 **After installing â€” configure your database:**
 
 ```bash
-sudo nano /opt/workstation-online/backend/.env
+sudo nano /opt/newsmeva/backend/.env
 ```
 
 Set these two values:
@@ -139,7 +139,7 @@ Configure once â€” copy the repo's Caddyfile (it binds port `:80` on every
 interface, so **no IP editing needed** â€” works even if the IP changes):
 
 ```bash
-sudo cp /opt/workstation-online/proxy/caddy/Caddyfile /etc/caddy/Caddyfile
+sudo cp /opt/newsmeva/proxy/caddy/Caddyfile /etc/caddy/Caddyfile
 sudo systemctl restart caddy
 ```
 
@@ -206,7 +206,7 @@ sudo systemctl disable newsmeva.service  # disable autostart at boot
 Manual (foreground) mode â€” useful for debugging:
 
 ```bash
-sudo -u meva bash /opt/workstation-online/redhat/start.sh
+sudo -u meva bash /opt/newsmeva/redhat/start.sh
 ```
 
 ---
@@ -214,7 +214,7 @@ sudo -u meva bash /opt/workstation-online/redhat/start.sh
 ## 9. Updating the App
 
 ```bash
-cd ~/workstation-online        # your clone
+cd ~/newsmeva        # your clone
 git pull
 sudo bash redhat/install.sh    # redeploys, rebuilds, restarts (keeps .env + data)
 ```
@@ -243,11 +243,11 @@ Your `backend/.env` and all data in Supabase are preserved â€” they live ou
 
 ```
 Install:      sudo bash redhat/install.sh
-Configure:    sudo nano /opt/workstation-online/backend/.env
+Configure:    sudo nano /opt/newsmeva/backend/.env
 Restart:      sudo systemctl restart newsmeva.service
 Logs:         sudo journalctl -u newsmeva.service -f
-Manual run:   sudo -u meva bash /opt/workstation-online/redhat/start.sh
-Stop manual:  sudo -u meva bash /opt/workstation-online/redhat/stop.sh
+Manual run:   sudo -u meva bash /opt/newsmeva/redhat/start.sh
+Stop manual:  sudo -u meva bash /opt/newsmeva/redhat/stop.sh
 ```
 
 For Ubuntu/Debian see **[SETUP-GUIDE-UBUNTU.md](SETUP-GUIDE-UBUNTU.md)**. For macOS use the `mac/` launchers. For Windows use the launchers in the `windows/` folder.

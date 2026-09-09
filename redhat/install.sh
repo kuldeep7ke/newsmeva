@@ -2,7 +2,7 @@
 # NEWS MEVA Online - RedHat-family (RHEL/CentOS/Rocky/AlmaLinux/Fedora) Install Helper
 #
 # Deploys the repository (backend + frontend) from THIS folder into
-# /opt/workstation-online and registers it as a systemd service.
+# /opt/newsmeva and registers it as a systemd service.
 # The app connects to YOUR OWN Supabase PostgreSQL database
 # (see docs/SETUP-SUPABASE.md to create one).
 #
@@ -32,7 +32,7 @@ echo ""
 # ------------------ CONFIG ------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-TARGET_BASE="/opt/workstation-online"
+TARGET_BASE="/opt/newsmeva"
 SERVICE_USER="meva"  # change if you run as a different user
 PORT="${PORT:-3002}"
 # -------------------------------------------
@@ -52,10 +52,10 @@ if [[ -z "$NODE_BIN" ]]; then
     BUNDLE="$(ls "$REPO_ROOT"/tools/node/node-v*-linux-x64.tar.xz 2>/dev/null | head -1)"
     if [[ -n "$BUNDLE" ]]; then
         echo "Node.js not found. Installing from bundled offline installer ($(basename "$BUNDLE"))..."
-        sudo mkdir -p /opt/workstation-node
-        sudo tar -xJf "$BUNDLE" -C /opt/workstation-node --strip-components=1
-        NODE_BIN="/opt/workstation-node/bin/node"
-        export PATH="/opt/workstation-node/bin:$PATH"
+        sudo mkdir -p /opt/newsmeva-node
+        sudo tar -xJf "$BUNDLE" -C /opt/newsmeva-node --strip-components=1
+        NODE_BIN="/opt/newsmeva-node/bin/node"
+        export PATH="/opt/newsmeva-node/bin:$PATH"
     else
         echo "Node.js not found. Installing Node.js 20 LTS (NodeSource)..."
         curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo -E bash -
@@ -131,7 +131,7 @@ sudo chown -R "$SERVICE_USER":"$SERVICE_USER" "$TARGET_BASE"
 echo "Installing systemd unit..."
 sudo cp "$SCRIPT_DIR/newsmeva.service" /etc/systemd/system/
 sudo sed -i "s|User=meva|User=$SERVICE_USER|" /etc/systemd/system/newsmeva.service
-sudo sed -i "s|WorkingDirectory=/opt/workstation-online|WorkingDirectory=$TARGET_BASE|" /etc/systemd/system/newsmeva.service
+sudo sed -i "s|WorkingDirectory=/opt/newsmeva|WorkingDirectory=$TARGET_BASE|" /etc/systemd/system/newsmeva.service
 sudo sed -i "s|ExecStart=/usr/bin/node|ExecStart=$NODE_BIN|" /etc/systemd/system/newsmeva.service
 sudo systemctl daemon-reload
 

@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/opt/workstation-online/proxy/caddy/caddy run --config /opt/workstation-online/proxy/caddy/Caddyfile --adapter caddyfile
+ExecStart=/opt/newsmeva/proxy/caddy/caddy run --config /opt/newsmeva/proxy/caddy/Caddyfile --adapter caddyfile
 Restart=always
 RestartSec=5
 

@@ -8,10 +8,15 @@ xattr -dr com.apple.quarantine . 2>/dev/null
 
 # If auto-start is installed, unload it FIRST - otherwise LaunchD would
 # respawn the wrapper the moment we kill it (Stop would never stick).
-PLIST="$HOME/Library/LaunchAgents/com.workstation-meva-online.server.plist"
+PLIST="$HOME/Library/LaunchAgents/com.newsmeva-online.server.plist"
+OLD_PLIST="$HOME/Library/LaunchAgents/com.workstation-meva-online.server.plist"
+for P in "$PLIST" "$OLD_PLIST"; do
+  if [ -f "$P" ]; then
+    launchctl unload "$P" >/dev/null 2>&1
+    launchctl bootout gui/$(id -u) "$P" 2>/dev/null || true
+  fi
+done
 if [ -f "$PLIST" ]; then
-  launchctl unload "$PLIST" >/dev/null 2>&1
-  launchctl bootout gui/$(id -u) "$PLIST" 2>/dev/null || true
   echo "Auto-start unloaded - the server will stay stopped until you"
   echo "re-run mac/Install AutoStart.command or start it manually."
 fi
