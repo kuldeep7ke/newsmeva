@@ -1,5 +1,5 @@
 import { getTasks, getCategories, getScripts, localDateStr, addTask } from './db.js';
-import { PRIORITY_CONFIG, STATUS_CONFIG, TASK_TYPES } from './seed.js';
+import { PRIORITY_CONFIG, TASK_TYPES } from './seed.js';
 import { t } from './i18n.js';
 import { escapeHtml, refreshIcons, statusLabel, renderTaskCard, renderTaskModal, renderOnboarding, closeOnboarding, icon } from './components.js';
 
@@ -73,10 +73,6 @@ export async function renderTasks() {
   const content = document.querySelector('#view-content');
   content.innerHTML = `
     <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
-      <select class="field" id="tasks-status-filter" style="max-width:200px">
-        <option value="all">All Statuses</option>
-        ${Object.keys(STATUS_CONFIG).map((s) => `<option value="${s}">${STATUS_CONFIG[s].label}</option>`).join('')}
-      </select>
       <select class="field" id="tasks-priority-filter" style="max-width:140px">
         <option value="all">All Priority</option>
         ${Object.keys(PRIORITY_CONFIG).map((p) => `<option value="${p}">${PRIORITY_CONFIG[p].label}</option>`).join('')}
@@ -87,18 +83,15 @@ export async function renderTasks() {
       ${open.length ? open.map((tk) => renderTaskCard(tk, categoryMap.get(tk.categoryId)?.name)).join('') : `<p class="empty-state">${t('no_tasks')}</p>`}
     </div></div>
   `;
-  const filterTasks = async () => {
-    const status = document.querySelector('#tasks-status-filter').value;
+  const filterTasks = () => {
     const priority = document.querySelector('#tasks-priority-filter').value;
     const search = document.querySelector('#tasks-search').value.toLowerCase();
     let filtered = open;
-    if (status !== 'all') filtered = filtered.filter((tk) => tk.status === status);
     if (priority !== 'all') filtered = filtered.filter((tk) => tk.priority === priority);
     if (search) filtered = filtered.filter((tk) => tk.title.toLowerCase().includes(search) || (tk.description || '').toLowerCase().includes(search));
     document.querySelector('#tasks-list').innerHTML = filtered.length ? filtered.map((tk) => renderTaskCard(tk, categoryMap.get(tk.categoryId)?.name)).join('') : `<p class="empty-state">${t('no_tasks')}</p>`;
     refreshIcons();
   };
-  document.querySelector('#tasks-status-filter').addEventListener('change', filterTasks);
   document.querySelector('#tasks-priority-filter').addEventListener('change', filterTasks);
   document.querySelector('#tasks-search').addEventListener('input', filterTasks);
   refreshIcons();
@@ -235,6 +228,7 @@ export async function renderCloud() {
         <span id="sync-status-text">${t('cloud_disconnected')}</span>
         <span class="muted" id="sync-last" style="margin-left:auto;font-size:0.78rem"></span>
       </div>
+      <p class="muted" id="sync-connected-url" style="font-size:0.82rem;margin:0.5rem 0 0;display:none"></p>
       <form id="sync-config-form">
         <div class="field-group">
           <label class="field-label">${t('cloud_supabase_url')}</label>
@@ -246,9 +240,8 @@ export async function renderCloud() {
         </div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
           <button type="submit" class="btn btn-primary">${t('cloud_connect')}</button>
+          <button type="button" class="btn btn-primary" id="sync-btn">${icon('refresh-cw')} ${t('cloud_sync_btn')}</button>
           <button type="button" class="btn btn-ghost" id="sync-disconnect-btn">${t('cloud_disconnect')}</button>
-          <button type="button" class="btn btn-ghost" id="sync-push-btn">${t('cloud_push')}</button>
-          <button type="button" class="btn btn-ghost" id="sync-pull-btn">${t('cloud_pull')}</button>
         </div>
       </form>
     </div>
@@ -273,6 +266,8 @@ create policy "sync_docs_anon_all" on public.sync_docs for all to anon using (tr
     if (cfg) {
       const form = document.querySelector('#sync-config-form');
       if (form) { form.url.value = cfg.url || ''; form.key.value = cfg.key || ''; }
+      const urlLine = document.querySelector('#sync-connected-url');
+      if (urlLine) { urlLine.style.display = 'block'; urlLine.textContent = cfg.url ? `${t('cloud_connected_to')}: ${cfg.url}` : ''; }
     }
     updateSyncStatusUI(sync.getSyncStatus());
   }
@@ -313,7 +308,7 @@ export async function renderSettings() {
     <div class="card">
       <h3>${t('settings_theme')}</h3>
       <div class="setting-row">
-        <div><div class="setting-label">${t('settings_dark_mode')}</div><div class="setting-sub">${isDark ? t('theme_dark') : t('theme_light')}</div></div>
+        <div><div class="setting-label">${t('settings_dark_mode')}</div><div class="setting-sub" id="theme-desc">${isDark ? t('theme_dark') : t('theme_light')}</div></div>
         <button class="icon-btn" id="theme-toggle-btn">${isDark ? icon('sun') : icon('moon')}</button>
       </div>
       <div class="setting-row">
@@ -334,6 +329,13 @@ export async function renderSettings() {
           <option value="mr" ${lang === 'mr' ? 'selected' : ''}>मराठी</option>
           <option value="hi" ${lang === 'hi' ? 'selected' : ''}>हिंदी</option>
         </select>
+      </div>
+    </div>
+    <div class="card">
+      <h3>${t('settings_data')}</h3>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+        <button class="btn btn-ghost" id="settings-cloud-btn">${icon('cloud')} ${t('settings_cloud_link')}</button>
+        <button class="btn btn-ghost" id="settings-backup-btn">${icon('download')} ${t('settings_backup_link')}</button>
       </div>
     </div>
   `;

@@ -21,8 +21,8 @@ export function renderSidebar(activeView) {
         ${[
           ['dashboard', 'layout-dashboard', t('dashboard')],
           ['tasks', 'list-todo', t('tasks')],
-          ['teleprompter-list', 'monitor', t('teleprompter')],
           ['scripts', 'file-text', t('scripts')],
+          ['teleprompter-list', 'monitor', t('teleprompter')],
         ].map(([view, iconName, label]) => `<button class="nav-item ${activeView === view ? 'active' : ''}" data-nav="${view}">${icon(iconName)}<span>${label}</span></button>`).join('')}
       </div>
       <div class="sidebar-section">

@@ -5,6 +5,7 @@ import { useSocket } from '../context/SocketContext';
 import { getRoleLabel } from '../utils/roles';
 import { getAppName, onAppNameChange, onChannelDisplayChange, getChannelDisplayName, setChannelDisplayCache } from '../utils/appConfig';
 import NotificationBell from './NotificationBell';
+import Announcements from './Announcements';
 import api from '../utils/api';
 import { useToast } from '../context/ToastContext';
 import {
@@ -515,6 +516,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-surface-50 flex">
+      <Announcements />
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}

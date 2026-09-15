@@ -1,6 +1,7 @@
 import { db, localDateTimeStr, makeUuid, getByUuid } from './db.js';
 
 const CONFIG_KEY = 'newsMeva_sync';
+const CONNECTED_URL_KEY = 'newsMeva_connectedUrl';
 const RECONNECT_INTERVAL = 30000;
 const PUSH_DEBOUNCE = 800;
 const URL_SUFFIX = '.supabase.co';
@@ -191,6 +192,7 @@ export async function connect(config) {
     const { error } = await state.client.from('sync_docs').select('id').limit(1);
     if (error && error.code !== 'PGRST116') throw error;
     localStorage.setItem(CONFIG_KEY, JSON.stringify({ url: config.url, key: config.key }));
+    localStorage.setItem(CONNECTED_URL_KEY, config.url);
     state.status = 'syncing';
 
     state.channel = state.client
@@ -223,6 +225,7 @@ export async function disconnect() {
   state.status = 'disconnected';
   state.error = null;
   localStorage.removeItem(CONFIG_KEY);
+  localStorage.removeItem(CONNECTED_URL_KEY);
   emit();
 }
 

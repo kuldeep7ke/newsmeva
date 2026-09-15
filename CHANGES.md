@@ -14,19 +14,20 @@ Replaced the old bundled-Node Android wrapper (NodeService + Kotlin control pane
 ## Web App Features
 - **Landing page** — hero, feature cards, 3-step how-it-works, tagline, footer.
 - **Dashboard** — stat cards (open/due-today/overdue/completed) with roomier spacing, quick create (title / task type / priority), overdue / due-today / all-open sections.
-- **Tasks** — filterable list (status, priority, search); next-stage flow (`STATUS_STEPS`) on the card arrow.
+- **Tasks** — filterable list (priority, search); next-stage flow (`STATUS_STEPS`) on the card arrow. No status filter — the Mini doesn't follow the full 17-stage workflow.
 - **Task form (simplified)** — **title, description, task type, priority** only. No multi-user fields (status, footage type, assigned to, category) — the Mini is a single-user app.
 - **8 news task types** — News, Breaking, Special Report, Story, Press, Ground Report, Live, Event. Priorities: urgent / high / medium / low.
-- **Teleprompter** — full-screen prompter: auto-scroll, speed −/+ (persisted), font size −/+ (persisted), mirror mode, text alignment (persisted), "Prompt Now" from scripts; **+ New Script** button on the list.
+- **Teleprompter** — full-screen prompter: auto-scroll, speed −/+ (persisted), font size −/+ (persisted), mirror mode, text alignment (persisted), "Prompt Now" from scripts; **+ New Script** button on the list. Listed below Scripts in the sidebar.
 - **Scripts** — create/edit/delete from the Teleprompter or Scripts view, word + char counts.
 - **Recycle bin** — soft-deleted tasks, restore or purge forever.
-- **Cloud sync** — optional user-supplied Supabase project; `public.sync_docs` table with realtime push/pull. Sync happens only between your own web pages, APK, devices, and machines — **no account / bridge to the main app** (bridge removed).
+- **Cloud sync** — optional user-supplied Supabase project; `public.sync_docs` table with realtime push/pull. One **Sync** button (push + pull). The last successful Sync link is saved and the app **auto-reconnects** on the next launch; the connected link is shown in the Sync view. Sync happens only between your own web pages, APK, devices, and machines — **no account / bridge to the main app** (bridge removed).
 - **Banner & broadcast announcements** — jsonbin-backed feed served edge-cached by a Cloudflare Pages Function (`functions/api/announcements.js`) at `/api/announcements?type=broadcast|banner`; client renders pills + banner overlay (see `docs/ANNOUNCEMENTS.md`).
 - **Backup** — full JSON export/import (all 5 tables).
-- **Settings** — theme (light/dark), brand color (orange/blue/green), language (EN / MR / HI).
+- **Settings** — theme (light/dark), brand color (orange/blue/green), language (EN / MR / HI), plus quick **Cloud & Sync** and **Export / Import** shortcuts.
 - **i18n** — full Marathi + Hindi translations (announcement strings included).
 
 ## Bug Fixes (this round)
+- **Dark-mode toggle in Settings not working** — the settings theme button and brand swatches are `<button>` elements, which never fire a `change` event, so the old `#view-content` `change`-handler never ran. Moved both to the click handler (buttons now toggle theme / set brand correctly and the settings icon + label update in place).
 - **Add / Cancel buttons not working in the task modal** — the modal (`#task-modal`) and onboarding overlay live outside `#view-content`, so the delegated `submit`/`click` listeners never fired. Added dedicated delegated listeners on `#task-modal` (submit + `[data-close-modal]`) and `#onboarding-overlay` (`[data-onboard-next]` / `[data-onboard-prev]`).
 - **Onboarding Next/Back/Launch buttons not working** — same root cause; now handled on the overlay.
 - **Editing a task created a duplicate instead of saving** — the task form never set `data-edit-id`; added it (`components.js` `renderTaskModal`).

@@ -39,7 +39,11 @@ async function initApp() {
     showOnboarding();
     initBroadcasts();
     listenSyncEvents();
-    // hide splash after first render
+    // auto-reconnect if previously connected
+    const savedSync = sync.getSyncConfig();
+    if (savedSync && savedSync.url && savedSync.key) {
+      sync.connect(savedSync).catch(() => {});
+    }
     setTimeout(hideSplash, 600);
   })();
   return initPromise;
@@ -136,10 +140,33 @@ function closeTaskModal() {
 }
 
 function handleViewContentClick(e) {
-  const syncPush = e.target.closest('#sync-push-btn');
-  if (syncPush) return sync.pushAll().then(() => refreshCurrentView());
-  const syncPull = e.target.closest('#sync-pull-btn');
-  if (syncPull) return sync.pullAll().then(() => refreshCurrentView());
+  const themeBtn = e.target.closest('#theme-toggle-btn');
+  if (themeBtn) {
+    toggleTheme();
+    const isDark = document.documentElement.dataset.theme === 'dark';
+    const btn = document.querySelector('#theme-toggle-btn');
+    if (btn) btn.innerHTML = isDark ? icon('sun') : icon('moon');
+    const sub = document.querySelector('#theme-desc');
+    if (sub) sub.textContent = isDark ? t('theme_dark') : t('theme_light');
+    refreshIcons();
+    return;
+  }
+  const brandSwatch = e.target.closest('.brand-swatch');
+  if (brandSwatch) {
+    const brand = brandSwatch.dataset.brand;
+    if (brand) {
+      document.documentElement.dataset.brand = brand;
+      localStorage.setItem('newsMeva_brand', brand);
+      document.querySelectorAll('.brand-swatch').forEach((s) => s.classList.toggle('active', s.dataset.brand === brand));
+    }
+    return;
+  }
+  const settingsCloudBtn = e.target.closest('#settings-cloud-btn');
+  if (settingsCloudBtn) return navigateTo('cloud');
+  const settingsBackupBtn = e.target.closest('#settings-backup-btn');
+  if (settingsBackupBtn) return navigateTo('backup');
+  const syncPush = e.target.closest('#sync-btn');
+  if (syncPush) return sync.manualSync().then(() => refreshCurrentView());
   const syncDisconnect = e.target.closest('#sync-disconnect-btn');
   if (syncDisconnect) return sync.disconnect().then(() => refreshCurrentView());
   const nextBtn = e.target.closest('[data-task-next]');
@@ -176,17 +203,6 @@ function handleViewContentChange(e) {
   if (e.target.id === 'lang-select') {
     setLang(e.target.value);
     refreshCurrentView();
-  }
-  if (e.target.closest('.brand-swatch')) {
-    const brand = e.target.closest('.brand-swatch').dataset.brand;
-    if (brand) {
-      document.documentElement.dataset.brand = brand;
-      localStorage.setItem('newsMeva_brand', brand);
-      document.querySelectorAll('.brand-swatch').forEach((s) => s.classList.toggle('active', s.dataset.brand === brand));
-    }
-  }
-  if (e.target.closest('#theme-toggle-btn')) {
-    toggleTheme();
   }
 }
 
