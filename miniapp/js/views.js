@@ -348,7 +348,7 @@ export async function renderAbout() {
     <div class="card">
       <h3>${t('about_title')}</h3>
       <p style="margin:0.5rem 0;color:var(--muted)">${t('about_desc')}</p>
-      <p style="margin:0.5rem 0"><strong>${t('about_version')}:</strong> 1.0.0</p>
+      <p style="margin:0.5rem 0"><strong>${t('about_version')}:</strong> v3.2.0 Beta</p>
       <a href="https://github.com/kuldeep7ke/newsmeva" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="margin-top:0.5rem">${icon('github')} ${t('about_github')}</a>
     </div>
     <div class="card">

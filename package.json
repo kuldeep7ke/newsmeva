@@ -1,6 +1,6 @@
 {
   "name": "newsmeva-mini",
-  "version": "1.0.0",
+  "version": "3.2.0",
   "private": true,
   "description": "News Meva Mini — offline-first newsroom task manager & teleprompter",
   "scripts": {

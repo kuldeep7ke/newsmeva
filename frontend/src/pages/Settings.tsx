@@ -6,14 +6,15 @@ import {
   Trash2, AlertTriangle,
 } from 'lucide-react';
 import { getAppName, setAppName, dispatchChannelDisplay } from '../utils/appConfig';
+import { getAppVersionLabel } from '../utils/appMeta';
 import { clearSessionHistory, clearAllLogins } from '../utils/quickLogin';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 import api from '../utils/api';
 
-const APP_VERSION = '1.0.0';
-const BUILD_DATE = '2026-07-22';
+const APP_VERSION_LABEL = getAppVersionLabel();
+const BUILD_DATE = '2026-09-16';
 
 function BulletinSlotRestore() {
   const { toast } = useToast();
@@ -512,7 +513,7 @@ channel_name: '', channel_display_name: '', website_url: 'www.newsmeva.com',
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-surface-200 p-3">
               <p className="text-[11px] text-surface-400 mb-0.5">Version</p>
-              <p className="text-sm font-semibold text-surface-800">v{APP_VERSION}</p>
+              <p className="text-sm font-semibold text-surface-800">{APP_VERSION_LABEL}</p>
             </div>
             <div className="rounded-xl border border-surface-200 p-3">
               <p className="text-[11px] text-surface-400 mb-0.5">Build Date</p>
