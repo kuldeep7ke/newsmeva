@@ -1,6 +1,11 @@
 # Deploy static site to Cloudflare Pages.
 # Requires repo secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
 # Until the secrets exist, this workflow is skipped (no-op).
+#
+# IMPORTANT: if the 'newsmeva' Pages project is git-integrated with this
+# repository, Cloudflare auto-detects the full Next.js app under frontend/
+# and will try 'npx next build'. This step forces the project's build config
+# back to a STATIC site (npm run build -> www/) so git builds succeed.
 name: Deploy to Cloudflare Pages
 
 on:
@@ -34,6 +39,21 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages project create newsmeva --production-branch main || true
 
+      # Override the Next.js auto-detected build config with a static build
+      # (npm run build -> www/). Fixes the 'npx next build' failure caused by
+      # Cloudflare detecting frontend/ (the full Next.js web app) in this repo.
+      - name: Force static build config
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
+        run: |
+          curl -fsS -X PATCH \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/newsmeva" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"build_config": {"build_command": "npm run build", "destination_dir": "www", "root_dir": ""}}' \
+            || echo "::warning::build_config update failed - fix it manually in the Cloudflare dashboard (Build command: npm run build, Output dir: /www)"
+
+      # Direct upload fallback: this immediately publishes a static deployment
+      # of miniapp/ without waiting for the git-integration build.
       - name: Deploy to Cloudflare Pages
         if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
         uses: cloudflare/wrangler-action@v3
