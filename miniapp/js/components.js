@@ -106,13 +106,6 @@ export function renderTaskModal(task, categories) {
           </select>
         </div>
       </div>
-      <div class="field-group">
-        <label class="field-label">${t('category')}</label>
-        <select class="field" name="categoryId">
-          <option value="">${t('no_category')}</option>
-          ${categories.map((c) => `<option value="${c.id}" ${isEdit && task.categoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
-        </select>
-      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-ghost" data-close-modal>${t('cancel')}</button>
         <button type="submit" class="btn btn-primary">${isEdit ? t('save') : t('add')}</button>

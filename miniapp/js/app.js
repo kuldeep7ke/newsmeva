@@ -1,4 +1,4 @@
-import { seedDatabase, addTask, updateTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript, getCategories } from './db.js';
+import { seedDatabase, addTask, updateTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript } from './db.js';
 import { renderSidebar, refreshIcons, closeOnboarding, icon } from './components.js';
 import { renderDashboard, renderTasks, renderTeleprompterList, renderScripts, renderScriptEditor, renderRecycleBin, renderCloud, renderBackup, renderSettings, renderAbout, showOnboarding, updateSyncStatusUI } from './views.js';
 import { setupBackup } from './backup.js';
@@ -205,10 +205,9 @@ async function handleTaskView(taskId) {
 }
 
 async function openTaskModal(taskId) {
-  const categories = await getCategories();
   const task = taskId ? await getTask(taskId) : null;
   const { renderTaskModal } = await import('./components.js');
-  renderTaskModal(task, categories);
+  renderTaskModal(task);
   refreshIcons();
 }
 
@@ -219,8 +218,7 @@ async function handleTaskFormSubmit(form) {
     title: fd.get('title'),
     description: fd.get('description'),
     taskType: fd.get('taskType'),
-    priority: fd.get('priority'),
-    categoryId: fd.get('categoryId')
+    priority: fd.get('priority')
   };
   if (isEdit) {
     await updateTask(isEdit, data);

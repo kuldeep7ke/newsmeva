@@ -51,10 +51,6 @@ export async function renderDashboard() {
         <select class="field" name="priority" style="max-width:120px">
           ${['urgent','high','medium','low'].map((p) => `<option value="${p}"${p==='medium'?' selected':''}>${p}</option>`).join('')}
         </select>
-        <select class="field" name="categoryId" style="max-width:170px">
-          <option value="">${t('no_category')}</option>
-          ${categories.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}
-        </select>
         <button class="btn btn-primary">${t('add')}</button>
       </form>
     </section>
@@ -65,7 +61,7 @@ export async function renderDashboard() {
   document.querySelector('#dashboard-create').addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    await addTask({ title: fd.get('title'), taskType: fd.get('taskType'), priority: fd.get('priority'), categoryId: fd.get('categoryId') || null });
+    await addTask({ title: fd.get('title'), taskType: fd.get('taskType'), priority: fd.get('priority') });
     window.navigateTo('dashboard');
   });
   refreshIcons();

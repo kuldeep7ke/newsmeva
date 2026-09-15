@@ -67,7 +67,7 @@ automatically syncs everything back the moment the connection returns.
 
 A trimmed, mobile-first companion app for the whole studio on the go — the same
 all-in-one **task manager, teleprompter, and script editor** with a warm
-TodoMeva-style UI (task cards, priority badges, category chips).
+TodoMeva-style UI (task cards, priority badges).
 
 **Live:**
 
@@ -80,8 +80,8 @@ TodoMeva-style UI (task cards, priority badges, category chips).
 **What's inside** (source: `miniapp/`):
 
 - **News task workflow** — 8 news task types (News, Breaking, Special Report,
-  Story, Press, Ground Report, Live, Event), 4 priorities, optional category
-  picker, next-stage flow, recycle bin
+  Story, Press, Ground Report, Live, Event), 4 priorities,
+  next-stage flow, recycle bin
 - **Teleprompter** — full-screen auto-scroll prompter with speed/font-size/mirror/
   alignment controls (settings persist), manual-scroll pause, "Prompt Now" from scripts
 - **Scripts** — create/edit/delete from the Teleprompter or Scripts list, word + char counts

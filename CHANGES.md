@@ -13,9 +13,9 @@ Replaced the old bundled-Node Android wrapper (NodeService + Kotlin control pane
 
 ## Web App Features
 - **Landing page** — hero, feature cards, 3-step how-it-works, tagline, footer.
-- **Dashboard** — stat cards (open/due-today/overdue/completed) with roomier spacing, quick create (title / task type / priority / optional category), overdue / due-today / all-open sections.
+- **Dashboard** — stat cards (open/due-today/overdue/completed) with roomier spacing, quick create (title / task type / priority), overdue / due-today / all-open sections.
 - **Tasks** — filterable list (status, priority, search); next-stage flow (`STATUS_STEPS`) on the card arrow.
-- **Task form (simplified)** — **title, description, task type, priority, optional category** only. No multi-user fields (status, footage type, assigned to) — the Mini is a single-user app.
+- **Task form (simplified)** — **title, description, task type, priority** only. No multi-user fields (status, footage type, assigned to, category) — the Mini is a single-user app.
 - **8 news task types** — News, Breaking, Special Report, Story, Press, Ground Report, Live, Event. Priorities: urgent / high / medium / low.
 - **Teleprompter** — full-screen prompter: auto-scroll, speed −/+ (persisted), font size −/+ (persisted), mirror mode, text alignment (persisted), "Prompt Now" from scripts; **+ New Script** button on the list.
 - **Scripts** — create/edit/delete from the Teleprompter or Scripts view, word + char counts.
