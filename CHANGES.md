@@ -1,7 +1,7 @@
 # NEWS MEVA - Mini App Changes
 
 ## Overview
-This document tracks changes to the News Meva Mini app — the offline-first newsroom task manager, teleprompter, and script editor that ships as an Android APK and as a static web app.
+Tracks changes to the News Meva Mini app — the offline-first news task manager, teleprompter, and script editor that ships as an Android APK and as a static web app (GitHub Pages + Cloudflare Pages).
 
 ## Architecture (v2)
 Replaced the old bundled-Node Android wrapper (NodeService + Kotlin control panel) with a **TodoMeva-style static offline-first web app + Capacitor 8 wrapper**:
@@ -9,35 +9,36 @@ Replaced the old bundled-Node Android wrapper (NodeService + Kotlin control pane
 - `miniapp/` — vanilla JS ES-module web app (no bundler). Served by Capacitor WebView, GitHub Pages, and Cloudflare Pages.
 - `android/` — Capacitor wrapper (`com.newsmeva`, "News Meva Mini"), rebuilt from the Todomeva Capacitor 8 Android project.
 - `scripts/build-web.cjs` — stages `miniapp/` → `www/` for Capacitor.
-- AMIN deployment: `cap sync android` → `gradlew assembleDebug` → upload APK artifact.
+- Ship path: `cap sync android` → `gradlew assembleDebug` → upload APK artifact.
 
 ## Web App Features
-- **Landing page** — hero, feature cards (17-stage workflow, teleprompter, sync, import/export), News Meva on Computer showcase grid, 3-step how-it-works, tagline, footer.
-- **Dashboard** — stat cards (open/due-today/overdue/completed), quick create, overdue/due-today/all-open sections.
-- **Tasks** — filterable list (status, priority, search); 16-stage newsroom workflow (draft → … → published/completed), 33 task types, 6 footage types, category picker.
-- **Teleprompter** — full-screen prompter: auto-scroll, speed −/+ (persisted), font size −/+ (persisted), mirror mode, text alignment (persisted), manual-scroll pause.
-- **Scripts** — create/edit/delete scripts, word + char counts, "Prompt Now" launches teleprompter.
-- **Recycle bin** — soft-deleted tasks, restore or purge forever (now reachable in sidebar).
-- **Cloud sync (Tier 1)** — optional user-supplied Supabase project; `public.sync_docs` table with realtime push/pull (wire-up in `app.js`).
-- **News Meva bridge (Tier 2)** — optional account login + pair-code, REST task sync, offline queue.
+- **Landing page** — hero, feature cards, 3-step how-it-works, tagline, footer.
+- **Dashboard** — stat cards (open/due-today/overdue/completed) with roomier spacing, quick create (title / task type / priority / optional category), overdue / due-today / all-open sections.
+- **Tasks** — filterable list (status, priority, search); next-stage flow (`STATUS_STEPS`) on the card arrow.
+- **Task form (simplified)** — **title, description, task type, priority, optional category** only. No multi-user fields (status, footage type, assigned to) — the Mini is a single-user app.
+- **8 news task types** — News, Breaking, Special Report, Story, Press, Ground Report, Live, Event. Priorities: urgent / high / medium / low.
+- **Teleprompter** — full-screen prompter: auto-scroll, speed −/+ (persisted), font size −/+ (persisted), mirror mode, text alignment (persisted), "Prompt Now" from scripts; **+ New Script** button on the list.
+- **Scripts** — create/edit/delete from the Teleprompter or Scripts view, word + char counts.
+- **Recycle bin** — soft-deleted tasks, restore or purge forever.
+- **Cloud sync** — optional user-supplied Supabase project; `public.sync_docs` table with realtime push/pull. Sync happens only between your own web pages, APK, devices, and machines — **no account / bridge to the main app** (bridge removed).
+- **Banner & broadcast announcements** — jsonbin-backed feed served edge-cached by a Cloudflare Pages Function (`functions/api/announcements.js`) at `/api/announcements?type=broadcast|banner`; client renders pills + banner overlay (see `docs/ANNOUNCEMENTS.md`).
 - **Backup** — full JSON export/import (all 5 tables).
 - **Settings** — theme (light/dark), brand color (orange/blue/green), language (EN / MR / HI).
-- **i18n** — full Marathi + Hindi translations.
+- **i18n** — full Marathi + Hindi translations (announcement strings included).
+
+## Bug Fixes (this round)
+- **Add / Cancel buttons not working in the task modal** — the modal (`#task-modal`) and onboarding overlay live outside `#view-content`, so the delegated `submit`/`click` listeners never fired. Added dedicated delegated listeners on `#task-modal` (submit + `[data-close-modal]`) and `#onboarding-overlay` (`[data-onboard-next]` / `[data-onboard-prev]`).
+- **Onboarding Next/Back/Launch buttons not working** — same root cause; now handled on the overlay.
+- **Editing a task created a duplicate instead of saving** — the task form never set `data-edit-id`; added it (`components.js` `renderTaskModal`).
+- **"Start working" / "Launch App" buttons not working** — listeners were wired only after `enterApp()`; now wired in the splash sequence at module load.
 
 ## Deploys
 - **GitHub Pages** — `pages.yml` static-copy build → `kuldeep7ke.github.io/newsmeva/`.
-- **Cloudflare Pages** — `deploy-cloudflare.yml` (wrangler-action, project `newsmeva`), gated on `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` secrets.
-- **Android APK** — `build-android-apk.yml` (npm ci → npm run build → cap sync android → gradlew assembleDebug → artifact).
+- **Cloudflare Pages** — git-integrated project `newsmeva`, static build `npm run build` → `/www`, with Functions (`functions/`) → `newsmeva.pages.dev`.
+- **Android APK** — `build-android-apk.yml` (npm ci → npm run build → cap sync android → gradlew assembleDebug → artifact `newsmeva-mini-apk`).
 
 ## Visual Design
-Adopted the TodoMeva design language: warm Flat-UI palette (`--bg #f7f3ee`, `--accent #f97316`, etc.), 22px radii, 3-column task cards (status circle · content · priority badge), sidebar with Views/Sync/More sections + pinned Settings/About, top-level pill buttons, soft cards.
-
-## Recent Fixes
-- `getByUuid()` added to `db.js` (supabase pull + realtime now work).
-- Cloud Push / Pull / Disconnect buttons wired in `app.js`.
-- Recycle Bin added to sidebar navigation.
-- Teleprompter settings persist to localStorage.
-- Task modal receives templates (template quick-fill no longer dead code).
+TodoMeva design language: warm Flat-UI palette (`--bg #f7f3ee`, `--accent #f97316`, etc.), generous radius, priority badges, soft cards. Dashboard stat cards and quick-create got extra padding and inter-card spacing.
 
 ## Build (manual)
 ```

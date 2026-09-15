@@ -44,49 +44,14 @@ export const STATUS_STEPS = {
 };
 
 export const TASK_TYPES = [
+  { value: 'news', label: 'News' },
   { value: 'breaking', label: 'Breaking' },
+  { value: 'special_report', label: 'Special Report' },
+  { value: 'story', label: 'Story' },
   { value: 'press', label: 'Press' },
-  { value: 'feature', label: 'Feature' },
-  { value: 'on_field', label: 'On Field' },
-  { value: 'coverage', label: 'Coverage' },
-  { value: 'footage_collection', label: 'Footage Collection' },
-  { value: 'field_report', label: 'Field Report' },
-  { value: 'ground_coverage', label: 'Ground Coverage' },
-  { value: 'recording', label: 'Recording' },
-  { value: 'script_writing', label: 'Script Writing' },
-  { value: 'video_edit', label: 'Video Edit' },
-  { value: 'thumbnail', label: 'Thumbnail' },
-  { value: 'motion_graphics', label: 'Motion Graphics' },
-  { value: 'graphics', label: 'Graphics' },
-  { value: 'graphic_design', label: 'Graphic Design' },
-  { value: 'social_post', label: 'Social Post' },
-  { value: 'shorts', label: 'Shorts' },
-  { value: 'content_create', label: 'Content Create' },
-  { value: 'platform_upload', label: 'Platform Upload' },
-  { value: 'digital', label: 'Digital' },
-  { value: 'ad_creation', label: 'Ad Creation' },
-  { value: 'voice_over', label: 'Voice Over' },
-  { value: 'update', label: 'Update' },
-  { value: 'local', label: 'Local' },
-  { value: 'national', label: 'National' },
-  { value: 'international', label: 'International' },
-  { value: 'upcoming_schedule', label: 'Upcoming Schedule' },
-  { value: 'planning', label: 'Planning' },
-  { value: 'general_duty', label: 'General Duty' },
-  { value: 'support', label: 'Support' },
-  { value: 'assignment', label: 'Assignment' },
-  { value: 'review', label: 'Review' },
-  { value: 'approval', label: 'Approval' },
-  { value: 'archive', label: 'Archive' }
-];
-
-export const FOOTAGE_TYPES = [
-  { value: 'internet', label: 'Internet' },
-  { value: 'reporter', label: 'Reporter' },
-  { value: 'local', label: 'Local' },
-  { value: 'animated', label: 'Animated' },
-  { value: 'ai_generated', label: 'AI Generated' },
-  { value: 'archive', label: 'Archive' }
+  { value: 'ground_report', label: 'Ground Report' },
+  { value: 'live', label: 'Live' },
+  { value: 'event', label: 'Event' }
 ];
 
 export const SEED_CATEGORIES = [

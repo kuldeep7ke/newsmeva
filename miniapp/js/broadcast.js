@@ -1,20 +1,21 @@
 import { t } from './i18n.js';
 import { refreshIcons } from './components.js';
 
-// Broadcast pills + promo banner, delivered from jsonbin.io bins via the
-// Cloudflare edge-cached proxy. Any authorized site can edit the bins on
+// Broadcast pills + promo banner, delivered from a single jsonbin.io bin via
+// the Cloudflare edge-cached proxy. Any authorized site can edit the bin on
 // jsonbin.io and the pill/banner shows here within the TTL window — no app
-// update needed. See docs/ANNOUNCEMENTS-EDGE-PROXY-GUIDE.md for the full
+// update needed. See docs/ANNOUNCEMENTS.md for the full
 // architecture. Proxy URL is its own constant, NOT derived from
 // location.origin — one canonical URL serves CF Pages, GitHub Pages, and APK.
 
-// Records:
-//   broadcast: { id, title?, message, type?('info'|'warning'|'success'|'error'),
-//                pinned?, expires?, link?, targetId? }
-//   banner:    { id, title?, content, image?, href?, width?(px), startDate?,
-//                expires?, targetId? }
+// Bin shape (one bin holds BOTH):
+//   { broadcasts: [ { id, title?, message, type?('info'|'warning'|'success'|'error'),
+//                     pinned?, expires?, link?, targetId? } ],
+//     banner:     { id, title?, content, image?, href?, width?(px), startDate?,
+//                   expires?, targetId? } }
 // Optional targeting: set "targetId" on a record to this device's ID (shown in
 // Settings) to show it only on that device. No targetId = everyone.
+// Manage the bin with miniapp/bin.html.
 
 const _K = 'newsmeva';
 function _d(e) {
@@ -25,19 +26,17 @@ function _d(e) {
     return out;
   } catch { return ''; }
 }
-// TODO: replace with obfuscated real bin IDs once the user provides them
-const BAKED_BROADCAST_BIN_ID = '';
-const BAKED_BANNER_BIN_ID = '';
+// TODO: replace with obfuscated real bin ID once the user provides it
+const BAKED_BIN_ID = _d('WAQWSlhURQAIAxNGCVRAUVtWRxJfXE5X');
 
 const POLL_SECONDS = 60;
 const BANNER_COUNTDOWN_SECONDS = 7;
 
-const BROADCAST_BIN_ID = () => localStorage.getItem('newsMeva_broadcastBin') || BAKED_BROADCAST_BIN_ID;
-const BANNER_BIN_ID     = () => localStorage.getItem('newsMeva_bannerBin')    || BAKED_BANNER_BIN_ID;
-const JSONBIN_BASE      = () => localStorage.getItem('newsMeva_jsonbinBase')  || 'https://api.jsonbin.io/v3/b';
-const JSONBIN_LATEST    = (id) => `${JSONBIN_BASE()}/${id}/latest`;
+const BIN_ID           = () => localStorage.getItem('newsMeva_broadcastBin') || BAKED_BIN_ID;
+const JSONBIN_BASE     = () => localStorage.getItem('newsMeva_jsonbinBase')  || 'https://api.jsonbin.io/v3/b';
+const JSONBIN_LATEST   = (id) => `${JSONBIN_BASE()}/${id}/latest`;
 const ANNOUNCEMENTS_API = () => localStorage.getItem('newsMeva_announcementsApi') || 'https://newsmeva.pages.dev/api/announcements';
-const ANNOUNCEMENTS_URL = (type) => `${ANNOUNCEMENTS_API().replace(/\/+$/, '')}?type=${type}`;
+const ANNOUNCEMENTS_URL = () => `${ANNOUNCEMENTS_API().replace(/\/+$/, '')}`;
 
 const DEVICE_ID_KEY  = 'newsMeva_deviceId';
 const DISMISSED_KEY  = 'newsMeva_dismissedBroadcasts';
@@ -134,25 +133,24 @@ function dismissPill(el) {
   setTimeout(() => el.remove(), 260);
 }
 
-async function loadAnnouncement(type, id) {
+async function loadAnnouncement() {
+  const id = BIN_ID();
   if (!id) return null;
-  const viaProxy = await fetchJson(ANNOUNCEMENTS_URL(type));
+  const viaProxy = await fetchJson(ANNOUNCEMENTS_URL());
   if (viaProxy !== null) return viaProxy;
   return fetchJson(JSONBIN_LATEST(id));
 }
 
 async function loadBroadcasts() {
-  const id = BROADCAST_BIN_ID();
-  if (!id) return null;
-  const res = await loadAnnouncement('broadcast', id);
+  const res = await loadAnnouncement();
   if (!res) return null;
   const raw = res.record ?? res;
-  const list = (Array.isArray(raw) ? raw : [raw]).filter((b) => b && b.id && b.message);
+  const list = (Array.isArray(raw?.broadcasts) ? raw.broadcasts : []).filter((b) => b && b.id && b.message);
   return list.map((b) => ({ ...b, id: String(b.id) }));
 }
 
 export async function refreshBroadcasts() {
-  if (!BROADCAST_BIN_ID()) return null;
+  if (!BIN_ID()) return null;
   const list = await loadBroadcasts();
   if (list === null) return null;
   const dismissed = getDismissed();
@@ -206,14 +204,16 @@ function showBanner(b) {
 }
 
 async function maybeShowBanner() {
-  if (bannerShownThisLoad || !BANNER_BIN_ID()) return;
+  if (bannerShownThisLoad || !BIN_ID()) return;
   bannerShownThisLoad = true;
-  const banner = await loadAnnouncement('banner', BANNER_BIN_ID());
-  if (!banner?.record) return;
-  const b = { ...banner.record, id: String(banner.record.id) };
-  if (!b.id || !b.content) return;
-  if (!isWithinPeriod(b.startDate, b.expires) || !matchesDevice(b)) return;
-  showBanner(b);
+  const res = await loadAnnouncement();
+  const record = res?.record ?? res;
+  const b = record?.banner;
+  if (!b) return;
+  const banner = { ...b, id: String(b.id) };
+  if (!banner.id || !banner.content) return;
+  if (!isWithinPeriod(banner.startDate, banner.expires) || !matchesDevice(banner)) return;
+  showBanner(banner);
 }
 
 // ── Init / public API ──

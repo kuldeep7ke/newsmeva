@@ -29,7 +29,6 @@ export function renderSidebar(activeView) {
         <p class="sidebar-title">Sync</p>
         ${[
           ['cloud', 'cloud', t('cloud_sync')],
-          ['bridge', 'link', 'News Meva Account'],
           ['backup', 'download', t('backup')],
         ].map(([view, iconName, label]) => `<button class="nav-item ${activeView === view ? 'active' : ''}" data-nav="${view}">${icon(iconName)}<span>${label}</span></button>`).join('')}
       </div>
@@ -74,24 +73,17 @@ export function renderTaskCard(task, categoryName) {
   `;
 }
 
-export function renderTaskModal(task, categories, templates) {
+export function renderTaskModal(task, categories) {
   const isEdit = !!task;
   const title = isEdit ? t('edit_task') : t('create_task');
-  const allStatuses = ['draft','script_writing','footage_collection','waiting_confirmation','correction_required','approved','editor_assigned','teleprompter_ready','prompting','recording_done','editing','uploading','published','under_review','completed','cancelled'];
-  const allTaskTypes = [
-    'breaking','press','feature','on_field','coverage','footage_collection','field_report','ground_coverage',
-    'recording','script_writing','video_edit','thumbnail','motion_graphics','graphics','graphic_design',
-    'social_post','shorts','content_create','platform_upload','digital','ad_creation','voice_over',
-    'update','local','national','international','upcoming_schedule','planning','general_duty','support','assignment','review','approval'
-  ];
-  const footageTypes = ['internet','reporter','local','animated','ai_generated','archive'];
+  const allTaskTypes = ['news','breaking','special_report','story','press','ground_report','live','event'];
 
   document.querySelector('#task-modal-body').innerHTML = `
     <div class="modal-header">
       <h3>${title}</h3>
       <button class="icon-btn" data-close-modal>${icon('x')}</button>
     </div>
-    <form id="task-form">
+    <form id="task-form" ${isEdit ? `data-edit-id="${task.id}"` : ''}>
       <div class="field-group">
         <label class="field-label">${t('title')}</label>
         <input class="field" name="title" required value="${isEdit ? escapeHtml(task.title) : ''}" placeholder="${t('placeholder_add_task')}" />
@@ -114,37 +106,12 @@ export function renderTaskModal(task, categories, templates) {
           </select>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
-        <div class="field-group">
-          <label class="field-label">${t('category')}</label>
-          <select class="field" name="categoryId">
-            <option value="">${t('no_category')}</option>
-            ${categories.map((c) => `<option value="${c.id}" ${isEdit && task.categoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
-          </select>
-        </div>
-        <div class="field-group">
-          <label class="field-label">${t('due_date')}</label>
-          <input class="field" type="date" name="dueDate" value="${isEdit ? (task.dueDate || '') : ''}" />
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
-        <div class="field-group">
-          <label class="field-label">${t('status')}</label>
-          <select class="field" name="status">
-            ${allStatuses.map((s) => `<option value="${s}" ${isEdit && task.status === s ? 'selected' : ''}>${s.replace(/_/g, ' ')}</option>`).join('')}
-          </select>
-        </div>
-        <div class="field-group">
-          <label class="field-label">${t('footage_type')}</label>
-          <select class="field" name="footageType">
-            <option value="">None</option>
-            ${footageTypes.map((f) => `<option value="${f}" ${isEdit && task.footageType === f ? 'selected' : ''}>${f.replace(/_/g, ' ')}</option>`).join('')}
-          </select>
-        </div>
-      </div>
       <div class="field-group">
-        <label class="field-label">${t('assigned_to')}</label>
-        <input class="field" name="assignedTo" value="${isEdit ? escapeHtml(task.assignedTo || '') : ''}" placeholder="Name..." />
+        <label class="field-label">${t('category')}</label>
+        <select class="field" name="categoryId">
+          <option value="">${t('no_category')}</option>
+          ${categories.map((c) => `<option value="${c.id}" ${isEdit && task.categoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
+        </select>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-ghost" data-close-modal>${t('cancel')}</button>
@@ -159,9 +126,9 @@ export function renderTaskModal(task, categories, templates) {
 export function renderOnboarding() {
   const steps = [
     { icon: 'layout-dashboard', title: 'Dashboard', text: 'See your open tasks, due today, and overdue at a glance.' },
-    { icon: 'list-todo', title: 'Tasks', text: 'Create tasks with 34 types and 17 workflow stages. Move them from draft to published.' },
+    { icon: 'list-todo', title: 'Tasks', text: 'Create tasks with 8 news types — Breaking, Special Report, Story, and more.' },
     { icon: 'monitor', title: 'Teleprompter', text: 'Write scripts and prompt them live. Adjustable speed, font size, and mirror mode.' },
-    { icon: 'cloud', title: 'Cloud Sync', text: 'Optional sync across your devices using your own Supabase project. Or connect your News Meva account.' }
+    { icon: 'cloud', title: 'Cloud Sync', text: 'Optional sync across your devices using your own Supabase project.' }
   ];
   const current = Number(localStorage.getItem('newsMeva_onboard_step') || '0');
   const step = steps[current] || steps[0];

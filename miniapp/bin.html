@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>News Meva — Bin Manager</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117; --surface: #1a1d27; --surface2: #232733;
+      --border: #2e3345; --text: #e4e6ed; --muted: #8b8fa3;
+      --accent: #6366f1; --accent-hover: #818cf8;
+      --danger: #ef4444; --danger-hover: #f87171;
+      --success: #22c55e; --warning: #f59e0b; --info: #3b82f6;
+      --radius: 8px; --font: 'Inter', system-ui, sans-serif;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+    .container { max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+    h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--muted); font-size: 0.875rem; margin-bottom: 2rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.25rem; }
+    .card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card h2 .badge { font-size: 0.7rem; background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 500; }
+    label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--muted); margin-bottom: 4px; margin-top: 0.75rem; }
+    label:first-child { margin-top: 0; }
+    input, textarea, select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 0.55rem 0.75rem; color: var(--text); font-family: var(--font); font-size: 0.875rem; }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 60px; }
+    .row { display: flex; gap: 0.75rem; }
+    .row > * { flex: 1; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; font-family: var(--font); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+    .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.75rem; }
+    .actions { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+    .broadlist-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 0.85rem; margin-bottom: 0.6rem; position: relative; }
+    .broadlist-item .item-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .broadlist-item .item-head span { font-weight: 600; font-size: 0.85rem; }
+    .broadlist-item .item-head small { color: var(--muted); font-size: 0.7rem; }
+    .broadlist-item .item-actions { display: flex; gap: 0.35rem; }
+    .broadlist-item .item-body { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+    .empty-state { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.85rem; }
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem 1.1rem; font-size: 0.8rem; font-weight: 500; z-index: 999; opacity: 0; transform: translateY(10px); transition: all 0.25s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.ok { border-color: var(--success); color: var(--success); }
+    .toast.err { border-color: var(--danger); color: var(--danger); }
+    .config-row { display: flex; gap: 0.5rem; align-items: flex-end; }
+    .config-row input { flex: 1; }
+    .config-row .btn { flex-shrink: 0; }
+    .section-divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .hint { font-size: 0.72rem; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+    .toggle-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; }
+    .toggle-row input[type="checkbox"] { width: auto; accent-color: var(--accent); }
+    .toggle-row label { margin: 0; }
+    .preview-box { background: var(--surface2); border: 1px dashed var(--border); border-radius: 6px; padding: 1rem; margin-top: 1rem; font-size: 0.8rem; color: var(--muted); }
+    .preview-box .pill { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.35rem 0.7rem; border-radius: 999px; font-size: 0.78rem; font-weight: 500; margin: 0.2rem; }
+    .pill-info { background: rgba(59,130,246,0.15); color: var(--info); }
+    .pill-warning { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .pill-success { background: rgba(34,197,94,0.15); color: var(--success); }
+    .pill-error { background: rgba(239,68,68,0.15); color: var(--danger); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bin Manager</h1>
+    <p class="subtitle">Manage broadcast pills + promo banner in one jsonbin.io bin.</p>
+
+    <!-- Config -->
+    <div class="card">
+      <h2>Configuration <span class="badge">master key baked in</span></h2>
+      <label>Bin ID</label>
+      <div class="config-row">
+        <input id="cfg-bin-id" placeholder="e.g. 66f1a2b3c..." />
+        <button class="btn btn-primary btn-sm" id="btn-load">Load</button>
+      </div>
+      <p class="hint">Paste your existing bin ID here to load/edit, or leave blank — Save will create a new bin.</p>
+      <label>API Key (optional override)</label>
+      <input id="cfg-api-key" type="password" placeholder="baked in — only set if it changes" />
+
+    <!-- Broadcasts -->
+    <div class="card">
+      <h2>Broadcasts <span class="badge" id="bc-count">0</span></h2>
+      <div id="bc-list"></div>
+      <div class="actions">
+        <button class="btn btn-primary btn-sm" id="btn-add-bc">+ Add Broadcast</button>
+      </div>
+    </div>
+
+    <!-- Banner -->
+    <div class="card">
+      <h2>Banner</h2>
+      <label>Title</label>
+      <input id="bn-title" placeholder="e.g. New feature released!" />
+      <label>Content</label>
+      <textarea id="bn-content" rows="3" placeholder="Describe the announcement..."></textarea>
+      <label>Image URL</label>
+      <input id="bn-image" placeholder="https://..." />
+      <label>Link URL</label>
+      <input id="bn-href" placeholder="https://..." />
+      <div class="row">
+        <div><label>Max Width (px)</label><input id="bn-width" type="number" placeholder="480" /></div>
+        <div><label>Start Date</label><input id="bn-start" type="datetime-local" /></div>
+        <div><label>Expires</label><input id="bn-expires" type="datetime-local" /></div>
+      </div>
+      <label>Target Device ID (blank = everyone)</label>
+      <input id="bn-target" placeholder="" />
+      <div class="preview-box" id="bn-preview" style="display:none"></div>
+    </div>
+
+    <!-- Save -->
+    <div class="card">
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-save">Save Bin</button>
+        <button class="btn btn-ghost" id="btn-preview">Preview</button>
+        <button class="btn btn-danger btn-sm" id="btn-clear">Clear All</button>
+      </div>
+      <p class="hint" id="save-status" style="margin-top:0.75rem"></p>
+    </div>
+
+    <!-- JSON preview -->
+    <div class="card">
+      <h2>Raw JSON</h2>
+      <textarea id="raw-json" rows="12" style="font-family:monospace;font-size:0.78rem"></textarea>
+      <div class="actions">
+        <button class="btn btn-ghost btn-sm" id="btn-copy-json">Copy</button>
+        <button class="btn btn-ghost btn-sm" id="btn-import-json">Import</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Broadcast edit modal -->
+  <div id="bc-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;display:none;align-items:center;justify-content:center;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;width:90%;max-width:480px;">
+      <h3 style="font-size:0.95rem;margin-bottom:1rem" id="bc-modal-title">Add Broadcast</h3>
+      <label>ID</label>
+      <input id="bc-id" placeholder="unique-id" />
+      <label>Title (optional)</label>
+      <input id="bc-title" placeholder="e.g. Maintenance" />
+      <label>Message</label>
+      <textarea id="bc-message" rows="2" placeholder="The message to display..."></textarea>
+      <label>Type</label>
+      <select id="bc-type">
+        <option value="info">info</option>
+        <option value="warning">warning</option>
+        <option value="success">success</option>
+        <option value="error">error</option>
+      </select>
+      <div class="row">
+        <div><label>Link (optional)</label><input id="bc-link" placeholder="https://..." /></div>
+        <div><label>Expires (optional)</label><input id="bc-expires" type="datetime-local" /></div>
+      </div>
+      <label>Target Device ID (blank = everyone)</label>
+      <input id="bc-target" placeholder="" />
+      <div class="toggle-row">
+        <input type="checkbox" id="bc-pinned" />
+        <label for="bc-pinned">Pinned (cannot be dismissed)</label>
+      </div>
+      <div class="actions" style="margin-top:1rem">
+        <button class="btn btn-primary btn-sm" id="bc-modal-save">Save</button>
+        <button class="btn btn-ghost btn-sm" id="bc-modal-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://api.jsonbin.io/v3';
+    const _K = 'newsmeva';
+    function _d(e) {
+      try {
+        const bin = atob(e);
+        let out = '';
+        for (let i = 0; i < bin.length; i++) out += String.fromCharCode(bin.charCodeAt(i) ^ _K.charCodeAt(i % _K.length));
+        return out;
+      } catch { return ''; }
+    }
+    const BAKED_KEY = _d('Mko8SwAxJQkKES1CK1Q5K0AXWR88JEQ=');
+    const BAKED_BIN_ID = _d('WAQWSlhURQAIAxNGCVRAUVtWRxJfXE5X');
+    let binId = localStorage.getItem('newsmeva_binId') || BAKED_BIN_ID || '';
+    let broadcasts = [
+      {
+        id: 'news-meva-welcome',
+        title: 'Welcome to News Meva Mini',
+        message: 'Broadcasts are live. Edit this bin on jsonbin.io, save, and the pill shows here within 60s.',
+        type: 'info',
+        pinned: false,
+        expires: '2030-12-31',
+        link: 'https://newsmeva.pages.dev'
+      },
+      {
+        id: 'news-meva-targeted-sample',
+        title: 'Targeted message',
+        message: 'This pill only shows on the device whose id matches targetId.',
+        type: 'warning',
+        pinned: false,
+        expires: '2030-12-31',
+        targetId: ''
+      }
+    ];
+    let banner = {
+      id: 'news-meva-banner-welcome',
+      title: 'News Meva Mini is ready',
+      content: 'Banner promos go here. Edit this bin on jsonbin.io, save, and it shows once per fresh load. Image field is optional.',
+      image: 'https://placehold.co/800x400/F97316/FFFFFF?text=News+Meva+Mini',
+      href: 'https://newsmeva.pages.dev',
+      width: '480',
+      startDate: '2026-01-01',
+      expires: '2030-12-31',
+      targetId: ''
+    };
+    let editingBcIdx = -1;
+
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => document.querySelectorAll(s);
+
+    function toast(msg, ok = true) {
+      const el = $('#toast');
+      el.textContent = msg;
+      el.className = 'toast show ' + (ok ? 'ok' : 'err');
+      setTimeout(() => el.className = 'toast', 2500);
+    }
+
+    async function apiFetch(path, method = 'GET', body = null) {
+      const key = $('#cfg-api-key').value?.trim() || BAKED_KEY;
+      const headers = { 'Content-Type': 'application/json' };
+      if (key) headers['X-Access-Key'] = key;
+      const opts = { method, headers };
+      if (body) opts.body = JSON.stringify(body);
+      const r = await fetch(`${API_BASE}${path}`, opts);
+      if (!r.ok) throw new Error(`API ${r.status}: ${await r.text()}`);
+      return r.json();
+    }
+
+    function renderBroadcasts() {
+      $('#bc-count').textContent = broadcasts.length;
+      if (!broadcasts.length) {
+        $('#bc-list').innerHTML = '<div class="empty-state">No broadcasts yet.</div>';
+        return;
+      }
+      $('#bc-list').innerHTML = broadcasts.map((b, i) => `
+        <div class="broadlist-item">
+          <div class="item-head">
+            <span>${esc(b.title || b.id)}</span>
+            <div class="item-actions">
+              <button class="btn btn-ghost btn-sm" onclick="editBc(${i})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteBc(${i})">Del</button>
+            </div>
+          </div>
+          <div class="item-body">
+            <span class="pill pill-${b.type || 'info'}">${b.type || 'info'}</span>
+            ${b.pinned ? '<span class="pill pill-warning">pinned</span>' : ''}
+            ${b.targetId ? '<span class="pill pill-info">targeted</span>' : ''}
+            <br>${esc(b.message || '')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function loadBannerToForm() {
+      $('#bn-title').value = banner.title || '';
+      $('#bn-content').value = banner.content || '';
+      $('#bn-image').value = banner.image || '';
+      $('#bn-href').value = banner.href || '';
+      $('#bn-width').value = banner.width || '';
+      $('#bn-start').value = banner.startDate ? toLocalInput(banner.startDate) : '';
+      $('#bn-expires').value = banner.expires ? toLocalInput(banner.expires) : '';
+      $('#bn-target').value = banner.targetId || '';
+    }
+
+    function readBannerFromForm() {
+      banner = {
+        id: banner.id || 'banner-' + Date.now().toString(36),
+        title: $('#bn-title').value.trim(),
+        content: $('#bn-content').value.trim(),
+        image: $('#bn-image').value.trim() || undefined,
+        href: $('#bn-href').value.trim() || undefined,
+        width: parseInt($('#bn-width').value) || undefined,
+        startDate: $('#bn-start').value ? new Date($('#bn-start').value).toISOString() : undefined,
+        expires: $('#bn-expires').value ? new Date($('#bn-expires').value).toISOString() : undefined,
+        targetId: $('#bn-target').value.trim() || undefined,
+      };
+      Object.keys(banner).forEach(k => banner[k] === undefined && delete banner[k]);
+    }
+
+    function toLocalInput(iso) {
+      const d = new Date(iso);
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    function getPayload() {
+      readBannerFromForm();
+      return { broadcasts, banner };
+    }
+
+    function loadPayload(data) {
+      broadcasts = Array.isArray(data?.broadcasts) ? data.broadcasts : [];
+      banner = data?.banner && typeof data.banner === 'object' ? data.banner : {};
+      renderBroadcasts();
+      loadBannerToForm();
+      updateRawJson();
+    }
+
+    function updateRawJson() {
+      $('#raw-json').value = JSON.stringify(getPayload(), null, 2);
+    }
+
+    // ── Events ──
+
+    $('#btn-load').addEventListener('click', async () => {
+      binId = $('#cfg-bin-id').value.trim();
+      if (!binId) { toast('Enter a bin ID or save to create one.', false); return; }
+      try {
+        const res = await apiFetch(`/b/${binId}/latest`);
+        loadPayload(res.record ?? res);
+        localStorage.setItem('newsmeva_binId', binId);
+        toast('Bin loaded.');
+      } catch (e) { toast('Load failed: ' + e.message, false); }
+    });
+
+    $('#btn-save').addEventListener('click', async () => {
+      const payload = getPayload();
+      try {
+        if (binId) {
+          await apiFetch(`/b/${binId}`, 'PUT', payload);
+        } else {
+          const res = await apiFetch('/b', 'POST', payload);
+          binId = res.id || res.metadata?.id;
+          $('#cfg-bin-id').value = binId;
+          localStorage.setItem('newsmeva_binId', binId);
+        }
+        updateRawJson();
+        toast('Saved!');
+      } catch (e) { toast('Save failed: ' + e.message, false); }
+    });
+
+    $('#btn-preview').addEventListener('click', () => {
+      readBannerFromForm();
+      const box = $('#bn-preview');
+      if (!banner.content) { box.style.display = 'none'; return; }
+      box.style.display = 'block';
+      const w = banner.width ? `max-width:${banner.width}px` : '';
+      box.innerHTML = `<div style="${w}"><strong>${esc(banner.title || '')}</strong><br>${esc(banner.content)}${banner.image ? '<br><img src="' + esc(banner.image) + '" style="max-width:100%;border-radius:4px;margin-top:0.5rem" />' : ''}</div>`;
+    });
+
+    $('#btn-clear').addEventListener('click', async () => {
+      if (!confirm('Clear all broadcasts and banner?')) return;
+      broadcasts = [];
+      banner = {};
+      renderBroadcasts();
+      loadBannerToForm();
+      updateRawJson();
+      if (binId) {
+        try { await apiFetch(`/b/${binId}`, 'PUT', { broadcasts: [], banner: {} }); toast('Cleared.'); }
+        catch (e) { toast('Clear failed: ' + e.message, false); }
+      }
+    });
+
+    $('#btn-add-bc').addEventListener('click', () => {
+      editingBcIdx = -1;
+      $('#bc-modal-title').textContent = 'Add Broadcast';
+      $('#bc-id').value = 'bc-' + Date.now().toString(36);
+      $('#bc-title').value = '';
+      $('#bc-message').value = '';
+      $('#bc-type').value = 'info';
+      $('#bc-link').value = '';
+      $('#bc-expires').value = '';
+      $('#bc-target').value = '';
+      $('#bc-pinned').checked = false;
+      $('#bc-modal').style.display = 'flex';
+    });
+
+    $('#bc-modal-cancel').addEventListener('click', () => { $('#bc-modal').style.display = 'none'; });
+
+    $('#bc-modal-save').addEventListener('click', () => {
+      const rec = {
+        id: $('#bc-id').value.trim() || ('bc-' + Date.now().toString(36)),
+        title: $('#bc-title').value.trim() || undefined,
+        message: $('#bc-message').value.trim(),
+        type: $('#bc-type').value,
+        pinned: $('#bc-pinned').checked || undefined,
+        link: $('#bc-link').value.trim() || undefined,
+        expires: $('#bc-expires').value ? new Date($('#bc-expires').value).toISOString() : undefined,
+        targetId: $('#bc-target').value.trim() || undefined,
+      };
+      Object.keys(rec).forEach(k => rec[k] === undefined && delete rec[k]);
+      if (!rec.message) { toast('Message is required.', false); return; }
+      if (editingBcIdx >= 0) { broadcasts[editingBcIdx] = rec; }
+      else { broadcasts.push(rec); }
+      renderBroadcasts();
+      updateRawJson();
+      $('#bc-modal').style.display = 'none';
+      toast(editingBcIdx >= 0 ? 'Updated.' : 'Added.');
+    });
+
+    window.editBc = function(i) {
+      editingBcIdx = i;
+      const b = broadcasts[i];
+      $('#bc-modal-title').textContent = 'Edit Broadcast';
+      $('#bc-id').value = b.id || '';
+      $('#bc-title').value = b.title || '';
+      $('#bc-message').value = b.message || '';
+      $('#bc-type').value = b.type || 'info';
+      $('#bc-link').value = b.link || '';
+      $('#bc-expires').value = b.expires ? toLocalInput(b.expires) : '';
+      $('#bc-target').value = b.targetId || '';
+      $('#bc-pinned').checked = !!b.pinned;
+      $('#bc-modal').style.display = 'flex';
+    };
+
+    window.deleteBc = function(i) {
+      if (!confirm('Delete this broadcast?')) return;
+      broadcasts.splice(i, 1);
+      renderBroadcasts();
+      updateRawJson();
+      toast('Deleted.');
+    };
+
+    $('#btn-copy-json').addEventListener('click', () => {
+      navigator.clipboard.writeText($('#raw-json').value).then(() => toast('Copied!')).catch(() => toast('Copy failed', false));
+    });
+
+    $('#btn-import-json').addEventListener('click', () => {
+      try {
+        const data = JSON.parse($('#raw-json').value);
+        loadPayload(data);
+        toast('Imported!');
+      } catch (e) { toast('Invalid JSON', false); }
+    });
+
+    // Live update raw json on banner form changes
+    $$('#bn-title,#bn-content,#bn-image,#bn-href,#bn-width,#bn-start,#bn-expires,#bn-target').forEach(el => {
+      el.addEventListener('input', updateRawJson);
+    });
+
+    // ── Init ──
+    if (binId) $('#cfg-bin-id').value = binId;
+    const savedKey = localStorage.getItem('newsmeva_jsonbinKey');
+    if (savedKey) $('#cfg-api-key').value = savedKey;
+    $('#cfg-api-key').addEventListener('change', (e) => localStorage.setItem('newsmeva_jsonbinKey', e.target.value));
+    renderBroadcasts();
+    updateRawJson();
+  </script>
+</body>
+</html>

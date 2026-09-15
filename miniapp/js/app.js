@@ -1,11 +1,10 @@
-import { seedDatabase, addTask, updateTask, deleteTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript, getCategories, getScripts, getTemplatesByCategory, localDateStr } from './db.js';
-import { renderSidebar, refreshIcons, statusLabel, escapeHtml, closeOnboarding, icon } from './components.js';
-import { renderDashboard, renderTasks, renderTeleprompterList, renderScripts, renderScriptEditor, renderRecycleBin, renderCloud, renderBridge, renderBackup, renderSettings, renderAbout, showOnboarding, updateSyncStatusUI } from './views.js';
+import { seedDatabase, addTask, updateTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript, getCategories } from './db.js';
+import { renderSidebar, refreshIcons, closeOnboarding, icon } from './components.js';
+import { renderDashboard, renderTasks, renderTeleprompterList, renderScripts, renderScriptEditor, renderRecycleBin, renderCloud, renderBackup, renderSettings, renderAbout, showOnboarding, updateSyncStatusUI } from './views.js';
 import { setupBackup } from './backup.js';
 import { initLang, setLang, t } from './i18n.js';
 import { openPrompter } from './teleprompter.js';
 import * as sync from './sync.js';
-import * as bridge from './bridge.js';
 import { initBroadcasts } from './broadcast.js';
 
 let initPromise = null;
@@ -34,7 +33,6 @@ async function initApp() {
   if (initPromise) return initPromise;
   initPromise = (async () => {
     initLang();
-    bridge.initBridge();
     await seedDatabase();
     wireGlobalEvents();
     await refreshCurrentView();
@@ -63,6 +61,22 @@ function wireGlobalEvents() {
   document.querySelector('#view-content').addEventListener('click', handleViewContentClick);
   document.querySelector('#view-content').addEventListener('submit', handleViewContentSubmit);
   document.querySelector('#view-content').addEventListener('change', handleViewContentChange);
+
+  document.querySelector('#task-modal').addEventListener('submit', (e) => {
+    const form = e.target;
+    if (form.id === 'task-form') {
+      e.preventDefault();
+      e.stopPropagation();
+      handleTaskFormSubmit(form);
+    }
+  });
+  document.querySelector('#task-modal').addEventListener('click', (e) => {
+    if (e.target.closest('[data-close-modal]')) closeTaskModal();
+  });
+  document.querySelector('#onboarding-overlay').addEventListener('click', (e) => {
+    if (e.target.closest('[data-onboard-next]')) return handleOnboardNext();
+    if (e.target.closest('[data-onboard-prev]')) return handleOnboardPrev();
+  });
 
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -155,11 +169,7 @@ function handleViewContentSubmit(e) {
   const form = e.currentTarget;
   if (form.id === 'task-form') return handleTaskFormSubmit(form);
   if (form.id === 'script-form') return handleScriptFormSubmit(form);
-  if (form.id === 'bridge-form') return handleBridgeLogin(form);
-  if (form.id === 'bridge-pair-form') return handleBridgePair(form);
   if (form.id === 'sync-config-form') return handleSyncConfig(form);
-  if (form.id === 'sync-push-form') return sync.pushAll().then(() => refreshCurrentView());
-  if (form.id === 'sync-pull-form') return sync.pullAll().then(() => refreshCurrentView());
 }
 
 function handleViewContentChange(e) {
@@ -187,7 +197,6 @@ async function handleTaskNext(taskId) {
   const steps = STATUS_STEPS[task.status];
   if (!steps || !steps.length) return;
   await updateTask(taskId, { status: steps[0] });
-  if (bridge.getBridgeConfig()) bridge.pushTaskChange('update', { ...task, status: steps[0] });
   refreshCurrentView();
 }
 
@@ -197,10 +206,9 @@ async function handleTaskView(taskId) {
 
 async function openTaskModal(taskId) {
   const categories = await getCategories();
-  const templates = taskId ? null : await getTemplatesByCategory(0);
   const task = taskId ? await getTask(taskId) : null;
   const { renderTaskModal } = await import('./components.js');
-  renderTaskModal(task, categories, templates);
+  renderTaskModal(task, categories);
   refreshIcons();
 }
 
@@ -212,21 +220,12 @@ async function handleTaskFormSubmit(form) {
     description: fd.get('description'),
     taskType: fd.get('taskType'),
     priority: fd.get('priority'),
-    categoryId: fd.get('categoryId'),
-    status: fd.get('status'),
-    dueDate: fd.get('dueDate'),
-    footageType: fd.get('footageType'),
-    assignedTo: fd.get('assignedTo')
+    categoryId: fd.get('categoryId')
   };
   if (isEdit) {
     await updateTask(isEdit, data);
-    if (bridge.getBridgeConfig()) bridge.pushTaskChange('update', { ...(await getTask(isEdit)), ...data });
   } else {
-    const id = await addTask(data);
-    if (bridge.getBridgeConfig()) {
-      const task = await getTask(id);
-      bridge.pushTaskChange('create', task);
-    }
+    await addTask(data);
   }
   closeTaskModal();
   refreshCurrentView();
@@ -284,30 +283,6 @@ async function handleSyncConfig(form) {
   try { await sync.connect({ url, key }); } catch (err) { console.error('Sync connect error:', err); }
 }
 
-async function handleBridgeLogin(form) {
-  const fd = new FormData(form);
-  const server = fd.get('server')?.trim();
-  const email = fd.get('email')?.trim();
-  const password = fd.get('password');
-  if (!server || !email || !password) return;
-  try { await bridge.login({ server, email, password }); } catch (err) { alert(err.message); }
-}
-
-async function handleBridgePair(form) {
-  const fd = new FormData(form);
-  const code = fd.get('code')?.trim();
-  if (!code) return;
-  // pair code = base64 encoded JSON { server, email, password }
-  try {
-    const decoded = JSON.parse(atob(code));
-    if (!decoded.server || !decoded.email || !decoded.password) throw new Error('Invalid pair code');
-    await bridge.login(decoded);
-    refreshCurrentView();
-  } catch (err) {
-    alert('Invalid pair code: ' + err.message);
-  }
-}
-
 function handleOnboardNext() {
   const step = Number(localStorage.getItem('newsMeva_onboard_step') || '0');
   if (step >= 3) {
@@ -338,7 +313,6 @@ export async function navigateTo(view, param) {
     'teleprompter-list': t('teleprompter'),
     scripts: t('scripts'),
     cloud: t('cloud_sync'),
-    bridge: 'News Meva Account',
     backup: t('backup'),
     settings: t('settings'),
     about: t('about'),
@@ -359,7 +333,6 @@ export async function navigateTo(view, param) {
     case 'scripts': await renderScripts(); break;
     case 'script-editor': await renderScriptEditor(param); break;
     case 'cloud': await renderCloud(); break;
-    case 'bridge': await renderBridge(); break;
     case 'backup': await renderBackup(); break;
     case 'settings': await renderSettings(); break;
     case 'about': await renderAbout(); break;

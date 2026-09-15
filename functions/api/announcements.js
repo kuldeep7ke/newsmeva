@@ -1,17 +1,12 @@
 const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b/';
-// TODO: replace with real bin IDs once the user provides them
-const FALLBACK_IDS = {
-  broadcast: '',
-  banner: '',
-};
+const FALLBACK_BIN_ID = '6aa9513affd5d160530a2986';
 const TTL_MINUTES = 10;
 const TTL_SECONDS = TTL_MINUTES * 60;
 
 export async function onRequestGet(context) {
   const { request, env, waitUntil } = context;
   const url = new URL(request.url);
-  const type = url.searchParams.get('type') === 'banner' ? 'banner' : 'broadcast';
-  const binId = (type === 'banner' ? env.BANNER_BIN_ID : env.BROADCAST_BIN_ID) || FALLBACK_IDS[type];
+  const binId = env.ANNOUNCEMENTS_BIN_ID || env.BROADCAST_BIN_ID || FALLBACK_BIN_ID;
 
   if (!binId) {
     return new Response(JSON.stringify({ error: 'bin-not-configured' }), {
@@ -20,7 +15,7 @@ export async function onRequestGet(context) {
     });
   }
 
-  const cacheKey = new Request(`${url.origin}/api/announcements?type=${type}`);
+  const cacheKey = new Request(`${url.origin}/api/announcements`);
   const cache = caches.default;
 
   let res = await cache.match(cacheKey);

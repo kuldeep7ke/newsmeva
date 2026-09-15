@@ -225,10 +225,10 @@ a { color: inherit; text-decoration: none; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
 .card h3 { margin: 0 0 0.75rem; font-size: 1.05rem; }
 .grid { display: grid; gap: 1rem; }
-.stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.2rem; }
-.stat-card .stat-value { font-size: 1.8rem; font-weight: 800; line-height: 1; }
-.stat-card .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 600; margin-top: 0.3rem; }
+.stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 1.25rem; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.4rem 1.5rem; }
+.stat-card .stat-value { font-size: 1.9rem; font-weight: 800; line-height: 1; }
+.stat-card .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 600; margin-top: 0.45rem; }
 .stat-card.accent { border-color: var(--accent); background: var(--accent-soft); }
 .stat-card.accent .stat-value { color: var(--accent-strong); }
 .stat-card.danger { border-color: var(--danger); background: #fee2e2; }
@@ -319,7 +319,7 @@ textarea.field { min-height: 100px; resize: vertical; font-family: inherit; }
 .cat-option.selected .cat-opt-check { opacity: 1; }
 
 /* ── Quick Create ── */
-.quick-create { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end; }
+.quick-create { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; }
 .quick-create .field { flex: 1; min-width: 180px; }
 .quick-create .cat-picker { min-width: 140px; }
 

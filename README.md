@@ -67,7 +67,7 @@ automatically syncs everything back the moment the connection returns.
 
 A trimmed, mobile-first companion app for the whole studio on the go — the same
 all-in-one **task manager, teleprompter, and script editor** with a warm
-TodoMeva-style UI (3-column task cards, priority badges, category chips).
+TodoMeva-style UI (task cards, priority badges, category chips).
 
 **Live:**
 
@@ -79,13 +79,16 @@ TodoMeva-style UI (3-column task cards, priority badges, category chips).
 
 **What's inside** (source: `miniapp/`):
 
-- **16-stage newsroom workflow** (draft → … → published/completed), **33 task
-  types**, 6 footage types, category picker, priorities, recycle bin
+- **News task workflow** — 8 news task types (News, Breaking, Special Report,
+  Story, Press, Ground Report, Live, Event), 4 priorities, optional category
+  picker, next-stage flow, recycle bin
 - **Teleprompter** — full-screen auto-scroll prompter with speed/font-size/mirror/
   alignment controls (settings persist), manual-scroll pause, "Prompt Now" from scripts
-- **Scripts** — create/edit/delete, word + char counts
-- **Cloud sync (Tier 1)** — bring your own Supabase project, realtime push/pull
-- **News Meva bridge (Tier 2)** — optional account login + pair-code REST sync
+- **Scripts** — create/edit/delete from the Teleprompter or Scripts list, word + char counts
+- **Cloud sync** — bring your own Supabase project, push/pull your data across your
+  own devices and machines (no account with the main app required)
+- **Banner & broadcast announcements** — edge-cached jsonbin feed served via a
+  Cloudflare Pages Function (`/api/announcements`) to every web page + the APK
 - **Backup** — full JSON export/import of all tables
 - **Settings & i18n** — theme (light/dark), brand color, language (EN / MR / HI)
 
@@ -240,6 +243,7 @@ render.yaml        Render.com cloud config
 | Guide | Purpose |
 |-------|---------|
 | [docs/SETUP-SUPABASE.md](docs/SETUP-SUPABASE.md) | Create your free Supabase database + connect (~5 minutes) |
+| [docs/ANNOUNCEMENTS.md](docs/ANNOUNCEMENTS.md) | Mini banner & broadcast announcements (jsonbin feed) |
 | [docs/SETUP-GUIDE-WINDOWS.md](docs/SETUP-GUIDE-WINDOWS.md) | Windows 10 / 11 full install |
 | [docs/SETUP-GUIDE-UBUNTU.md](docs/SETUP-GUIDE-UBUNTU.md) | Ubuntu/Debian full install |
 | [docs/SETUP-GUIDE-RHEL.md](docs/SETUP-GUIDE-RHEL.md) | RHEL/CentOS/Rocky/AlmaLinux/Fedora full install |

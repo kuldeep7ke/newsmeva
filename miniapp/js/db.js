@@ -83,7 +83,7 @@ export async function addTask(task) {
     uuid: makeUuid(),
     title: task.title.trim(),
     description: task.description?.trim() || '',
-    taskType: task.taskType || 'feature',
+    taskType: task.taskType || 'news',
     status: task.status || 'draft',
     priority: task.priority || 'medium',
     categoryId: task.categoryId ? Number(task.categoryId) : null,

@@ -1,13 +1,11 @@
-import { getTasks, getCategories, getScripts, localDateStr, deleteTask, updateTask, restoreTask, permanentDeleteTask, addTask, addScript, exportData, importData, db } from './db.js';
-import { PRIORITY_CONFIG, STATUS_CONFIG, STATUS_STEPS, TASK_TYPES, FOOTAGE_TYPES, SEED_CATEGORIES } from './seed.js';
+import { getTasks, getCategories, getScripts, localDateStr, addTask } from './db.js';
+import { PRIORITY_CONFIG, STATUS_CONFIG, TASK_TYPES } from './seed.js';
 import { t } from './i18n.js';
 import { escapeHtml, refreshIcons, statusLabel, renderTaskCard, renderTaskModal, renderOnboarding, closeOnboarding, icon } from './components.js';
 
 let syncModule = null;
-let bridgeModule = null;
 
 function loadSync() { return syncModule || import('./sync.js').then((m) => { syncModule = m; return m; }); }
-function loadBridge() { return bridgeModule || import('./bridge.js').then((m) => { bridgeModule = m; return m; }); }
 
 export async function showOnboarding() {
   if (localStorage.getItem('newsMeva_onboarded')) return;
@@ -47,11 +45,15 @@ export async function renderDashboard() {
       <h3>${t('quick_create')}</h3>
       <form id="dashboard-create" class="quick-create">
         <input class="field" name="title" placeholder="${t('placeholder_add_task')}" required />
-        <select class="field" name="taskType" style="max-width:160px">
-          ${TASK_TYPES.slice(0, 10).map((tt) => `<option value="${tt.value}">${tt.label}</option>`).join('')}
+        <select class="field" name="taskType" style="max-width:170px">
+          ${TASK_TYPES.map((tt) => `<option value="${tt.value}">${tt.label}</option>`).join('')}
         </select>
         <select class="field" name="priority" style="max-width:120px">
           ${['urgent','high','medium','low'].map((p) => `<option value="${p}"${p==='medium'?' selected':''}>${p}</option>`).join('')}
+        </select>
+        <select class="field" name="categoryId" style="max-width:170px">
+          <option value="">${t('no_category')}</option>
+          ${categories.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}
         </select>
         <button class="btn btn-primary">${t('add')}</button>
       </form>
@@ -63,7 +65,7 @@ export async function renderDashboard() {
   document.querySelector('#dashboard-create').addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    await addTask({ title: fd.get('title'), taskType: fd.get('taskType'), priority: fd.get('priority') });
+    await addTask({ title: fd.get('title'), taskType: fd.get('taskType'), priority: fd.get('priority'), categoryId: fd.get('categoryId') || null });
     window.navigateTo('dashboard');
   });
   refreshIcons();
@@ -111,7 +113,10 @@ export async function renderTeleprompterList() {
   const content = document.querySelector('#view-content');
   content.innerHTML = `
     <div class="card">
-      <h3>${t('scripts')}</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <h3 style="margin:0">${t('scripts')}</h3>
+        <button class="btn btn-primary btn-sm" data-create-script>${icon('plus')} ${t('new_script')}</button>
+      </div>
       <div class="task-list">
         ${scripts.length ? scripts.map((s) => `
           <div class="task-card" data-script-id="${s.id}">
@@ -286,57 +291,6 @@ export function updateSyncStatusUI(status) {
   dot.className = 'sync-status-dot ' + (status.status === 'connected' ? 'connected' : status.status === 'syncing' ? 'syncing' : status.status === 'error' ? 'error' : 'disconnected');
   text.textContent = status.status === 'connected' ? t('cloud_connected') : status.status === 'syncing' ? t('cloud_syncing') : status.status === 'error' ? `${t('cloud_error')}: ${status.error || ''}` : t('cloud_disconnected');
   if (last) last.textContent = status.lastSync ? `${t('cloud_last_sync')}: ${new Date(status.lastSync).toLocaleTimeString()}` : '';
-}
-
-export async function renderBridge() {
-  let bridge;
-  try { bridge = await loadBridge(); } catch { bridge = null; }
-  const content = document.querySelector('#view-content');
-  const config = bridge?.getBridgeConfig();
-  const status = bridge?.getBridgeStatus();
-  content.innerHTML = `
-    <div class="card">
-      <h3>${t('bridge_login')}</h3>
-      <p class="muted" style="font-size:0.88rem;margin:0 0 1rem">Connect to your News Meva backend to sync tasks with the web and desktop apps.</p>
-      ${config ? `
-        <div class="account-card">
-          <div class="account-avatar">${(config.email || 'U')[0].toUpperCase()}</div>
-          <div class="account-info">
-            <div class="account-name">${escapeHtml(config.email || 'User')}</div>
-            <div class="account-detail">${escapeHtml(config.server || '')}</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
-          <button class="btn btn-ghost btn-sm" id="bridge-logout">${t('bridge_logout')}</button>
-        </div>
-      ` : `
-        <form id="bridge-form">
-          <div class="field-group">
-            <label class="field-label">${t('bridge_server')}</label>
-            <input class="field" name="server" type="url" placeholder="https://your-newsmeva-server.com" />
-          </div>
-          <div class="field-group">
-            <label class="field-label">${t('bridge_email')}</label>
-            <input class="field" name="email" type="email" required />
-          </div>
-          <div class="field-group">
-            <label class="field-label">${t('bridge_password')}</label>
-            <input class="field" name="password" type="password" required />
-          </div>
-          <button type="submit" class="btn btn-primary">${t('cloud_connect')}</button>
-        </form>
-        <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border)">
-          <h4 style="margin:0 0 0.5rem">${t('bridge_pair_code')}</h4>
-          <p class="muted" style="font-size:0.82rem;margin:0 0 0.5rem">${t('bridge_pair_info')}</p>
-          <form id="bridge-pair-form" style="display:flex;gap:0.5rem">
-            <input class="field" name="code" placeholder="XXXX-XXXX" style="max-width:160px" />
-            <button type="submit" class="btn btn-primary">${t('cloud_connect')}</button>
-          </form>
-        </div>
-      `}
-    </div>
-  `;
-  refreshIcons();
 }
 
 export async function renderBackup() {
