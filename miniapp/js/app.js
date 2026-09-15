@@ -46,7 +46,6 @@ async function initApp() {
 }
 
 function wireGlobalEvents() {
-  document.querySelectorAll('[data-enter-app]').forEach((btn) => btn.addEventListener('click', enterApp));
   document.querySelector('#fab').addEventListener('click', () => openTaskModal());
   document.querySelector('#mobile-menu-btn').addEventListener('click', openSidebar);
   document.querySelector('#sidebar-backdrop').addEventListener('click', closeSidebar);
@@ -378,5 +377,6 @@ async function refreshCurrentView() {
     hideSplash();
     showLanding();
     refreshIcons();
+    document.querySelectorAll('[data-enter-app]').forEach((btn) => btn.addEventListener('click', enterApp));
   }, 1800);
 })();
