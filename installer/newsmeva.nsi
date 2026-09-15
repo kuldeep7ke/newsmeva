@@ -281,6 +281,10 @@ Section "Install" SecMain
   nsExec::ExecToLog 'netsh advfirewall firewall add rule name="NEWS MEVA 3002" protocol=TCP dir=in localport=3002 action=allow profile=any'
 
   ; --- Start Menu shortcuts ---
+  ; Remove the leftover 'Broadcast & banner feed' Start Menu shortcut created
+  ; by an earlier NSIS build (v3.2.0) so Reinstall/Repair over it cleans up.
+  nsExec::Exec 'cmd /c del /f /q "%APPDATA%\Microsoft\Windows\Start Menu\Programs\NEWS MEVA\Broadcast & banner feed.lnk" 2>nul'
+  nsExec::Exec 'cmd /c del /f /q "%ProgramData%\Microsoft\Windows\Start Menu\Programs\NEWS MEVA\Broadcast & banner feed.lnk" 2>nul'
   CreateDirectory "$SMPROGRAMS\NEWS MEVA"
   CreateShortcut "$SMPROGRAMS\NEWS MEVA\Start Server.lnk" "$INSTDIR\windows\Start Server.bat" "" "" "" SW_SHOWMINIMIZED
   CreateShortcut "$SMPROGRAMS\NEWS MEVA\Start Server (Hidden).lnk" "$INSTDIR\windows\Start Server Hidden.vbs"
