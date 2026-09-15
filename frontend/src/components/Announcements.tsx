@@ -120,7 +120,11 @@ export default function Announcements() {
   async function fetchAnnouncements(): Promise<BinShape | null> {
     try {
       const viaProxy = await fetch(ANNOUNCEMENTS_URL(), { cache: 'no-store' });
-      if (viaProxy.ok) return (await viaProxy.json()) as BinShape;
+      if (viaProxy.ok) {
+        const j = (await viaProxy.json()) as { record?: BinShape } | BinShape;
+        const rec = (j as { record?: BinShape }).record;
+        return (rec ?? j) as BinShape;
+      }
     } catch {}
     const id = localStorage.getItem('newsMeva_broadcastBin') || BAKED_BIN_ID;
     if (!id) return null;
