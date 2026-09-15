@@ -264,7 +264,7 @@ export default function Backups() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-surface-200 overflow-x-auto">
+      <div className="flex gap-1 border-b border-surface-200 overflow-x-auto overflow-y-hidden">
         <button onClick={() => setActiveTab('backup')} className={`px-4 py-2 text-sm font-medium -mb-px border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === 'backup' ? 'border-accent-600 text-accent-700' : 'border-transparent text-surface-400 hover:text-surface-600'}`}>
           <DatabaseBackup className="w-4 h-4" /> Backups
         </button>
@@ -411,7 +411,7 @@ export default function Backups() {
               <p className="text-surface-400 text-sm">No backups yet. The first backup is created automatically when the server starts.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto overflow-y-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-surface-200 bg-surface-50">

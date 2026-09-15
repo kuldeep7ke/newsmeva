@@ -13,6 +13,25 @@
 .tp-no-scrollbar::-webkit-scrollbar { display: none; }
 .tp-no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 
+/*
+ * Permanent fix: hide the native up/down spinner buttons on ALL
+ * <input type="number"> (Chrome/Edge/Safari + Firefox).
+ * These tiny stacked ▲▼ controls on the input's right edge were repeatedly
+ * mistaken for a "mini scrollbar" (e.g. Backups → Automatic backup settings).
+ * Hiding them globally means every future number input is covered too —
+ * no per-page patching ever again. Typing, validation and mobile numeric
+ * keyboards keep working; only the spinner buttons are removed.
+ */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 @keyframes modal-pop {
   from { opacity: 0; transform: translateY(10px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
