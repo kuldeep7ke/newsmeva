@@ -62,9 +62,10 @@ data-snapshots/
 # Obsidian vault local config
 .obsidian/
 
-# Quick Heal antivirus log artifacts (not project files)
-!qhlogs.doc
-!!boqJs_qhlogs.txt
+# Quick Heal antivirus log artifacts (not project files; leading ! must be escaped)
+\!qhlogs.doc
+\!\!boqJs_qhlogs.txt
+*qhlogs*
 
 www/
 node_modules/
