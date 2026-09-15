@@ -26,6 +26,8 @@ jobs:
           mkdir -p public
           cp miniapp/index.html public/
           cp -r miniapp/css miniapp/js miniapp/assets miniapp/vendor public/
+          cp miniapp/robots.txt public/robots.txt
+          cp miniapp/sitemap.xml public/sitemap.xml
 
       - uses: actions/upload-pages-artifact@v5
         with:
