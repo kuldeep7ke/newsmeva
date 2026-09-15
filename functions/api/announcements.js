@@ -1,6 +1,6 @@
 const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b/';
 const FALLBACK_BIN_ID = '6aa9513affd5d160530a2986';
-const TTL_MINUTES = 10;
+const TTL_MINUTES = 180;
 const TTL_SECONDS = TTL_MINUTES * 60;
 
 export async function onRequestGet(context) {
