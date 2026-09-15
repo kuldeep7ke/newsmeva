@@ -29,16 +29,14 @@ jobs:
           cache: npm
 
       - run: npm ci
-        working-directory: miniapp
 
       - name: Build static site
-        working-directory: miniapp
         run: node scripts/build-web.cjs
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: miniapp/www
+          path: www
 
       - uses: actions/deploy-pages@v4
