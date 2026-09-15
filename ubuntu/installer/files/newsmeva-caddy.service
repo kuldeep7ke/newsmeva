@@ -1,0 +1,12 @@
+[Unit]
+Description=NEWS MEVA Online reverse proxy (Caddy)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/newsmeva/proxy/caddy/caddy run --config /opt/newsmeva/proxy/caddy/Caddyfile --adapter caddyfile
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,44 @@
+# Build a clean static copy of the site and publish it to GitHub Pages.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Assemble static site
+        run: |
+          mkdir -p public
+          cp miniapp/index.html public/
+          cp -r miniapp/css miniapp/js miniapp/assets miniapp/vendor public/
+          cp miniapp/robots.txt public/robots.txt
+          cp miniapp/sitemap.xml public/sitemap.xml
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,19 @@
+[Unit]
+Description=NEWS MEVA Online server
+After=network.target caddy.service
+Wants=caddy.service
+
+[Service]
+Type=simple
+User=meva
+WorkingDirectory=/opt/newsmeva/backend
+# dotenv loads .env from process.cwd(); without this the backend/.env written
+# by install.sh (and by Backups -> Database) is never read and DATABASE_URL/PORT are ignored.
+EnvironmentFile=/opt/newsmeva/backend/.env
+ExecStart=/usr/bin/node /opt/newsmeva/backend/dist/index.js
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

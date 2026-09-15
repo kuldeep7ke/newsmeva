@@ -1,0 +1,17 @@
+[Unit]
+Description=NEWS MEVA Online server
+After=network.target newsmeva-caddy.service
+Wants=newsmeva-caddy.service
+
+[Service]
+Type=simple
+User=meva
+WorkingDirectory=/opt/newsmeva/backend
+EnvironmentFile=/opt/newsmeva/backend/.env
+ExecStart=/opt/newsmeva-node/bin/node /opt/newsmeva/backend/dist/index.js
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
