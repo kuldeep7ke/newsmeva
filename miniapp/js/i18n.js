@@ -167,7 +167,13 @@ const STRINGS = {
     about_full_text: 'News Meva is a complete multi-user newsroom management system with dashboard, bulletins, reporters, OTP, published stories, programs, ads, analytics, and role-based access control.',
     about_offline: 'Offline-first',
     about_offline_text: 'All data is stored locally in your browser. No internet required to use the app.',
-    no_templates: 'No templates available for this category.'
+    no_templates: 'No templates available for this category.',
+    bc_not_configured: 'Broadcast not configured',
+    bc_offline: 'Offline',
+    bc_updated: 'Updated',
+    bc_listening: 'Listening',
+    bc_close: 'Close',
+    bc_banner: 'Announcement'
   },
   mr: {
     app_name: 'न्यूज मेवा मिनी',
@@ -334,7 +340,13 @@ const STRINGS = {
     about_full_app: 'संपूर्ण News Meva डेस्कटॉप सुइट',
     about_full_text: 'News Meva हा डॅशबोर्ड, बुलेटिन्स, प्रतिवेदक, OTP, प्रकाशित कथा, कार्यक्रम, जाहिराती, विश्लेषण आणि भूमिका-आधारित प्रवेश नियंत्रण असतो.',
     about_offline: 'ऑफलाइन-फर्स्ट',
-    about_offline_text: 'सर्व डेटा तुमच्या ब्राउझरमध्ये स्थानिकरित्या सुरक्षित आहे. अ‍ॅप वापरण्यासाठी इंटरनेट आवश्यक नाही.'
+    about_offline_text: 'सर्व डेटा तुमच्या ब्राउझरमध्ये स्थानिकरित्या सुरक्षित आहे. अ‍ॅप वापरण्यासाठी इंटरनेट आवश्यक नाही.',
+    bc_not_configured: 'प्रसारण कॉन्फिगर केलेले नाही',
+    bc_offline: 'ऑफलाइन',
+    bc_updated: 'अद्ययावत',
+    bc_listening: 'ऐकत आहे',
+    bc_close: 'बंद करा',
+    bc_banner: 'घोषणा'
   },
   hi: {
     app_name: 'न्यूज मेवा मिनी',
@@ -501,7 +513,13 @@ const STRINGS = {
     about_full_app: 'पूर्ण News Meva डेस्कटॉप सूट',
     about_full_text: 'News Meva एक संपूर्ण मल्टी-यूज़र न्यूज़रूम प्रबंधन प्रणाली है जिसमें डैशबोर्ड, बुलेटिन, प्रतिवेदक, OTP, प्रकाशित कहानियाँ, कार्यक्रम, विज्ञापन, विश्लेषण और भूमिका-आधारित पहुँच नियंत्रण है।',
     about_offline: 'ऑफ़लाइन-फ़र्स्ट',
-    about_offline_text: 'सारा डेटा आपके ब्राउज़र में स्थानिक रूप से सुरक्षित है। ऐप इस्तेमाल करने के लिए इंटरनेट ज़रूरी नहीं।'
+    about_offline_text: 'सारा डेटा आपके ब्राउज़र में स्थानिक रूप से सुरक्षित है। ऐप इस्तेमाल करने के लिए इंटरनेट ज़रूरी नहीं।',
+    bc_not_configured: 'प्रसारण कॉन्फ़िगर नहीं है',
+    bc_offline: 'ऑफ़लाइन',
+    bc_updated: 'अपडेट',
+    bc_listening: 'सुन रहा है',
+    bc_close: 'बंद करें',
+    bc_banner: 'घोषणा'
   }
 };
 

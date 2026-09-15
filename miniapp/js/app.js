@@ -6,6 +6,7 @@ import { initLang, setLang, t } from './i18n.js';
 import { openPrompter } from './teleprompter.js';
 import * as sync from './sync.js';
 import * as bridge from './bridge.js';
+import { initBroadcasts } from './broadcast.js';
 
 let initPromise = null;
 let activeView = 'dashboard';
@@ -38,6 +39,7 @@ async function initApp() {
     wireGlobalEvents();
     await refreshCurrentView();
     showOnboarding();
+    initBroadcasts();
     listenSyncEvents();
     // hide splash after first render
     setTimeout(hideSplash, 600);
