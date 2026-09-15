@@ -2789,6 +2789,131 @@ Backend (Express)
 
 ---
 
+## 28. News Meva Mini (web + Android APK)
+
+A trimmed, mobile-first companion app — same task manager, teleprompter, and
+script editor with a warm TodoMeva-style UI. **Vanilla JS** (no framework), runs
+entirely client-side in the browser, optionally syncs against the user's own
+Supabase project. Served statically on both Cloudflare Pages and GitHub Pages;
+the Android APK wraps the same webroot with Capacitor.
+
+### Live channels
+
+| Channel | URL |
+|---------|-----|
+| Cloudflare Pages | `https://newsmeva.pages.dev/` |
+| GitHub Pages | `https://kuldeep7ke.github.io/newsmeva/` |
+| Android APK | built automatically by `.github/workflows/build-android-apk.yml` (artifact `newsmeva-mini-apk`) |
+
+### Structure (`miniapp/`)
+
+```
+index.html          single-page shell (views are JS-rendered)
+bin.html            announcement-bin viewer/debug page
+robots.txt / sitemap.xml
+assets/             favicon.svg, logo.svg, palette.md
+css/style.css       full styling (light/dark themes, brand color)
+js/
+  app.js            boot, router state, entry workflows
+  views.js          screens (dashboard, tasks, scripts, settings, …)
+  components.js     shared UI (cards, modals, toasts, onboarding)
+  db.js             Dexie (IndexedDB) schema + CRUD
+  sync.js           Supabase push/pull sync
+  seed.js           first-run seed tasks
+  teleprompter.js   full-screen auto-scroll prompter
+  backup.js         JSON export/import of all tables
+  broadcast.js      announcements client (pills + banner; see §29)
+  i18n.js           EN / MR / HI dictionaries
+vendor/             dexie.min.js, supabase.min.js, lucide.min.js (local, offline)
+```
+
+### Feature set
+
+- **News task workflow** — 8 task types (News, Breaking, Special Report, Story,
+  Press, Ground Report, Live, Event), 4 priorities, next-stage flow, recycle bin
+- **Teleprompter** — auto-scroll with speed / font-size / mirror / alignment
+  controls (persist), manual-scroll pause, "Prompt Now" from scripts
+- **Scripts** — create/edit/delete from prompter or list, word + char counts
+- **Cloud sync** — bring-your-own Supabase (push/pull across devices); no account
+  with the main app required
+- **Backup** — full JSON export/import of all tables
+- **Settings & i18n** — theme, brand color, language (EN / MR / HI)
+
+### Build & ship
+
+```bash
+npm install           # Capacitor deps at repo root
+npm run build         # miniapp/ -> www/  (scripts/build-web.cjs)
+npx cap sync android  # push www/ into android/
+cd android && ./gradlew assembleDebug   # APK in app/build/outputs/apk/debug/
+```
+
+GitHub Actions builds the APK plus both static sites on every push to `main`.
+
+---
+
+## 29. Banner & Broadcast Announcements
+
+A **single jsonbin.io bin** is the CMS for two broadcast channels shown on every
+web page and inside the Android APK: **broadcast pills** (persistent toasts) and
+a **promo banner overlay**. Editing the bin is enough — changes appear within the
+edge-cache TTL, **no app update or deploy** needed. Full runbook:
+`docs/ANNOUNCEMENTS.md`.
+
+### Pipeline
+
+```
+jsonbin.io bin (the CMS)  ──fetch /latest──▶  Cloudflare Pages Function
+   functions/api/announcements.js  (edge-cached 180 min, CORS *,
+   Cache-Control: max-age=10800)
+   ──▶  https://newsmeva.pages.dev/api/announcements?type=broadcast|banner
+   ──▶  miniapp/js/broadcast.js (no-store; 60 s poll + visibilitychange)
+        ├─ Cloudflare Pages   (newsmeva.pages.dev)
+        ├─ GitHub Pages       (kuldeep7ke.github.io/newsmeva)
+        └─ Android APK        (same canonical URL, hard-coded)
+        + direct-jsonbin fallback if the proxy is unreachable
+```
+
+Key design rule: the proxy URL is a **single hard-coded constant** in
+`broadcast.js` — **not** `location.origin` — so one canonical feed serves all
+three channels.
+
+### Configuration
+
+1. **Recommended:** set `ANNOUNCEMENTS_BIN_ID` (or `BROADCAST_BIN_ID`) as an
+   environment variable on the Cloudflare Pages project **newsmeva**. The
+   function then serves it — no code change.
+2. **Baked fallback:** set `BAKED_BIN_ID` in `miniapp/js/broadcast.js`
+   (obfuscated before committing) to also enable the direct-jsonbin path.
+
+Until configured, the endpoint returns `404 {"error":"bin-not-configured"}`
+(CORS `*`) and the app simply shows nothing. Runtime test overrides (localStorage):
+`newsMeva_broadcastBin`, `newsMeva_announcementsApi`, `newsMeva_jsonbinBase`.
+
+### Bin shape (one bin holds BOTH)
+
+```jsonc
+{
+  "broadcasts": [   // pills
+    { "id": "b-1", "title": "…", "message": "text", "type": "info|warning|success|error",
+      "pinned": false, "expires": "2026-…Z", "link": "https://…", "targetId": null }
+  ],
+  "banner": { "id": "bn-1", "title": "…", "content": "body", "image": "…",
+              "href": "…", "width": 480, "startDate": "…", "expires": "…", "targetId": null }
+}
+```
+
+`targetId` = device id (shown in Mini Settings) → show only on that device.
+
+### Files
+
+- `functions/api/announcements.js` — Cloudflare Pages Function (edge-cached proxy)
+- `miniapp/js/broadcast.js` — client fetch + pills + banner overlay
+- `miniapp/js/i18n.js` — `bc_not_configured`, `bc_offline`, `bc_updated`, `bc_listening`, `bc_close`, `bc_banner`
+- `miniapp/css/style.css` — `broadcast-holder`, `.bc-pill*`, `.banner-overlay*`
+
+---
+
 ## Appendix: Role Definitions
 
 ```typescript

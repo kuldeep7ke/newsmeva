@@ -31,7 +31,7 @@ const ROOT = path.resolve(__dirname, '..', '..');
 // ----------------------------------------------------------------------------
 const PKG = 'newsmeva-online';           // apt package identity (upgrade/remove)
 const DEB_PREFIX = 'newsmeva-online';    // .deb output filename prefix
-const VERSION = process.argv.find((a, i) => process.argv[i - 1] === '--version') || '3.1.2';
+const VERSION = process.argv.find((a, i) => process.argv[i - 1] === '--version') || '3.2.0';
 const ARCH = process.argv.find((a, i) => process.argv[i - 1] === '--arch') || 'amd64';
 const INSTALL_DIR = '/opt/newsmeva';
 const NODE_PREFIX = '/opt/newsmeva-node';
@@ -316,6 +316,11 @@ function buildControl() {
     ' is fully offline: no npm, compiler, package downloads or internet needed.',
     ' The backend connects to your own Supabase PostgreSQL database (DATABASE_URL in',
     ' /opt/newsmeva/backend/.env). The first user to sign up becomes admin.',
+    ' Broadcast pills and banner announcements are delivered to every page via a',
+    ' Cloudflare edge proxy (newsmeva.pages.dev/api/announcements).',
+    ' News Meva Mini companion (task manager + teleprompter + script editor) is free',
+    ' on the web at https://kuldeep7ke.github.io/newsmeva/ and https://newsmeva.pages.dev',
+    ' with an Android APK built automatically in GitHub Actions.',
     '',
   ].join('\n');
   fs.writeFileSync(path.join(CONTROL_DIR, 'control'), control);

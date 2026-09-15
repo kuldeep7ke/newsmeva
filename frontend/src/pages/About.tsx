@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { getAppName } from '../utils/appConfig';
 import { getAppVersionLabel } from '../utils/appMeta';
-import { Newspaper, Users, Radio, Shield, Wifi, MonitorSmartphone, Sparkles } from 'lucide-react';
+import { Newspaper, Users, Radio, Shield, Wifi, MonitorSmartphone, Sparkles, Smartphone, Globe, Cloud, Download } from 'lucide-react';
 
 const APP = getAppName();
 
@@ -99,6 +99,51 @@ export default function About() {
             channel or a digital-first newsroom, the platform adapts to your workflow with
             customizable roles, task types, and priority options.
           </p>
+        </section>
+
+        <section>
+          <h2 className="text-lg font-bold text-surface-800 mb-4">News Meva Mini — for Social Media, Shorts &amp; Reels</h2>
+          <p className="text-surface-600 leading-relaxed">
+            Producing content for social media, shorts, or reels? <strong>News Meva Mini</strong> is
+            the lightweight, mobile-first companion to {APP} — the same task manager, teleprompter,
+            and script editor trimmed down for creators and on-the-go newsrooms. No account, no
+            install, fully offline, with optional sync across your own devices. It runs free on the
+            web and as an Android app:
+          </p>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <a href="https://kuldeep7ke.github.io/newsmeva/" target="_blank" rel="noopener noreferrer"
+              className="bg-white rounded-xl border border-surface-200 p-4 hover:border-accent-400 hover:shadow-md transition-all group">
+              <Globe className="w-5 h-5 text-accent-500 mb-3" />
+              <h3 className="text-sm font-semibold text-surface-800 mb-1">GitHub Pages</h3>
+              <p className="text-xs text-surface-500 leading-relaxed">Web version — opens in any browser, no sign-up needed.</p>
+              <p className="text-xs text-accent-500 mt-2 font-medium group-hover:underline">kuldeep7ke.github.io/newsmeva</p>
+            </a>
+            <a href="https://newsmeva.pages.dev/" target="_blank" rel="noopener noreferrer"
+              className="bg-white rounded-xl border border-surface-200 p-4 hover:border-accent-400 hover:shadow-md transition-all group">
+              <Cloud className="w-5 h-5 text-accent-500 mb-3" />
+              <h3 className="text-sm font-semibold text-surface-800 mb-1">Cloudflare Pages</h3>
+              <p className="text-xs text-surface-500 leading-relaxed">Fast, always-up mirror of the same mini app for any region.</p>
+              <p className="text-xs text-accent-500 mt-2 font-medium group-hover:underline">newsmeva.pages.dev</p>
+            </a>
+            <a href="https://github.com/kuldeep7ke/newsmeva/actions/workflows/build-android-apk.yml" target="_blank" rel="noopener noreferrer"
+              className="bg-white rounded-xl border border-surface-200 p-4 hover:border-accent-400 hover:shadow-md transition-all group">
+              <Smartphone className="w-5 h-5 text-accent-500 mb-3" />
+              <h3 className="text-sm font-semibold text-surface-800 mb-1">Android APK</h3>
+              <p className="text-xs text-surface-500 leading-relaxed">Installable app — grab the latest build from GitHub Actions.</p>
+              <p className="text-xs text-accent-500 mt-2 font-medium group-hover:underline">Download the APK</p>
+            </a>
+          </div>
+          <div className="mt-4 rounded-xl bg-accent-50 border border-accent-100 p-4 flex items-start gap-3">
+            <Download className="w-5 h-5 text-accent-600 mt-0.5 shrink-0" />
+            <div className="text-xs text-surface-600 leading-relaxed">
+              <p className="font-semibold text-surface-800 mb-1">Perfect for creators</p>
+              <p>
+                Use the mini app to demo tasks, record teleprompter takes for shorts/reels, and share
+                one link with your audience. The full {APP} suite remains for the newsroom's daily
+                multi-user workflow on your own server.
+              </p>
+            </div>
+          </div>
         </section>
 
         <section>

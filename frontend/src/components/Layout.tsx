@@ -535,7 +535,7 @@ export default function Layout() {
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-1">
           {filteredNav.map((item) => {
             const active = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
             return (
@@ -667,11 +667,11 @@ export default function Layout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 lg:p-6">
+<main className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar p-3 sm:p-4 lg:p-6">
           <Outlet />
         </main>
 
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-surface-200 flex items-center justify-around px-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] overflow-x-auto">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-surface-200 flex items-center justify-around px-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] overflow-x-auto no-scrollbar">
           {filteredNav.map((item) => {
             const active = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
             return (

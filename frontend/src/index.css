@@ -13,6 +13,13 @@
 .tp-no-scrollbar::-webkit-scrollbar { display: none; }
 .tp-no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 
+/* Hide scrollbars on the app's scroll containers while keeping wheel/touch
+   scrolling fully functional. Applies to the page area, sidebar nav and the
+   mobile bottom bar so no stray native scrollbar can ever reappear at the
+   right edge of the content, regardless of how tall a page's content gets. */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+
 /*
  * Permanent fix: hide the native up/down spinner buttons on ALL
  * <input type="number"> (Chrome/Edge/Safari + Firefox).

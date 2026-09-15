@@ -27,7 +27,7 @@ app served over LAN (or internet), backed by **Supabase PostgreSQL**, with an
 | Offline mirror | SQLite via `sql.js` → `backend/workstation.db` + outbox sync engine |
 | Repo | `https://github.com/kuldeep7ke/newsmeva` (public; local branch `main` pushes to `main`) |
 
-## 2. Project Snapshot (verified 2026-08-15)
+## 2. Project Snapshot (verified 2026-09-15)
 
 - **Mode:** PostgreSQL (Supabase pooler, region `ap-northeast-2`). SQLite legacy
   path still compiles but is never used standalone.
@@ -54,6 +54,20 @@ app served over LAN (or internet), backed by **Supabase PostgreSQL**, with an
 - **Database connect rework:** connect to any Supabase DB with Restore (pull
   online data into app) or Fresh Start (push local data to online). Your local
   copy is never wiped automatically — wiping everything is always a manual action.
+- **News Meva Mini** (`miniapp/`): standalone offline-first task manager &
+  teleprompter web app (vanilla JS + Dexie + Supabase sync, 8 news task types),
+  served on Cloudflare Pages (`https://newsmeva.pages.dev/`) **and** GitHub Pages
+  (`kuldeep7ke.github.io/newsmeva`); same webroot is wrapped by the Android APK.
+- **Announcements (banner + broadcast):** one jsonbin.io bin (CF env var
+  `ANNOUNCEMENTS_BIN_ID`) → edge-cached Cloudflare Pages Function
+  `functions/api/announcements.js` → canonical URL
+  `https://newsmeva.pages.dev/api/announcements?type=broadcast|banner`
+  (`Cache-Control: max-age=10800`, 180 min TTL; CORS `*`; returns
+  `404 bin-not-configured` until the bin is set). `miniapp/js/broadcast.js` uses
+  that single canonical URL (not `location.origin`) so Mini web + APK + GH Pages
+  share one feed, with a direct-jsonbin fallback. Runbook: `docs/ANNOUNCEMENTS.md`.
+- **Version:** `3.2.0` (app-internal `APP_VERSION` in `appMeta.ts` — raised along
+  with installer packaging this round; see entry 105).
 
 ### Architecture
 
@@ -66,6 +80,21 @@ Express + Socket.IO server (backend/, TS → dist/, node dist/index.js)
     ├─── Supabase PostgreSQL (pooler :6543)   ← source of truth (online)
     └─── SQLite mirror (sql.js, workstation.db) ← always kept, used offline
                                               + sync_outbox queue + 5s health ping
+```
+
+### Mini architecture (announcements feed)
+
+```
+jsonbin.io bin (the CMS you edit — jsonbin.io/b/<ANNOUNCEMENTS_BIN_ID>)
+        │  fetch /latest
+        ▼
+Cloudflare Pages Function  functions/api/announcements.js  (edge-cached 180 min)
+        ▼
+https://newsmeva.pages.dev/api/announcements?type=broadcast|banner   (canonical)
+        ▼  miniapp/js/broadcast.js (no-store, 60 s poll + visibilitychange)
+        ├─ Cloudflare Pages  (newsmeva.pages.dev)
+        ├─ GitHub Pages      (kuldeep7ke.github.io/newsmeva)
+        └─ Android APK       (same canonical URL, hard-coded)  + direct-jsonbin fallback
 ```
 
 ### Boot sequence (`initDatabase()`, schema.ts — order matters)
@@ -100,6 +129,9 @@ offline:  same, but PG leg skipped (engine = mirror); outbox rows wait
 backend/     Express + Socket.IO API (src/ → dist/), sync engine, mirror DB;
              ad-hoc dev tools live in scripts/ (reset-db, db-reset, … — run from backend/)
 frontend/    React SPA (Vite)
+miniapp/     News Meva Mini web app (vanilla JS + Dexie + Supabase sync) —
+             served on Cloudflare + GitHub Pages, also the Android APK webroot
+functions/   Cloudflare Pages Function: api/announcements.js (edge-cached jsonbin feed)
 android/     Android wrapper bundling Node (arm64/armv7l)
 docs/        All guides: MEMORY-CAPSULE.md (this file), SETUP-SUPABASE.md,
              SETUP-GUIDE-UBUNTU.md, SETUP-GUIDE-RHEL.md
@@ -793,3 +825,5 @@ v24.19.0 has only arm64, so a bump silently breaks 32-bit devices.
 | 102 | **v3.1.0 -> v3.1.1 bump: mojibake/brand-fixed installers released 2026-09-09** - Entry-101 rebuilt installers could NOT replace the live v3.1.0 release assets: GitHub marked v3.1.0 immutable too (`gh release view --json isImmutable` -> true; `gh release upload --clobber` -> HTTP 422 "Cannot delete asset from an immutable release"), same protection that locked v3.0.0. User approved bumping to **v3.1.1**. Updated: NSIS `OutFile newsmeva-setup-v3.1.1.exe` + `VIProductVersion 3.1.1.0` + ProductVersion/FileVersion `3.1.1` + welcome text "BETA release (v3.1.1)"; `ubuntu/installer/build-deb.js` VERSION default -> `3.1.1`; docs (`SETUP-GUIDE-WINDOWS.md` v3.1.0->v3.1.1 incl all `newsmeva-setup-v3*.exe` refs; `SETUP-GUIDE-UBUNTU.md` deb `newsmeva-online_3.1.1_amd64.deb`; `README.md` beta/status lines). App-internal version stays `3.0.0` (appMeta.ts + package.jsons + android) - only installer/release packaging bumped. Rebuilt + verified: `newsmeva-setup-v3.1.1.exe` 70,794,415 B (FileVersion/ProductVersion 3.1.1, README `# NEWS MEVA`, app payload mojibake-free, lan helper `Add NewsMeva Hosts.*` bundled) and `newsmeva-online_3.1.1_amd64.deb` 56,621,412 B (control Package `newsmeva-online` Version `3.1.1`). Old v3.1.0 exe+deb deleted locally; confirmed-immutable v3.1.0 release + remote tag deleted (v3.1.0 expected permanently blocked like v3.0.0); new tag `v3.1.1` + release created with both rebuilt installers |
 | 103 | **QA pass: full-app test + found/fixed timestamp TZ glitch 2026-09-09** - Systematically tested all app on an isolated QA server (temp copy of backend dist + fresh workstation.db, sqlite mode, port 3110; real backend/workstation.db untouched). Typechecks clean (backend tsc, frontend tsc -b). API smoke suite 126/126 pass (auth/users/roles/bulletin-templates/locations/archives/reporters/programs/ads/bulletins/tasks incl teleprompter+news-items+trash/stories full state machine/leaves/news correction/channel-metadata/notifications/pending-requests/analytics/activity/settings/backups/sync/telemetry/permission matrix). WebSocket realtime verified (connect, signup, task:created). Fuzz pass: 52 malformed requests to mutation endpoints -> 0 HTTP 500. Frontend served 200 with SPA fallback; route cross-check 162/162 frontend<->backend paths covered. Found + FIXED one real glitch: 6 spots parsed SQLite UTC timestamps ('YYYY-MM-DD HH:MM:SS') with raw new Date(x.replace(' ','T')) which JS interprets as LOCAL, shifting every displayed time by the UTC offset; replaced with the timezone-safe parseDate()/formatDateTime() helper (frontend/src/utils/dates.ts). Files: frontend/src/pages/TaskDetail.tsx (script_imported_at + completed_at), Teleprompter.tsx (history), TeleprompterList.tsx (loaded/history line x3). Rebuilt frontend (tsc + vite clean). NOTE: shipped v3.1.1 installers still contain the OLD date display; re-releasing requires a rebuild + new version bump decision | rontend\src\pages\TaskDetail.tsx, rontend\src\pages\Teleprompter.tsx, rontend\src\pages\TeleprompterList.tsx, rontend\src\utils\dates.ts |
 | 104 | **QA bugfix shipped as v3.1.2 release 2026-09-09** - The timestamp-display glitch from entry 103 shipped as **v3.1.2**. Packaging bump (app-internal version stays 3.0.0): NSIS OutFile newsmeva-setup-v3.1.2.exe + VIProductVersion 3.1.2.0 + FileVersion/ProductVersion 3.1.2 + welcome text BETA (v3.1.2); build-deb.js VERSION default 3.1.2; docs README (status line + exe highlighter) + SETUP-GUIDE-WINDOWS (6 refs) + SETUP-GUIDE-UBUNTU (deb filename, 3 refs). Rebuilt from fresh dists (backend tsc + frontend vite). exe 70,794,467 B SHA256 F222914485462CA02E439EF80072F210F529B70C6F69812DFD30FE91E5C8E0D9: FileVersion 3.1.2, README title # NEWS MEVA, 83/83 bundled frontend dist assets byte-identical to the fixed build, backend+frontend dist mojibake-free. deb 56,621,608 B SHA256 B958DA4E8500473C3B23200898B0625425DDC3B7A62182458E969FA4287A8D9B: control Package newsmeva-online Version 3.1.2 Architecture amd64, payload verified same (README/NEWS MEVA, 83/83 assets, clean). Deleted superseded v3.1.1 exe+deb locally and v3.1.1 release + remote+local tag (v3.1.1 now permanently blocked like v3.0.0/v3.1.0). Annotated tag v3.1.2 + release NEWS MEVA Online v3.1.2 (Beta) at https://github.com/kuldeep7ke/newsmeva/releases/tag/v3.1.2; verified isDraft=false and both assets byte-identical (local downloads match GitHub digests) |
+
+| 105 | **v3.1.2 -> v3.2.0: News Meva Mini + announcements + installers rebuilt 2026-09-15** - Feature round shipped by packaging bump to **v3.2.0** (GitHub locks every released version; the v3.1.2 release/tag was deleted to free the name and v3.1.2 is now permanently blocked like v3.0.0/v3.1.0/v3.1.1). **App-internal version raised this time too**: `appMeta.ts` APP_VERSION -> `3.2.0` (previous packaging bumps 99/102/104 kept it 3.0.0), package.jsons + locks bumped. **News Meva Mini** (`miniapp/`): TodoMeva-style offline-first task manager + teleprompter, vanilla JS + Dexie + Supabase sync, curated 8 news task types + simplified form; served on Cloudflare Pages (`newsmeva.pages.dev`) AND GitHub Pages (`kuldeep7ke.github.io/newsmeva`); Capacitor-wrapped Android APK (build workflow). Simplify pass removed the JS bridge, fixed modal/onboarding buttons, teleprompter + button, dashboard spacing, single-bin announcements. **Banner & broadcast announcements**: one jsonbin.io bin (CF env var `ANNOUNCEMENTS_BIN_ID`) -> edge-cached CF Pages Function `functions/api/announcements.js` at `https://newsmeva.pages.dev/api/announcements?type=broadcast|banner` (CORS `*`, `Cache-Control: max-age=10800` TTL raised 10m->180m; `404 bin-not-configured` until set); `miniapp/js/broadcast.js` (60 s poll + visibilitychange, direct-jsonbin fallback, canonical URL not location.origin) serves Mini web + APK + GH Pages; jsonbin `record` envelope unwrap fix. Runbook `docs/ANNOUNCEMENTS.md`. **SEO**: meta/OG/Twitter/JSON-LD + robots.txt/sitemap.xml (+ CI inclusion). **App fixes**: theme toggle fixed, status filter removed from Tasks, sidebar reorder (Scripts before Teleprompter), single Sync button + auto-reconnect, Settings shortcuts for Cloud & Sync and Export/Import, category option removed from task form/quick-create. **PERMANENT scrollbar fix**: `.no-scrollbar` utility added in `frontend/src/index.css` (hides scrollbar visually, keeps wheel/touch scroll) and applied to the app's three scroll containers in `Layout.tsx` (sidebar nav, `<main>`, mobile bottom nav) - the Backups "little scrollbar" was the height-driven native bar on PAGE-level `<main>` (content taller than viewport); earlier inner-scrollbar fixes (Backups tabs/table wrapper overflow-y-hidden, number-input spinner CSS) retained. Frontend rebuilt (vite, assets `index-DMWxXAA9.css`/`index-BR7V-V5R.js`). **Installers rebuilt**: NSIS `newsmeva-setup-v3.2.0.exe` (67.5 MB, VIProductVersion/FileVersion/ProductVersion 3.2.0, welcome text BETA v3.2.0, Start Menu now adds `News Meva Mini.lnk` -> newsmeva.pages.dev + `Broadcast & banner feed.lnk` -> /api/announcements) and `newsmeva-online_3.2.0_amd64.deb` (54.0 MB, control Description now covers Mini + announcements). Build steps (Windows): makensis on `installer/newsmeva.nsi` needs `tools/node/node-v24.19.0-win-x64/` portable Node (re-extractable from the v24.19.0 win-x64 zip); deb via `cmd /c "node ubuntu/installer/build-deb.js"`. Both artifacts git-ignored; docs README + both SETUP-GUIDEs + this capsule updated | `miniapp/*`, `functions/api/announcements.js`, `frontend/src/components/Layout.tsx`, `frontend/src/index.css`, `frontend/src/pages/{About,Backups}.tsx`, `frontend/src/utils/appMeta.ts`, `installer/newsmeva.nsi`, `ubuntu/installer/build-deb.js`, `README.md`, `docs/{ANNOUNCEMENTS,SETUP-GUIDE-WINDOWS,SETUP-GUIDE-UBUNTU,MEMORY-CAPSULE}.md`, `.github/workflows/*`, `android/*` |

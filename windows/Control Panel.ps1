@@ -187,6 +187,8 @@ $script:dbText = 'Unknown'
           <Button x:Name="btnClean" Content="Clean junk files" Padding="10,4" Margin="0,0,6,6" FontSize="11"/>
           <Button x:Name="btnLog" Content="View server.log" Padding="10,4" Margin="0,0,6,6" FontSize="11"/>
           <Button x:Name="btnFolder" Content="Open backend folder" Padding="10,4" Margin="0,0,6,6" FontSize="11"/>
+          <Button x:Name="btnMini" Content="Open News Meva Mini" Padding="10,4" Margin="0,0,6,6" FontSize="11"/>
+          <Button x:Name="btnAnnounce" Content="Broadcast &amp; banner feed" Padding="10,4" Margin="0,0,6,6" FontSize="11"/>
         </WrapPanel>
       </StackPanel>
     </Border>
@@ -248,6 +250,8 @@ $btnHeal       = Get-Ctl 'btnHeal'
 $btnClean      = Get-Ctl 'btnClean'
 $btnLog        = Get-Ctl 'btnLog'
 $btnFolder     = Get-Ctl 'btnFolder'
+$btnMini       = Get-Ctl 'btnMini'
+$btnAnnounce   = Get-Ctl 'btnAnnounce'
 $chkOpenBrowser = Get-Ctl 'chkOpenBrowser'
 $txtPort       = Get-Ctl 'txtPort'
 $txtStatus     = Get-Ctl 'txtStatus'
@@ -539,6 +543,8 @@ $btnLog.Add_Click({
   if (Test-Path -LiteralPath $logFile) { Start-Process notepad $logFile } else { Set-Status 'server.log does not exist yet.' }
 })
 $btnFolder.Add_Click({ if (Test-Path -LiteralPath $backend) { Start-Process explorer.exe $backend } else { Set-Status 'backend folder not found.' } })
+$btnMini.Add_Click({ Open-Url 'https://newsmeva.pages.dev/' })
+$btnAnnounce.Add_Click({ Open-Url 'https://newsmeva.pages.dev/api/announcements' })
 $lnkDbGuide.Add_Click({ Open-Url 'https://github.com/kuldeep7ke/newsmeva/blob/main/docs/SETUP-SUPABASE.md' })
 
 $btnCopyLocal.Add_Click({ Copy-ToClip "http://localhost:$($script:cfg.PORT)" })

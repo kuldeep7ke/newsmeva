@@ -18,17 +18,17 @@
 ; Configuration
 ; ---------------------------------------------------------------------------
 Name "NEWS MEVA Online"
-OutFile "newsmeva-setup-v3.1.2.exe"
+OutFile "newsmeva-setup-v3.2.0.exe"
 InstallDir "C:\NewsMeva"
 InstallDirRegKey HKLM "Software\NewsMeva" "InstallDir"
 RequestExecutionLevel admin
 Unicode True
 
 ; Version info shown in Explorer properties
-VIProductVersion "3.1.2.0"
+VIProductVersion "3.2.0.0"
 VIAddVersionKey "ProductName" "NEWS MEVA Online"
-VIAddVersionKey "ProductVersion" "3.1.2"
-VIAddVersionKey "FileVersion" "3.1.2"
+VIAddVersionKey "ProductVersion" "3.2.0"
+VIAddVersionKey "FileVersion" "3.2.0"
 VIAddVersionKey "FileDescription" "NEWS MEVA Online Installer (Beta)"
 VIAddVersionKey "LegalCopyright" "Free & public domain (Unlicense)"
 
@@ -39,7 +39,7 @@ VIAddVersionKey "LegalCopyright" "Free & public domain (Unlicense)"
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 !define MUI_WELCOMEPAGE_TITLE "NEWS MEVA Online Setup"
-!define MUI_WELCOMEPAGE_TEXT "This wizard will install NEWS MEVA Online on your computer.$\r$\n$\r$\nINSTALLER NOTES:$\r$\n  - BETA release (v3.1.2) - testing mode$\r$\n  - Free & open source - public domain (Unlicense)$\r$\n  - Requires Windows 10 or Windows 11 (64-bit)$\r$\n  - Node.js + Caddy are bundled - no internet needed$\r$\n  - Always installs a FRESH copy: NO user data, NO database, NO previous settings$\r$\n$\r$\nThe installer will:$\r$\n  - Check your system requirements$\r$\n  - Copy the application files$\r$\n  - Open port 3002 in the Windows Firewall$\r$\n  - Create Start Menu shortcuts$\r$\n$\r$\nClick Next to continue."
+!define MUI_WELCOMEPAGE_TEXT "This wizard will install NEWS MEVA Online on your computer.$\r$\n$\r$\nINSTALLER NOTES:$\r$\n  - BETA release (v3.2.0) - testing mode$\r$\n  - Free & open source - public domain (Unlicense)$\r$\n  - Requires Windows 10 or Windows 11 (64-bit)$\r$\n  - Node.js + Caddy are bundled - no internet needed$\r$\n  - Always installs a FRESH copy: NO user data, NO database, NO previous settings$\r$\n  - Broadcast pills + banner announcements arrive via edge cache (TTL 180 min)$\r$\n  - News Meva Mini companion is free on the web / Android APK$\r$\n$\r$\nThe installer will:$\r$\n  - Check your system requirements$\r$\n  - Copy the application files$\r$\n  - Open port 3002 in the Windows Firewall$\r$\n  - Create Start Menu shortcuts$\r$\n$\r$\nClick Next to continue."
 !define MUI_FINISHPAGE_RUN "$INSTDIR\windows\Control Panel.bat"
 !define MUI_FINISHPAGE_RUN_TEXT "Open the Control Panel (set up your database)"
 !define MUI_FINISHPAGE_LINK "Open documentation"
@@ -96,7 +96,7 @@ Function TermsPageCreate
   ${If} $TermsDialog == error
     Abort
   ${EndIf}
-  ${NSD_CreateLabel} 0 0 100% 100u "NEWS MEVA Online is free and open-source software (Unlicense / public domain).$\r$\n$\r$\nInstalling this application copies files to your computer, opens TCP port 3002 in the Windows Firewall, adds Start Menu and desktop shortcuts, and installs small helper utilities.$\r$\n$\r$\nYour ONLINE data is stored in your own Supabase project. Local files (workstation.db, backups, telemetry, logs, .env) stay on THIS computer - uninstalling can keep or permanently delete them (you choose at uninstall time).$\r$\n$\r$\nThe software is provided AS IS, WITHOUT warranty of any kind. Use it at your own risk.$\r$\n$\r$\nFull legal text: see the LICENSE file included with the source code."
+  ${NSD_CreateLabel} 0 0 100% 100u "NEWS MEVA Online is free and open-source software (Unlicense / public domain).$\r$\n$\r$\nInstalling this application copies files to your computer, opens TCP port 3002 in the Windows Firewall, adds Start Menu and desktop shortcuts, and installs small helper utilities.$\r$\n$\r$\nYour ONLINE data is stored in your own Supabase project. Local files (workstation.db, backups, telemetry, logs, .env) stay on THIS computer - uninstalling can keep or permanently delete them (you choose at uninstall time).$\r$\n$\r$\nBroadcast pills and banner announcements are delivered to every page through a public Cloudflare edge proxy (newsmeva.pages.dev/api/announcements), which any signed-in admin can configure.$\r$\n$\r$\nThe software is provided AS IS, WITHOUT warranty of any kind. Use it at your own risk.$\r$\n$\r$\nFull legal text: see the LICENSE file included with the source code."
   Pop $0
   ${NSD_CreateCheckBox} 12u 108u 80% 14u "I &accept the Terms and Conditions"
   Pop $TermsAgreedChk
@@ -289,6 +289,8 @@ Section "Install" SecMain
   CreateShortcut "$SMPROGRAMS\NEWS MEVA\Install Autostart.lnk" "$INSTDIR\windows\Install Autostart.bat"
   CreateShortcut "$SMPROGRAMS\NEWS MEVA\Remove Autostart.lnk" "$INSTDIR\windows\Remove Autostart.bat"
   CreateShortcut "$SMPROGRAMS\NEWS MEVA\NEWS MEVA Website.lnk" "http://localhost:3002"
+  CreateShortcut "$SMPROGRAMS\NEWS MEVA\News Meva Mini.lnk" "https://newsmeva.pages.dev/"
+  CreateShortcut "$SMPROGRAMS\NEWS MEVA\Broadcast & banner feed.lnk" "https://newsmeva.pages.dev/api/announcements"
   CreateShortcut "$SMPROGRAMS\NEWS MEVA\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 
   ; --- Desktop shortcut ---
