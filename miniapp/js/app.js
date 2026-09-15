@@ -193,7 +193,7 @@ function handleViewContentClick(e) {
 
 function handleViewContentSubmit(e) {
   e.preventDefault();
-  const form = e.currentTarget;
+  const form = e.target;
   if (form.id === 'task-form') return handleTaskFormSubmit(form);
   if (form.id === 'script-form') return handleScriptFormSubmit(form);
   if (form.id === 'sync-config-form') return handleSyncConfig(form);

@@ -8,7 +8,10 @@ export function setupBackup() {
 
   if (exportBtn) exportBtn.addEventListener('click', doExport);
   if (importBtn) importBtn.addEventListener('click', () => fileInput?.click());
-  if (fileInput) fileInput.addEventListener('change', handleImport);
+  if (fileInput && !fileInput.dataset.backupWired) {
+    fileInput.dataset.backupWired = '1';
+    fileInput.addEventListener('change', handleImport);
+  }
 }
 
 async function doExport() {

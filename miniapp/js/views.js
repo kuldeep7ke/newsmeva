@@ -2,6 +2,7 @@ import { getTasks, getCategories, getScripts, localDateStr, addTask } from './db
 import { PRIORITY_CONFIG, TASK_TYPES } from './seed.js';
 import { t } from './i18n.js';
 import { escapeHtml, refreshIcons, statusLabel, renderTaskCard, renderTaskModal, renderOnboarding, closeOnboarding, icon } from './components.js';
+import { setupBackup } from './backup.js';
 
 let syncModule = null;
 
@@ -44,11 +45,11 @@ export async function renderDashboard() {
     <section class="card">
       <h3>${t('quick_create')}</h3>
       <form id="dashboard-create" class="quick-create">
-        <input class="field" name="title" placeholder="${t('placeholder_add_task')}" required />
-        <select class="field" name="taskType" style="max-width:170px">
+        <input class="field" name="title" placeholder="${t('placeholder_add_task')}" aria-label="${t('placeholder_add_task')}" required />
+        <select class="field" name="taskType" aria-label="${t('task_type')}" style="max-width:170px">
           ${TASK_TYPES.map((tt) => `<option value="${tt.value}">${tt.label}</option>`).join('')}
         </select>
-        <select class="field" name="priority" style="max-width:120px">
+        <select class="field" name="priority" aria-label="${t('priority')}" style="max-width:120px">
           ${['urgent','high','medium','low'].map((p) => `<option value="${p}"${p==='medium'?' selected':''}>${p}</option>`).join('')}
         </select>
         <button class="btn btn-primary">${t('add')}</button>
@@ -73,11 +74,11 @@ export async function renderTasks() {
   const content = document.querySelector('#view-content');
   content.innerHTML = `
     <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
-      <select class="field" id="tasks-priority-filter" style="max-width:140px">
+      <select class="field" id="tasks-priority-filter" aria-label="${t('priority')}" style="max-width:140px">
         <option value="all">All Priority</option>
         ${Object.keys(PRIORITY_CONFIG).map((p) => `<option value="${p}">${PRIORITY_CONFIG[p].label}</option>`).join('')}
       </select>
-      <input class="field" id="tasks-search" placeholder="Search tasks..." style="max-width:220px" />
+      <input class="field" id="tasks-search" placeholder="Search tasks..." aria-label="Search tasks" style="max-width:220px" />
     </div>
     <div class="card"><div class="task-list" id="tasks-list">
       ${open.length ? open.map((tk) => renderTaskCard(tk, categoryMap.get(tk.categoryId)?.name)).join('') : `<p class="empty-state">${t('no_tasks')}</p>`}
@@ -231,12 +232,12 @@ export async function renderCloud() {
       <p class="muted" id="sync-connected-url" style="font-size:0.82rem;margin:0.5rem 0 0;display:none"></p>
       <form id="sync-config-form">
         <div class="field-group">
-          <label class="field-label">${t('cloud_supabase_url')}</label>
-          <input class="field" name="url" type="url" placeholder="https://your-project.supabase.co" />
+          <label class="field-label" for="sync-url">${t('cloud_supabase_url')}</label>
+          <input class="field" id="sync-url" name="url" type="url" placeholder="https://your-project.supabase.co" />
         </div>
         <div class="field-group">
-          <label class="field-label">${t('cloud_supabase_key')}</label>
-          <input class="field" name="key" placeholder="your-anon-key" />
+          <label class="field-label" for="sync-key">${t('cloud_supabase_key')}</label>
+          <input class="field" id="sync-key" name="key" placeholder="your-anon-key" />
         </div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
           <button type="submit" class="btn btn-primary">${t('cloud_connect')}</button>
@@ -248,7 +249,7 @@ export async function renderCloud() {
     <div class="card">
       <h3>Supabase Setup</h3>
       <p class="muted" style="font-size:0.85rem;margin:0 0 0.75rem">${t('cloud_schema_info')}</p>
-      <textarea class="field" readonly style="font-family:monospace;font-size:0.78rem;min-height:120px;background:var(--surface-soft)">create table if not exists public.sync_docs (
+      <textarea class="field" id="sync-schema" name="syncSchema" readonly aria-label="Supabase schema" style="font-family:monospace;font-size:0.78rem;min-height:120px;background:var(--surface-soft)">create table if not exists public.sync_docs (
   id text primary key,
   entity text not null,
   data jsonb not null,
@@ -297,6 +298,7 @@ export async function renderBackup() {
     </div>
   `;
   refreshIcons();
+  setupBackup();
 }
 
 export async function renderSettings() {
@@ -324,7 +326,7 @@ export async function renderSettings() {
       <h3>${t('settings_language')}</h3>
       <div class="setting-row">
         <div class="setting-label">Language</div>
-        <select class="field" id="lang-select" style="max-width:160px">
+        <select class="field" id="lang-select" aria-label="${t('settings_language')}" style="max-width:160px">
           <option value="en" ${lang === 'en' ? 'selected' : ''}>English</option>
           <option value="mr" ${lang === 'mr' ? 'selected' : ''}>मराठी</option>
           <option value="hi" ${lang === 'hi' ? 'selected' : ''}>हिंदी</option>
@@ -349,7 +351,7 @@ export async function renderAbout() {
       <h3>${t('about_title')}</h3>
       <p style="margin:0.5rem 0;color:var(--muted)">${t('about_desc')}</p>
       <p style="margin:0.5rem 0"><strong>${t('about_version')}:</strong> v3.2.0 Beta</p>
-      <a href="https://github.com/kuldeep7ke/newsmeva" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="margin-top:0.5rem">${icon('github')} ${t('about_github')}</a>
+      <a href="https://github.com/kuldeep7ke/newsmeva" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="margin-top:0.5rem">${icon('external-link')} ${t('about_github')}</a>
     </div>
     <div class="card">
       <h3>${t('about_how_it_works')}</h3>
