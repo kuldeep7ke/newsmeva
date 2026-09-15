@@ -1,3 +1,8 @@
+> Search-oriented keywords: newsroom management software, news task manager,
+> teleprompter app, breaking news tracker, news scripts editor, editorial
+> workflow, broadcast teleprompter, news team workflow, newsroom suite,
+> offline-first news app, Android news app, Marathi newsroom.
+
 # NEWS MEVA
 
 A complete Marathi newsroom management suite for LAN or cloud deployment —

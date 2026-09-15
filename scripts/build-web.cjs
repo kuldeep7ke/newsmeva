@@ -10,7 +10,7 @@ const ROOT = path.resolve(__dirname, '..');
 const WWW = path.join(ROOT, 'www');
 const MINIAPP = path.join(ROOT, 'miniapp');
 
-const ASSETS = ['index.html', 'css', 'js', 'vendor', 'assets'];
+const ASSETS = ['index.html', 'css', 'js', 'vendor', 'assets', 'robots.txt', 'sitemap.xml'];
 
 // Clean www/
 if (fs.existsSync(WWW)) fs.rmSync(WWW, { recursive: true });

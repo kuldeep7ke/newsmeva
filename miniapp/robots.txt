@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kuldeep7ke.github.io/newsmeva/sitemap.xml
