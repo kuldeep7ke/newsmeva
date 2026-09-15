@@ -61,3 +61,6 @@ data-snapshots/
 
 # Obsidian vault local config
 .obsidian/
+
+www/
+node_modules/

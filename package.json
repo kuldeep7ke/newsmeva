@@ -1,10 +1,20 @@
 {
-  "name": "workstation-meva-online",
-  "version": "3.0.0",
+  "name": "newsmeva-mini",
+  "version": "1.0.0",
   "private": true,
+  "description": "News Meva Mini — offline-first newsroom task manager & teleprompter",
   "scripts": {
-    "build": "cd backend && npm run build && cd ../frontend && npm run build",
-    "start": "cd backend && npm start",
-    "dev": "cd backend && npm run dev"
+    "build": "node scripts/build-web.cjs",
+    "cap:sync": "npx cap sync android",
+    "cap:copy": "npx cap copy android",
+    "cap:build": "npx cap build android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/local-notifications": "^8.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.2"
   }
 }

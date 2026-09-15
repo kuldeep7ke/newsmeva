@@ -1,0 +1,8 @@
+{
+  "appId": "com.newsmeva",
+  "appName": "News Meva Mini",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true
+  }
+}
