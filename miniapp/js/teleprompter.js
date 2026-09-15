@@ -105,34 +105,40 @@ export function openPrompter(container, scriptContent, settings = {}) {
     state.speed = Math.min(10, state.speed + 1);
     document.querySelector('#tp-speed-label').textContent = state.speed;
     flashSpeed(state.speed);
+    localStorage.setItem('tp_speed', String(state.speed));
   });
 
   document.querySelector('#tp-speed-down').addEventListener('click', () => {
     state.speed = Math.max(-10, state.speed - 1);
     document.querySelector('#tp-speed-label').textContent = state.speed;
     flashSpeed(state.speed);
+    localStorage.setItem('tp_speed', String(state.speed));
   });
 
   document.querySelector('#tp-font-up').addEventListener('click', () => {
     state.fontSize = Math.min(72, state.fontSize + 4);
     scrollArea.style.fontSize = state.fontSize + 'px';
+    localStorage.setItem('tp_fontSize', String(state.fontSize));
   });
 
   document.querySelector('#tp-font-down').addEventListener('click', () => {
     state.fontSize = Math.max(16, state.fontSize - 4);
     scrollArea.style.fontSize = state.fontSize + 'px';
+    localStorage.setItem('tp_fontSize', String(state.fontSize));
   });
 
   document.querySelector('#tp-mirror').addEventListener('click', (e) => {
     state.mirror = !state.mirror;
     scrollArea.classList.toggle('mirror', state.mirror);
     e.currentTarget.classList.toggle('active', state.mirror);
+    localStorage.setItem('tp_mirror', state.mirror ? '1' : '0');
   });
 
   ['left', 'center', 'right'].forEach((align) => {
     document.querySelector(`#tp-align-${align}`).addEventListener('click', (e) => {
       state.textAlign = align;
       scrollArea.style.textAlign = align;
+      localStorage.setItem('tp_align', align);
       ['left', 'center', 'right'].forEach((a) => {
         document.querySelector(`#tp-align-${a}`).classList.toggle('active', a === align);
       });

@@ -160,6 +160,11 @@ export async function addActivity(entry) {
 
 export async function getActivities() { return db.activities.orderBy('timestamp').reverse().toArray(); }
 
+export async function getByUuid(table, uuid) {
+  const rows = await db.table(table).where('uuid').equals(uuid).toArray();
+  return rows[0] || null;
+}
+
 export async function exportData() {
   return {
     version: 1,

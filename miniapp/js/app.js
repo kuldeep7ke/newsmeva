@@ -1,4 +1,4 @@
-import { seedDatabase, addTask, updateTask, deleteTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript, getCategories, getScripts, localDateStr } from './db.js';
+import { seedDatabase, addTask, updateTask, deleteTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript, getCategories, getScripts, getTemplatesByCategory, localDateStr } from './db.js';
 import { renderSidebar, refreshIcons, statusLabel, escapeHtml, closeOnboarding, icon } from './components.js';
 import { renderDashboard, renderTasks, renderTeleprompterList, renderScripts, renderScriptEditor, renderRecycleBin, renderCloud, renderBridge, renderBackup, renderSettings, renderAbout, showOnboarding, updateSyncStatusUI } from './views.js';
 import { setupBackup } from './backup.js';
@@ -121,6 +121,12 @@ function closeTaskModal() {
 }
 
 function handleViewContentClick(e) {
+  const syncPush = e.target.closest('#sync-push-btn');
+  if (syncPush) return sync.pushAll().then(() => refreshCurrentView());
+  const syncPull = e.target.closest('#sync-pull-btn');
+  if (syncPull) return sync.pullAll().then(() => refreshCurrentView());
+  const syncDisconnect = e.target.closest('#sync-disconnect-btn');
+  if (syncDisconnect) return sync.disconnect().then(() => refreshCurrentView());
   const nextBtn = e.target.closest('[data-task-next]');
   if (nextBtn) return handleTaskNext(nextBtn.dataset.taskNext);
   const viewBtn = e.target.closest('[data-task-view]');
@@ -151,6 +157,8 @@ function handleViewContentSubmit(e) {
   if (form.id === 'bridge-form') return handleBridgeLogin(form);
   if (form.id === 'bridge-pair-form') return handleBridgePair(form);
   if (form.id === 'sync-config-form') return handleSyncConfig(form);
+  if (form.id === 'sync-push-form') return sync.pushAll().then(() => refreshCurrentView());
+  if (form.id === 'sync-pull-form') return sync.pullAll().then(() => refreshCurrentView());
 }
 
 function handleViewContentChange(e) {
@@ -188,7 +196,7 @@ async function handleTaskView(taskId) {
 
 async function openTaskModal(taskId) {
   const categories = await getCategories();
-  const templates = taskId ? null : null;
+  const templates = taskId ? null : await getTemplatesByCategory(0);
   const task = taskId ? await getTask(taskId) : null;
   const { renderTaskModal } = await import('./components.js');
   renderTaskModal(task, categories, templates);

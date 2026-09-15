@@ -13,56 +13,64 @@ export function statusLabel(status) { return STATUS_LABEL_MAP[status] || status?
 
 export function renderSidebar(activeView) {
   const sidebar = document.querySelector('#sidebar');
-  const nav = [
-    { section: t('dashboard') },
-    { id: 'dashboard', label: t('dashboard'), icon: 'layout-dashboard' },
-    { id: 'tasks', label: t('tasks'), icon: 'list-todo' },
-    { id: 'teleprompter-list', label: t('teleprompter'), icon: 'monitor' },
-    { id: 'scripts', label: t('scripts'), icon: 'file-text' },
-    { divider: true },
-    { id: 'cloud', label: t('cloud_sync'), icon: 'cloud' },
-    { id: 'bridge', label: 'News Meva Account', icon: 'link' },
-    { id: 'backup', label: t('backup'), icon: 'download' },
-    { divider: true },
-    { section: 'More' },
-    { id: 'settings', label: t('settings'), icon: 'settings' },
-    { id: 'about', label: t('about'), icon: 'info' }
-  ];
-
   sidebar.innerHTML = `
-    <div class="sidebar-brand">
-      <img src="assets/logo.svg" alt="Logo" width="36" height="36" />
-      <span>${t('app_name')}</span>
+    <div class="sidebar-main">
+      <a href="#" class="brand" data-nav="dashboard"><img src="assets/logo.svg" alt="${t('app_name')}" class="brand-logo" width="38" height="38"/><span>${t('app_name')}</span></a>
+      <div class="sidebar-section">
+        <p class="sidebar-title">${t('dashboard')}</p>
+        ${[
+          ['dashboard', 'layout-dashboard', t('dashboard')],
+          ['tasks', 'list-todo', t('tasks')],
+          ['teleprompter-list', 'monitor', t('teleprompter')],
+          ['scripts', 'file-text', t('scripts')],
+        ].map(([view, iconName, label]) => `<button class="nav-item ${activeView === view ? 'active' : ''}" data-nav="${view}">${icon(iconName)}<span>${label}</span></button>`).join('')}
+      </div>
+      <div class="sidebar-section">
+        <p class="sidebar-title">Sync</p>
+        ${[
+          ['cloud', 'cloud', t('cloud_sync')],
+          ['bridge', 'link', 'News Meva Account'],
+          ['backup', 'download', t('backup')],
+        ].map(([view, iconName, label]) => `<button class="nav-item ${activeView === view ? 'active' : ''}" data-nav="${view}">${icon(iconName)}<span>${label}</span></button>`).join('')}
+      </div>
+      <div class="sidebar-section">
+        <p class="sidebar-title">More</p>
+        ${[
+          ['recycle', 'trash-2', t('recycle_bin')],
+        ].map(([view, iconName, label]) => `<button class="nav-item ${activeView === view ? 'active' : ''}" data-nav="${view}">${icon(iconName)}<span>${label}</span></button>`).join('')}
+      </div>
     </div>
-    ${nav.map((item) => {
-      if (item.divider) return '<div class="sidebar-divider"></div>';
-      if (item.section) return `<div class="sidebar-section">${item.section}</div>`;
-      return `<button class="sidebar-item${activeView === item.id ? ' active' : ''}" data-nav="${item.id}">${icon(item.icon)}<span>${item.label}</span></button>`;
-    }).join('')}
+    <div class="sidebar-settings">
+      ${[
+        ['settings', 'settings', t('settings')],
+        ['about', 'info', t('about')],
+      ].map(([view, iconName, label]) => `<button class="settings-item ${activeView === view ? 'active' : ''}" data-nav="${view}">${icon(iconName)}<span>${label}</span></button>`).join('')}
+    </div>
   `;
   refreshIcons();
 }
 
 export function renderTaskCard(task, categoryName) {
-  const badgeClass = `badge-${task.status}`;
-  const priorityBadge = task.priority === 'urgent' ? `<span class="badge badge-urgent">Urgent</span>` : '';
+  const isOpen = task.status !== 'completed' && task.status !== 'cancelled' && !task.deletedAt;
+  const statusClass = task.status === 'completed' ? 'completed' : task.status === 'cancelled' ? 'completed' : '';
   return `
-    <div class="task-card" data-task-id="${task.id}">
-      <div style="flex:1;min-width:0">
-        <div class="task-card-title">${escapeHtml(task.title)}</div>
-        <div class="task-card-meta">
-          <span class="badge ${badgeClass}">${statusLabel(task.status)}</span>
-          ${priorityBadge}
-          ${task.taskType ? `<span>${escapeHtml(task.taskType.replace(/_/g, ' '))}</span>` : ''}
+    <article class="task-card ${statusClass}" data-task-id="${task.id}">
+      ${task.status !== 'completed' && task.status !== 'cancelled' ? `<button class="status-btn" data-task-next="${task.id}" title="${t('next_stage')}">${icon('arrow-right')}</button>` : `<button class="status-btn completed" disabled>${icon('check')}</button>`}
+      <div>
+        <p class="task-title">${escapeHtml(task.title)}</p>
+        ${task.description ? `<p class="muted" style="font-size:0.85rem;margin:0 0 4px">${escapeHtml(task.description).slice(0, 80)}</p>` : ''}
+        <div class="task-meta">
+          <span class="badge badge-${task.status}">${statusLabel(task.status)}</span>
           ${categoryName ? `<span>${escapeHtml(categoryName)}</span>` : ''}
           ${task.dueDate ? `<span>${escapeHtml(task.dueDate)}</span>` : ''}
         </div>
+        ${isOpen ? `<div class="task-actions">
+          <button class="chip-btn" data-task-next="${task.id}" title="${t('next_stage')}">${icon('arrow-right')}<span>${t('next_stage')}</span></button>
+          <button class="chip-btn" data-task-view="${task.id}" title="${t('view_task')}">${icon('eye')}<span>${t('view_task')}</span></button>
+        </div>` : ''}
       </div>
-      <div class="task-card-actions">
-        ${task.status !== 'completed' && task.status !== 'cancelled' ? `<button class="btn btn-sm btn-primary" data-task-next="${task.id}" title="${t('next_stage')}">${icon('arrow-right')}</button>` : ''}
-        <button class="btn btn-sm" data-task-view="${task.id}" title="${t('view_task')}">${icon('eye')}</button>
-      </div>
-    </div>
+      <span class="badge badge-${task.priority}">${t('priority_' + task.priority)}</span>
+    </article>
   `;
 }
 
