@@ -61,6 +61,46 @@ automatically syncs everything back the moment the connection returns.
 - **Polished loading UX** — branded splash on boot, shimmer skeletons while
   pages fetch data (no spinners)
 
+---
+
+## News Meva Mini (web + Android APK)
+
+A trimmed, mobile-first companion app for the whole studio on the go — the same
+all-in-one **task manager, teleprompter, and script editor** with a warm
+TodoMeva-style UI (3-column task cards, priority badges, category chips).
+
+**Live:**
+
+| Channel | URL |
+|---------|-----|
+| GitHub Pages | [kuldeep7ke.github.io/newsmeva](https://kuldeep7ke.github.io/newsmeva/) |
+| Cloudflare Pages | [newsmeva.pages.dev](https://newsmeva.pages.dev/) |
+| Android APK | built automatically, artifact `newsmeva-mini-apk` in GitHub Actions → `build-android-apk.yml` |
+
+**What's inside** (source: `miniapp/`):
+
+- **16-stage newsroom workflow** (draft → … → published/completed), **33 task
+  types**, 6 footage types, category picker, priorities, recycle bin
+- **Teleprompter** — full-screen auto-scroll prompter with speed/font-size/mirror/
+  alignment controls (settings persist), manual-scroll pause, "Prompt Now" from scripts
+- **Scripts** — create/edit/delete, word + char counts
+- **Cloud sync (Tier 1)** — bring your own Supabase project, realtime push/pull
+- **News Meva bridge (Tier 2)** — optional account login + pair-code REST sync
+- **Backup** — full JSON export/import of all tables
+- **Settings & i18n** — theme (light/dark), brand color, language (EN / MR / HI)
+
+**Build & ship:**
+
+```bash
+npm install          # Capacitor deps at repo root
+npm run build        # miniapp/ -> www/ via scripts/build-web.cjs
+npx cap sync android # push www/ into the Android wrapper (android/)
+cd android && ./gradlew assembleDebug   # APK in app/build/outputs/apk/debug/
+```
+
+CI (`GitHub Actions`) builds the APK, static GitHub Pages, and static Cloudflare
+Pages `newsmeva` on every push to `main`. Changelog: [`CHANGES.md`](CHANGES.md).
+
 ## Quick Start (fastest — Windows)
 
 ```bat
@@ -175,7 +215,10 @@ SQLite via sql.js) alongside Supabase.
 ```
 backend/           Express + Socket.IO API (TS -> dist/), sync engine, mirror DB
 frontend/          React SPA (Vite)
-android/           Android wrapper app (bundles Node runtime)
+miniapp/           News Meva Mini — static vanilla-JS web app (web + Android APK)
+android/           Android wrapper: Capacitor app (News Meva Mini) OR legacy bundled-Node wrapper
+scripts/           Build tooling (scripts/build-web.cjs stages miniapp/ -> www/)
+.github/workflows/ CI: Android APK, GitHub Pages, Cloudflare Pages
 docs/              All guides: memory capsule, from-scratch blueprint, setup guides
 proxy/             Optional reverse proxy: Caddyfile (:80 -> :3002) + caddy.exe (Windows)
 ubuntu/            Ubuntu/Debian installer + systemd service + start/stop scripts
