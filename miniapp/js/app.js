@@ -1,6 +1,6 @@
 import { seedDatabase, addTask, updateTask, deleteTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript, restoreScript, permanentDeleteScript, getScriptByTask, wipeAllData } from './db.js';
 import { renderSidebar, refreshIcons, closeOnboarding, icon, escapeHtml, confirmDialog } from './components.js';
-import { renderDashboard, renderTasks, renderTeleprompterList, renderScripts, renderScriptEditor, renderRecycleBin, renderCloud, renderBackup, renderSettings, renderAbout, renderGuideBasic, renderGuideRecommended, showOnboarding, updateSyncStatusUI } from './views.js';
+import { renderDashboard, renderTasks, renderTeleprompterList, renderScripts, renderScriptEditor, renderRecycleBin, renderCloud, renderIdentity, renderBackup, renderSettings, renderAbout, renderGuideBasic, renderGuideRecommended, showOnboarding, updateSyncStatusUI } from './views.js';
 import { setupBackup } from './backup.js';
 import { initLang, setLang, t } from './i18n.js';
 import { openPrompter } from './teleprompter.js';
@@ -215,6 +215,8 @@ function handleViewContentClick(e) {
     }
     return;
   }
+  const settingsIdentityBtn = e.target.closest('#settings-identity-btn');
+  if (settingsIdentityBtn) return navigateTo('identity');
   const settingsCloudBtn = e.target.closest('#settings-cloud-btn');
   if (settingsCloudBtn) return navigateTo('cloud');
   const settingsBackupBtn = e.target.closest('#settings-backup-btn');
@@ -281,6 +283,7 @@ function handleViewContentSubmit(e) {
   if (form.id === 'task-form') return handleTaskFormSubmit(form);
   if (form.id === 'script-form') return handleScriptFormSubmit(form);
   if (form.id === 'sync-config-form') return handleSyncConfig(form);
+  if (form.id === 'identity-form') return handleIdentityForm(form);
 }
 
 function handleViewContentChange(e) {
@@ -529,12 +532,17 @@ async function handleSyncConfig(form) {
   const fd = new FormData(form);
   const url = fd.get('url')?.trim();
   const key = fd.get('key')?.trim();
-  const channel = fd.get('channel')?.trim();
-  const user = fd.get('user')?.trim();
   if (!url || !key) return;
-  if (channel) localStorage.setItem('newsMeva_channel', channel.toLowerCase());
-  if (user) localStorage.setItem('newsMeva_userName', user);
   try { await sync.connect({ url, key }); } catch (err) { console.error('Sync connect error:', err); }
+}
+
+function handleIdentityForm(form) {
+  const fd = new FormData(form);
+  const user = fd.get('user')?.trim();
+  const channel = fd.get('channel')?.trim().toLowerCase();
+  if (user) localStorage.setItem('newsMeva_userName', user);
+  if (channel) localStorage.setItem('newsMeva_channel', channel);
+  refreshCurrentView();
 }
 
 function handleOnboardNext() {
@@ -567,6 +575,7 @@ export async function navigateTo(view, param) {
     'teleprompter-list': t('teleprompter'),
     scripts: t('scripts'),
     cloud: t('cloud_sync'),
+    identity: t('identity'),
     backup: t('backup'),
     settings: t('settings'),
     about: t('about'),
@@ -589,6 +598,7 @@ export async function navigateTo(view, param) {
     case 'scripts': await renderScripts(); break;
     case 'script-editor': await renderScriptEditor(param); break;
     case 'cloud': await renderCloud(); break;
+    case 'identity': await renderIdentity(); break;
     case 'backup': await renderBackup(); break;
     case 'settings': await renderSettings(); break;
     case 'about': await renderAbout(); break;

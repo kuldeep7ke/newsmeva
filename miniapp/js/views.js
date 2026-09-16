@@ -256,7 +256,6 @@ export async function renderRecycleBin() {
 export async function renderCloud() {
   let sync;
   try { sync = await loadSync(); } catch { sync = null; }
-  const identity = getIdentity();
   const content = document.querySelector('#view-content');
   content.innerHTML = `
     <div class="card">
@@ -276,16 +275,6 @@ export async function renderCloud() {
         <div class="field-group">
           <label class="field-label" for="sync-key">${t('cloud_supabase_key')}</label>
           <input class="field" id="sync-key" name="key" placeholder="your-anon-key" />
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
-          <div class="field-group">
-            <label class="field-label" for="sync-channel">${t('cloud_channel')}</label>
-            <input class="field" id="sync-channel" name="channel" type="text" maxlength="40" placeholder="${t('cloud_channel_ph')}" value="${escapeHtml(identity.channel || '')}" />
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="sync-user">${t('cloud_user')}</label>
-            <input class="field" id="sync-user" name="user" type="text" maxlength="40" placeholder="${t('cloud_user_ph')}" value="${escapeHtml(identity.user || '')}" />
-          </div>
         </div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
           <button type="submit" class="btn btn-primary">${t('cloud_connect')}</button>
@@ -308,15 +297,36 @@ export async function renderCloud() {
       const urlLine = document.querySelector('#sync-connected-url');
       if (urlLine) {
         urlLine.style.display = 'block';
-        const bits = [];
-        if (cfg.url) bits.push(`${t('cloud_connected_to')}: ${cfg.url}`);
-        bits.push(`${t('cloud_channel')}: ${identity.channel || t('cloud_channel_ph')}`);
-        bits.push(`${t('cloud_user')}: ${identity.user || t('cloud_user_ph')}`);
-        urlLine.textContent = bits.join(' · ');
+        urlLine.textContent = `${t('cloud_connected_to')}: ${cfg.url}`;
       }
     }
     updateSyncStatusUI(sync.getSyncStatus());
   }
+  refreshIcons();
+}
+
+export async function renderIdentity() {
+  const identity = getIdentity();
+  const content = document.querySelector('#view-content');
+  content.innerHTML = `
+    <div class="card">
+      <h3>${t('identity')}</h3>
+      <p class="muted" style="font-size:0.88rem;margin:0 0 1rem">${t('identity_info')}</p>
+      <form id="identity-form">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+          <div class="field-group">
+            <label class="field-label" for="identity-user">${t('cloud_user')}</label>
+            <input class="field" id="identity-user" name="user" type="text" maxlength="40" placeholder="${t('cloud_user_ph')}" value="${escapeHtml(identity.user || '')}" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="identity-channel">${t('cloud_channel')}</label>
+            <input class="field" id="identity-channel" name="channel" type="text" maxlength="40" placeholder="${t('cloud_channel_ph')}" value="${escapeHtml(identity.channel || '')}" />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">${t('save')}</button>
+      </form>
+    </div>
+  `;
   refreshIcons();
 }
 
@@ -410,6 +420,16 @@ export async function renderSettings() {
           <option value="mr" ${lang === 'mr' ? 'selected' : ''}>मराठी</option>
           <option value="hi" ${lang === 'hi' ? 'selected' : ''}>हिंदी</option>
         </select>
+      </div>
+    </div>
+    <div class="card">
+      <h3>${t('identity')}</h3>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">${t('cloud_user')} / ${t('cloud_channel')}</div>
+          <div class="setting-sub">${t('identity_info')}</div>
+        </div>
+        <button class="btn btn-ghost" id="settings-identity-btn">${t('s_open')}</button>
       </div>
     </div>
     <div class="card">
