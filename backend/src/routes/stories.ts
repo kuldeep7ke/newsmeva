@@ -140,6 +140,12 @@ router.put('/:id', authenticate, authorize(1, 2, 3), async (req: AuthRequest, re
 
   if (status !== undefined) {
     if (!STATUSES.includes(status)) return res.status(400).json({ error: 'Invalid status.' });
+    // Approval transitions are admin/manager-only via the dedicated
+    // /confirm and /send-to-tasks endpoints — a level-3 user must not
+    // self-approve their own story through the generic PUT.
+    if (req.user!.access_level === 3 && (status === 'approved' || status === 'send_to_tasks')) {
+      return res.status(403).json({ error: 'Only managers and admins can approve stories.' });
+    }
     const allowed = STORY_TRANSITIONS[story.status] || [];
     if (!allowed.includes(status)) {
       return res.status(400).json({ error: `Cannot transition from '${story.status}' to '${status}'. Allowed: ${allowed.join(', ') || 'none'}` });

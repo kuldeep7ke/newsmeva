@@ -46,7 +46,7 @@ export default function SignUp() {
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       if (res.data.user.access_level !== 1) {
-        saveLogin(res.data.user.email, res.data.user.full_name, form.password);
+        saveLogin(res.data.user.email, res.data.user.full_name, res.data.token);
       }
       navigate('/onboarding');
     } catch (err: any) {

@@ -107,7 +107,19 @@ async function fetchJson(url) {
   } catch { return null; }
 }
 
-function safeUrl(value) { try { return new URL(value, location.href).href; } catch { return null; } }
+function safeUrl(value) {
+  try {
+    const url = new URL(value, location.href);
+    // Reject dangerous schemes that could lead to XSS
+    const scheme = url.protocol.toLowerCase();
+    if (scheme === 'javascript:' || scheme === 'data:') {
+      return null;
+    }
+    return url.href;
+  } catch {
+    return null;
+  }
+}
 
 // ── Broadcast pills ──
 

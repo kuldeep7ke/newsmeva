@@ -246,10 +246,38 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   // Exclude trashed tasks unless explicitly filtering for them
   const filteredTasks = qStatus === 'trashed' ? tasks : (tasks as any[]).filter((t: any) => t.status !== 'trashed');
 
+  res.json(filteredTasks);
+});
+
+router.post('/auto-manage', authenticate, authorize(1, 2), async (req: AuthRequest, res: Response) => {
   const now = new Date();
   const nowMs = now.getTime();
   const terminalStatuses = ['completed', 'cancelled', 'published', 'under_review'];
-  for (const task of filteredTasks as any[]) {
+  
+  // Get all non-trashed tasks for processing
+  const tasks = await prepare(`
+    SELECT t.*, a.full_name as assigned_to_name, a.role as assigned_to_role, a.access_level as assigned_to_level,
+      b.full_name as assigned_by_name, ve.full_name as video_editor_name,
+      r.name as reporter_name, r.location as reporter_location,
+      ar.name as archive_name, ar.details as archive_details, ar.location as archive_location,
+      lc.name as location_name, lc.region as location_region,
+      bl.title as bulletin_title, bt.name as bulletin_template_name, bt.publish_time as bulletin_template_time,
+      (SELECT COUNT(*) FROM task_collaborators tc JOIN profiles cp ON cp.id = tc.profile_id WHERE tc.task_id = t.id AND (cp.access_level IS NULL OR cp.access_level > 1)) as collaborator_count
+    FROM tasks t
+    LEFT JOIN profiles a ON t.assigned_to = a.id
+    LEFT JOIN profiles b ON t.assigned_by = b.id
+    LEFT JOIN profiles ve ON t.video_editor_id = ve.id
+    LEFT JOIN reporters r ON t.reporter_id = r.id
+    LEFT JOIN archives ar ON t.archive_id = ar.id
+    LEFT JOIN locations lc ON t.location_id = lc.id
+    LEFT JOIN bulletins bl ON t.bulletin_id = bl.id
+    LEFT JOIN bulletin_templates bt ON t.bulletin_template_id = bt.id
+    WHERE t.status <> 'trashed'
+  `).all();
+
+  const processed = [];
+  for (const task of tasks as any[]) {
+    // Handle overdue cancellation for non-bulletin tasks
     if (!task.bulletin_template_id || !task.bulletin_template_time) {
       if (task.deadline && !terminalStatuses.includes(task.status)) {
         const dl = String(task.deadline);
@@ -257,10 +285,13 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
         if (deadlineMs < nowMs) {
           await prepare("UPDATE tasks SET status = 'cancelled', updated_at = datetime('now') WHERE id = ?").run(task.id);
           task.status = 'cancelled';
+          processed.push({ id: task.id, action: 'cancelled_overdue', status: 'cancelled' });
         }
       }
       continue;
     }
+    
+    // Handle deadline adjustment and grace period cancellation for bulletin tasks
     const [h, m] = task.bulletin_template_time.split(':').map(Number);
     const pubTimeToday = new Date();
     pubTimeToday.setHours(h, m, 0, 0);
@@ -272,15 +303,21 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
       if (task.deadline !== expectedStr) {
         await prepare("UPDATE tasks SET deadline = ?, updated_at = datetime('now') WHERE id = ?").run(expectedStr, task.id);
         task.deadline = expectedStr;
+        processed.push({ id: task.id, action: 'updated_deadline', deadline: expectedStr });
       }
       if (pubMs + graceMs < nowMs) {
         await prepare("UPDATE tasks SET status = 'cancelled', updated_at = datetime('now') WHERE id = ?").run(task.id);
         task.status = 'cancelled';
+        processed.push({ id: task.id, action: 'cancelled_grace_period', status: 'cancelled' });
       }
     }
   }
 
-  res.json(filteredTasks);
+  res.json({ 
+    success: true, 
+    processed_count: processed.length,
+    processed: processed
+  });
 });
 
 router.get('/trashed', authenticate, async (req: AuthRequest, res: Response) => {

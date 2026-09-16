@@ -1,6 +1,6 @@
 ﻿import { Router, Response } from 'express';
 import { prepare } from '../database/schema';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { authenticate, authorize, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
@@ -157,7 +157,7 @@ router.get('/reminders', authenticate, async (req: AuthRequest, res: Response) =
   res.json({ dueToday, expiringSoon });
 });
 
-router.get('/activity', authenticate, async (req: AuthRequest, res: Response) => {
+router.get('/activity', authenticate, authorize(1, 2), async (req: AuthRequest, res: Response) => {
   const raw = Number.parseInt(String(req.query.limit ?? '50'), 10);
   const limit = Number.isFinite(raw) && raw > 0 ? Math.min(raw, 500) : 50;
   const logs = await prepare(`

@@ -61,11 +61,11 @@ export function renderTaskCard(task, categoryName, pending = false) {
         <div class="task-card-top">
           <p class="task-title">${escapeHtml(task.title)}</p>
           ${pending ? `<span class="badge badge-new">${t('new_badge')}</span>` : ''}
-          <span class="badge badge-${task.priority} task-priority">${t('priority_' + task.priority)}</span>
+          <span class="badge badge-${escapeHtml(task.priority)} task-priority">${t('priority_' + escapeHtml(task.priority))}</span>
         </div>
         ${task.description ? `<p class="task-desc">${escapeHtml(task.description)}</p>` : ''}
         <div class="task-meta">
-          <span class="badge badge-${task.status}">${statusLabel(task.status)}</span>
+          <span class="badge badge-${escapeHtml(task.status)}">${statusLabel(escapeHtml(task.status))}</span>
           <span class="task-meta-type">${escapeHtml(typeLabel)}</span>
           ${categoryName ? `<span>${escapeHtml(categoryName)}</span>` : ''}
           ${task.dueDate ? `<span>${escapeHtml(task.dueDate)}</span>` : ''}

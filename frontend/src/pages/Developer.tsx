@@ -29,7 +29,7 @@ export default function Developer() {
   const [loading, setLoading] = useState(false);
   const [showLocalStorage, setShowLocalStorage] = useState(false);
   const [notifResult, setNotifResult] = useState('');
-  const [savedLoginEdits, setSavedLoginEdits] = useState<Record<string, { password: string; pin: string }>>({});
+  const [savedLoginEdits, setSavedLoginEdits] = useState<Record<string, { token?: string; pin: string }>>({});
   const [showCleanConfirm, setShowCleanConfirm] = useState(false);
   const [cleaning, setCleaning] = useState(false);
   const [loginTab, setLoginTab] = useState<'account' | 'saved'>('account');
@@ -153,11 +153,11 @@ export default function Developer() {
     setLoading(false);
   };
 
-  const refreshSavedLoginEdits = () => {
-    const edits: Record<string, { password: string; pin: string }> = {};
-    getSavedLogins().forEach(l => { edits[l.email] = { password: l.password || '', pin: l.pin || '' }; });
+const refreshSavedLoginEdits = () => {
+    const edits: Record<string, { token?: string; pin: string }> = {};
+    getSavedLogins().forEach(l => { edits[l.email] = { token: l.token, pin: l.pin || '' }; });
     setSavedLoginEdits(edits);
-  };
+};
 
   const saveLocalLogin = (email: string) => {
     const edit = savedLoginEdits[email];
@@ -166,7 +166,7 @@ export default function Developer() {
       toast('PIN must be empty or exactly 4 digits', 'error');
       return;
     }
-    updateSavedLogin(email, { password: edit.password, pin: edit.pin });
+    updateSavedLogin(email, { pin: edit.pin });
     refreshSavedLoginEdits();
     toast('Saved local login password/PIN', 'success');
   };
@@ -545,30 +545,31 @@ export default function Developer() {
               <>
                 <p className="text-xs text-surface-400 mb-4">These are local quick-login values saved only in this browser.</p>
                 <div className="space-y-2">
-                  {getSavedLogins().map((login) => {
-                    const edit = savedLoginEdits[login.email] || { password: login.password || '', pin: login.pin || '' };
-                    return (
-                      <div key={login.email} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_120px_auto] gap-2 items-end rounded-xl bg-surface-50 border border-surface-200 p-3">
-                        <div>
-                          <p className="text-sm font-medium text-surface-700">{login.full_name}</p>
-                          <p className="text-xs text-surface-400">{login.email}</p>
-                        </div>
-                        <div>
-                          <label className="flat-label">Saved Password</label>
-                          <input type="password" className="flat-input text-xs" value={edit.password}
-                            onChange={(e) => setSavedLoginEdits(prev => ({ ...prev, [login.email]: { ...edit, password: e.target.value } }))} />
-                        </div>
-                        <div>
-                          <label className="flat-label">PIN</label>
-                          <input inputMode="numeric" maxLength={4} className="flat-input text-xs" value={edit.pin}
-                            onChange={(e) => setSavedLoginEdits(prev => ({ ...prev, [login.email]: { ...edit, pin: e.target.value.replace(/\D/g, '').slice(0, 4) } }))} />
-                        </div>
-                        <button onClick={() => saveLocalLogin(login.email)} className="flat-btn-accent text-xs">
-                          <Save className="w-3 h-3" /> Save Local
-                        </button>
-                      </div>
-                    );
-                  })}
+{getSavedLogins().map((login) => {
+  const edit = savedLoginEdits[login.email] || { token: login.token || '', pin: login.pin || '' };
+  return (
+    <div key={login.email} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_120px_auto] gap-2 items-end rounded-xl bg-surface-50 border border-surface-200 p-3">
+      <div>
+        <p className="text-sm font-medium text-surface-700">{login.full_name}</p>
+        <p className="text-xs text-surface-400">{login.email}</p>
+      </div>
+
+      <div>
+        <label className="flat-label">Token Status</label>
+        <span className="text-xs">{edit.token ? '✓ Saved' : '✗ None'}</span>
+      </div>
+
+      <div>
+        <label className="flat-label">PIN</label>
+        <input inputMode="numeric" maxLength={4} className="flat-input text-xs" value={edit.pin}
+          onChange={(e) => setSavedLoginEdits(prev => ({ ...prev, [login.email]: { ...edit, pin: e.target.value.replace(/\D/g, '').slice(0, 4) } }))} />
+      </div>
+      <button onClick={() => saveLocalLogin(login.email)} className="flat-btn-accent text-xs">
+        <Save className="w-3 h-3" /> Save Local
+      </button>
+    </div>
+  );
+})}
                   {getSavedLogins().length === 0 && (
                     <p className="text-sm text-surface-400 py-4 text-center">No saved quick logins in this browser.</p>
                   )}

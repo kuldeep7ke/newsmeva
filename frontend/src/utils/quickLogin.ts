@@ -4,7 +4,7 @@ const HISTORY_KEY = 'session_history';
 export interface SavedLogin {
   email: string;
   full_name: string;
-  password: string;
+  token?: string;
   pin: string;
   lastLogin: string;
   access_level?: number;
@@ -25,11 +25,11 @@ export function getSavedLogins(): SavedLogin[] {
   } catch { return []; }
 }
 
-export function saveLogin(email: string, full_name: string, password: string, pin?: string, accessLevel?: number, role?: string) {
+export function saveLogin(email: string, full_name: string, token: string, pin?: string, accessLevel?: number, role?: string) {
   if (accessLevel === 1) return;
   const list = getSavedLogins().filter(l => l.email !== email);
   const existing = getSavedLogins().find(l => l.email === email);
-  list.unshift({ email, full_name, password, pin: pin || existing?.pin || '', lastLogin: new Date().toISOString(), access_level: accessLevel, role: role || existing?.role });
+  list.unshift({ email, full_name, token, pin: pin || existing?.pin || '', lastLogin: new Date().toISOString(), access_level: accessLevel, role: role || existing?.role });
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, 5)));
 }
 
@@ -42,7 +42,7 @@ export function updatePin(email: string, pin: string) {
   }
 }
 
-export function updateSavedLogin(email: string, updates: Partial<Pick<SavedLogin, 'password' | 'pin' | 'full_name'>>) {
+export function updateSavedLogin(email: string, updates: Partial<Pick<SavedLogin, 'pin' | 'full_name'>>) {
   const list = getSavedLogins();
   const entry = list.find(l => l.email === email);
   if (entry) {

@@ -34,7 +34,7 @@ const handleSubmit = async (e: FormEvent) => {
     if (data.user.access_level === 3) {
       // Profiles without an email can't quick-login via email — fall back to the
       // username they logged in with so the saved entry still works.
-      saveLogin(data.user.email || loginId, data.user.full_name, password, undefined, data.user.access_level, data.user.role);
+      saveLogin(data.user.email || loginId, data.user.full_name, data.token, undefined, data.user.access_level, data.user.role);
     }
     navigate(data.isNewUser ? '/onboarding' : '/dashboard');
     toast('Welcome back!', 'success');

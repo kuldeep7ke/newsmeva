@@ -25,10 +25,10 @@ function sanitizeIp(req: any): string {
 
 const router = Router();
 
-// List all active level-3 profiles (for landing page) — public read-only, no email exposure
-router.get('/level3', async (_req: AuthRequest, res: Response) => {
+// List all active level-3 profiles (for landing page) — authenticated read, no email exposure
+router.get('/level3', authenticate, async (_req: AuthRequest, res: Response) => {
   const profiles = await prepare(
-    "SELECT id, full_name, email, role, (CASE WHEN pin IS NOT NULL AND pin != '' THEN 1 ELSE 0 END) as has_pin FROM profiles WHERE access_level = 3 AND is_active = 1 AND is_archived = 0 ORDER BY full_name ASC"
+    "SELECT id, full_name, role, (CASE WHEN pin IS NOT NULL AND pin != '' THEN 1 ELSE 0 END) as has_pin FROM profiles WHERE access_level = 3 AND is_active = 1 AND is_archived = 0 ORDER BY full_name ASC"
   ).all();
   res.json(profiles);
 });
