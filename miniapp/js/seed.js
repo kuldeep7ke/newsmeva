@@ -6,41 +6,9 @@ export const PRIORITY_CONFIG = {
 };
 
 export const STATUS_CONFIG = {
-  draft: { label: 'Draft', order: 0 },
-  script_writing: { label: 'Script Writing', order: 1 },
-  footage_collection: { label: 'Footage Collection', order: 2 },
-  waiting_confirmation: { label: 'Waiting Confirmation', order: 3 },
-  correction_required: { label: 'Correction Required', order: 4 },
-  approved: { label: 'Approved', order: 5 },
-  editor_assigned: { label: 'Editor Assigned', order: 6 },
-  teleprompter_ready: { label: 'Teleprompter Ready', order: 7 },
-  prompting: { label: 'Prompting', order: 8 },
-  recording_done: { label: 'Recording Done', order: 9 },
-  editing: { label: 'Editing', order: 10 },
-  uploading: { label: 'Uploading', order: 11 },
-  published: { label: 'Published', order: 12 },
-  under_review: { label: 'Under Review', order: 13 },
-  completed: { label: 'Completed', order: 14 },
-  cancelled: { label: 'Cancelled', order: 15 }
-};
-
-export const STATUS_STEPS = {
-  draft: ['script_writing', 'footage_collection'],
-  script_writing: ['waiting_confirmation'],
-  footage_collection: ['waiting_confirmation'],
-  waiting_confirmation: ['approved', 'correction_required'],
-  correction_required: ['script_writing', 'footage_collection'],
-  approved: ['editor_assigned'],
-  editor_assigned: ['teleprompter_ready'],
-  teleprompter_ready: ['prompting'],
-  prompting: ['recording_done'],
-  recording_done: ['editing'],
-  editing: ['uploading'],
-  uploading: ['published'],
-  published: ['under_review', 'completed'],
-  under_review: ['completed', 'correction_required'],
-  completed: [],
-  cancelled: []
+  draft: { label: 'To Do', order: 0 },
+  completed: { label: 'Completed', order: 1 },
+  cancelled: { label: 'Cancelled', order: 2 }
 };
 
 export const TASK_TYPES = [

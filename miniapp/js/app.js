@@ -1,5 +1,5 @@
-import { seedDatabase, addTask, updateTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript } from './db.js';
-import { renderSidebar, refreshIcons, closeOnboarding, icon } from './components.js';
+import { seedDatabase, addTask, updateTask, deleteTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript, restoreScript, permanentDeleteScript, getScriptByTask } from './db.js';
+import { renderSidebar, refreshIcons, closeOnboarding, icon, escapeHtml } from './components.js';
 import { renderDashboard, renderTasks, renderTeleprompterList, renderScripts, renderScriptEditor, renderRecycleBin, renderCloud, renderBackup, renderSettings, renderAbout, showOnboarding, updateSyncStatusUI } from './views.js';
 import { setupBackup } from './backup.js';
 import { initLang, setLang, t } from './i18n.js';
@@ -76,6 +76,8 @@ function wireGlobalEvents() {
   });
   document.querySelector('#task-modal').addEventListener('click', (e) => {
     if (e.target.closest('[data-close-modal]')) closeTaskModal();
+    const delBtn = e.target.closest('[data-task-delete]');
+    if (delBtn) handleTaskDelete(delBtn.dataset.taskDelete);
   });
   document.querySelector('#onboarding-overlay').addEventListener('click', (e) => {
     if (e.target.closest('[data-onboard-next]')) return handleOnboardNext();
@@ -84,6 +86,7 @@ function wireGlobalEvents() {
 
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      if (document.querySelector('.tp-root')) return;
       e.preventDefault();
       openTaskModal();
     }
@@ -140,6 +143,8 @@ function closeTaskModal() {
 }
 
 function handleViewContentClick(e) {
+  const navBtn = e.target.closest('[data-nav]');
+  if (navBtn) return navigateTo(navBtn.dataset.nav);
   const themeBtn = e.target.closest('#theme-toggle-btn');
   if (themeBtn) {
     toggleTheme();
@@ -169,14 +174,26 @@ function handleViewContentClick(e) {
   if (syncPush) return sync.manualSync().then(() => refreshCurrentView());
   const syncDisconnect = e.target.closest('#sync-disconnect-btn');
   if (syncDisconnect) return sync.disconnect().then(() => refreshCurrentView());
-  const nextBtn = e.target.closest('[data-task-next]');
-  if (nextBtn) return handleTaskNext(nextBtn.dataset.taskNext);
+  const doneBtn = e.target.closest('[data-task-done]');
+  if (doneBtn) return handleTaskDone(doneBtn.dataset.taskDone);
+  const donePopupBg = e.target.closest('[data-done-popup]');
+  if (donePopupBg && e.target === donePopupBg) return closeDonePopup();
+  const donePopupAction = e.target.closest('[data-done-action]');
+  if (donePopupAction) return handleDoneAction(donePopupAction.dataset.doneAction);
+  const donePopupCancel = e.target.closest('[data-done-cancel]');
+  if (donePopupCancel) return closeDonePopup();
   const viewBtn = e.target.closest('[data-task-view]');
   if (viewBtn) return handleTaskView(viewBtn.dataset.taskView);
+  const promptBtn = e.target.closest('[data-task-prompt]');
+  if (promptBtn) return handleTaskPrompt(promptBtn.dataset.taskPrompt);
+  const delBtn = e.target.closest('[data-task-delete]');
+  if (delBtn) return handleTaskDelete(delBtn.dataset.taskDelete);
+  const createTaskBtn = e.target.closest('[data-create-task]');
+  if (createTaskBtn) return openTaskModal();
   const onDelBtn = e.target.closest('[data-recycle-purge]');
-  if (onDelBtn) return handlePermanentDelete(onDelBtn.dataset.recyclePurge);
+  if (onDelBtn) return handlePermanentDelete(onDelBtn.dataset.recyclePurge, onDelBtn.dataset.recycleType);
   const onRestoreBtn = e.target.closest('[data-recycle-restore]');
-  if (onRestoreBtn) return handleRestore(onRestoreBtn.dataset.recycleRestore);
+  if (onRestoreBtn) return handleRestore(onRestoreBtn.dataset.recycleRestore, onRestoreBtn.dataset.recycleType);
   const scriptPromptBtn = e.target.closest('[data-script-prompt]');
   if (scriptPromptBtn) return handleScriptPrompt(scriptPromptBtn.dataset.scriptPrompt);
   const scriptEditBtn = e.target.closest('[data-script-edit]');
@@ -206,14 +223,49 @@ function handleViewContentChange(e) {
   }
 }
 
-async function handleTaskNext(taskId) {
+let pendingDoneTaskId = null;
+
+function showDonePopup(task) {
+  const content = document.querySelector('#view-content');
+  if (!content) return;
+  pendingDoneTaskId = task.id;
+  content.insertAdjacentHTML('beforeend', `
+    <div class="action-overlay" data-done-popup>
+      <div class="action-popup" role="dialog" aria-modal="true" aria-label="${t('mark_done')}">
+        <h3>${t('done_popup_title')}</h3>
+        <p class="muted" style="font-size:0.85rem;margin:0 0 0.75rem">${escapeHtml(task.title)}</p>
+        <button class="btn btn-primary" data-done-action="done">${icon('check')} ${t('done_only')}</button>
+        <button class="btn" data-done-action="prompt">${icon('play')} ${t('done_prompt')}</button>
+        <button class="btn" data-done-cancel>${t('cancel')}</button>
+      </div>
+    </div>
+  `);
+  refreshIcons();
+}
+
+function closeDonePopup() {
+  document.querySelectorAll('[data-done-popup]').forEach((el) => el.remove());
+  pendingDoneTaskId = null;
+}
+
+async function handleDoneAction(action) {
+  const taskId = pendingDoneTaskId;
+  closeDonePopup();
+  if (!taskId) return;
+  await updateTask(taskId, { status: 'completed' });
+  if (action === 'prompt') await handleTaskPrompt(taskId);
+  else refreshCurrentView();
+}
+
+async function handleTaskDone(taskId) {
   const task = await getTask(taskId);
   if (!task) return;
-  const { STATUS_STEPS } = await import('./seed.js');
-  const steps = STATUS_STEPS[task.status];
-  if (!steps || !steps.length) return;
-  await updateTask(taskId, { status: steps[0] });
-  refreshCurrentView();
+  if (task.status === 'completed' || task.status === 'cancelled') {
+    await updateTask(taskId, { status: 'draft' });
+    refreshCurrentView();
+    return;
+  }
+  showDonePopup(task);
 }
 
 async function handleTaskView(taskId) {
@@ -245,34 +297,93 @@ async function handleTaskFormSubmit(form) {
   refreshCurrentView();
 }
 
-async function handlePermanentDelete(taskId) {
+async function handlePermanentDelete(id, type) {
   if (!confirm('Delete forever?')) return;
-  await permanentDeleteTask(taskId);
+  if (type === 'script') await permanentDeleteScript(id);
+  else await permanentDeleteTask(id);
   refreshCurrentView();
 }
 
-async function handleRestore(taskId) {
-  await restoreTask(taskId);
+async function handleRestore(id, type) {
+  if (type === 'script') await restoreScript(id);
+  else await restoreTask(id);
   refreshCurrentView();
 }
 
-async function handleScriptPrompt(scriptId) {
-  const { getScript } = await import('./db.js');
-  const script = await getScript(scriptId);
-  if (!script) return;
-  const wrapper = document.createElement('div');
-  document.body.appendChild(wrapper);
-  openPrompter(wrapper, script.content, {
+function tpSettings() {
+  return {
     speed: Number(localStorage.getItem('tp_speed') || 3),
     fontSize: Number(localStorage.getItem('tp_fontSize') || 32),
     mirror: localStorage.getItem('tp_mirror') === '1',
     textAlign: localStorage.getItem('tp_align') || 'left',
     lineHeight: Number(localStorage.getItem('tp_spacing') || 1.6)
+  };
+}
+
+function openScriptPrompter({ title, subtitle, body, scriptId, onFinish, doneMessage }) {
+  const wrapper = document.createElement('div');
+  document.body.appendChild(wrapper);
+  openPrompter(wrapper, body, tpSettings(), {
+    title, subtitle, scriptId, onFinish, doneMessage,
+    onClose: () => { refreshCurrentView(); }
   });
 }
 
+async function handleScriptPrompt(scriptId) {
+  const { getScript, updateScript } = await import('./db.js');
+  const script = await getScript(scriptId);
+  if (!script) return;
+  if (script.finishedAt) await updateScript(scriptId, { finishedAt: '' });
+  openScriptPrompter({
+    title: script.title || '',
+    subtitle: '',
+    body: script.content || '',
+    scriptId: script.id,
+    doneMessage: 'Finished'
+  });
+}
+
+async function handleTaskPrompt(taskId) {
+  const { getCategories } = await import('./db.js');
+  const task = await getTask(taskId);
+  if (!task || task.deletedAt) return;
+  const categories = await getCategories();
+  const categoryName = categories.find((c) => c.id === task.categoryId)?.name || '';
+  const typeLabel = String(task.taskType || 'news').replace(/_/g, ' ');
+  const metaBits = [typeLabel, categoryName, task.priority ? `${task.priority} priority` : '', task.dueDate || ''].filter(Boolean);
+  const description = (task.description || '').trim();
+  const body = description || metaBits.join('\n');
+  const existing = await getScriptByTask(task.id);
+  let scriptId = null;
+  if (existing) {
+    await updateScript(existing.id, { title: task.title || '', content: body, taskId: task.id, finishedAt: '' });
+    scriptId = existing.id;
+  } else {
+    scriptId = await addScript({ title: task.title || '', content: body, taskId: task.id, finishedAt: '' });
+  }
+  openScriptPrompter({
+    title: task.title || '',
+    subtitle: metaBits.join(' · '),
+    body,
+    scriptId,
+    doneMessage: 'Recording finished — task marked done',
+    onFinish: async () => {
+      const fresh = await getTask(taskId);
+      if (fresh && fresh.status !== 'completed') await updateTask(taskId, { status: 'completed' });
+      refreshCurrentView();
+    }
+  });
+}
+
+async function handleTaskDelete(taskId) {
+  if (!confirm('Move this task to the recycle bin?')) return;
+  await deleteTask(taskId);
+  closeTaskModal();
+  refreshCurrentView();
+}
+
 async function handleScriptDelete(scriptId) {
-  if (!confirm('Delete this script?')) return;
+  if (!confirm('Move this script to the recycle bin?')) return;
   await deleteScript(scriptId);
   refreshCurrentView();
 }

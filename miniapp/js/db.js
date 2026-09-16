@@ -13,6 +13,22 @@ db.version(2).stores({
   activities: '++id, uuid, type, taskId, timestamp'
 });
 
+db.version(3).stores({
+  categories: '++id, uuid, name, order',
+  templates: '++id, uuid, categoryId, order',
+  tasks: '++id, uuid, status, priority, taskType, categoryId, dueDate, createdAt, completedAt, deletedAt',
+  scripts: '++id, uuid, title, taskId, deletedAt, createdAt, updatedAt',
+  activities: '++id, uuid, type, taskId, timestamp'
+});
+
+db.version(4).stores({
+  categories: '++id, uuid, name, order',
+  templates: '++id, uuid, categoryId, order',
+  tasks: '++id, uuid, status, priority, taskType, categoryId, dueDate, createdAt, completedAt, deletedAt',
+  scripts: '++id, uuid, title, taskId, finishedAt, deletedAt, createdAt, updatedAt',
+  activities: '++id, uuid, type, taskId, timestamp'
+});
+
 export function makeUuid() {
   if (window.crypto && typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID();
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -74,8 +90,10 @@ export async function getCategories() { return db.categories.orderBy('order').to
 export async function getTemplatesByCategory(categoryId) { return db.templates.where('categoryId').equals(Number(categoryId)).sortBy('order'); }
 export async function getTasks() { return db.tasks.orderBy('createdAt').reverse().toArray(); }
 export async function getTask(id) { return db.tasks.get(Number(id)); }
-export async function getScripts() { return db.scripts.orderBy('updatedAt').reverse().toArray(); }
+export async function getScripts() { return db.scripts.orderBy('updatedAt').reverse().filter((s) => !s.deletedAt).toArray(); }
+export async function getDeletedScripts() { return db.scripts.orderBy('updatedAt').reverse().filter((s) => s.deletedAt).toArray(); }
 export async function getScript(id) { return db.scripts.get(Number(id)); }
+export async function getScriptByTask(taskId) { return db.scripts.where('taskId').equals(Number(taskId)).filter((s) => !s.deletedAt).first(); }
 
 export async function addTask(task) {
   const now = localDateTimeStr();
@@ -126,10 +144,13 @@ export async function addScript(script) {
     uuid: makeUuid(),
     title: script.title.trim(),
     content: script.content || '',
+    taskId: script.taskId ? Number(script.taskId) : null,
     wordCount: script.content ? script.content.trim().split(/\s+/).length : 0,
     charCount: script.content?.length || 0,
+    finishedAt: script.finishedAt || '',
     createdAt: now,
-    updatedAt: now
+    updatedAt: now,
+    deletedAt: ''
   });
 }
 
@@ -146,7 +167,15 @@ export async function updateScript(id, changes) {
   });
 }
 
-export async function deleteScript(id) { await db.scripts.delete(Number(id)); }
+export async function deleteScript(id) {
+  await db.scripts.update(Number(id), { deletedAt: localDateTimeStr(), updatedAt: localDateTimeStr() });
+}
+
+export async function restoreScript(id) {
+  await db.scripts.update(Number(id), { deletedAt: '', updatedAt: localDateTimeStr() });
+}
+
+export async function permanentDeleteScript(id) { await db.scripts.delete(Number(id)); }
 
 export async function addActivity(entry) {
   return db.activities.add({

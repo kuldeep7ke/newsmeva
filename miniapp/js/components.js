@@ -49,26 +49,35 @@ export function renderSidebar(activeView) {
   refreshIcons();
 }
 
-export function renderTaskCard(task, categoryName) {
-  const isOpen = task.status !== 'completed' && task.status !== 'cancelled' && !task.deletedAt;
-  const statusClass = task.status === 'completed' ? 'completed' : task.status === 'cancelled' ? 'completed' : '';
+export function renderTaskCard(task, categoryName, pending = false) {
+  const isDone = task.status === 'completed' || task.status === 'cancelled' || !!task.deletedAt;
+  const statusClass = isDone ? 'completed' : '';
+  const doneLabel = isDone ? t('reopen_task') : t('mark_done');
+  const typeLabel = String(task.taskType || 'news').replace(/_/g, ' ');
   return `
-    <article class="task-card ${statusClass}" data-task-id="${task.id}">
-      ${task.status !== 'completed' && task.status !== 'cancelled' ? `<button class="status-btn" data-task-next="${task.id}" title="${t('next_stage')}">${icon('arrow-right')}</button>` : `<button class="status-btn completed" disabled>${icon('check')}</button>`}
-      <div>
-        <p class="task-title">${escapeHtml(task.title)}</p>
-        ${task.description ? `<p class="muted" style="font-size:0.85rem;margin:0 0 4px">${escapeHtml(task.description).slice(0, 80)}</p>` : ''}
+    <article class="task-card ${statusClass}${pending ? ' pending' : ''}" data-task-id="${task.id}">
+      <div class="task-card-main">
+        <div class="task-card-top">
+          <p class="task-title">${escapeHtml(task.title)}</p>
+          ${pending ? `<span class="badge badge-new">${t('new_badge')}</span>` : ''}
+          <span class="badge badge-${task.priority} task-priority">${t('priority_' + task.priority)}</span>
+        </div>
+        ${task.description ? `<p class="task-desc">${escapeHtml(task.description)}</p>` : ''}
         <div class="task-meta">
           <span class="badge badge-${task.status}">${statusLabel(task.status)}</span>
+          <span class="task-meta-type">${escapeHtml(typeLabel)}</span>
           ${categoryName ? `<span>${escapeHtml(categoryName)}</span>` : ''}
           ${task.dueDate ? `<span>${escapeHtml(task.dueDate)}</span>` : ''}
         </div>
-        ${isOpen ? `<div class="task-actions">
-          <button class="chip-btn" data-task-next="${task.id}" title="${t('next_stage')}">${icon('arrow-right')}<span>${t('next_stage')}</span></button>
-          <button class="chip-btn" data-task-view="${task.id}" title="${t('view_task')}">${icon('eye')}<span>${t('view_task')}</span></button>
-        </div>` : ''}
+        <div class="task-actions">
+          <button class="chip-btn chip-btn-primary" data-task-done="${task.id}" title="${doneLabel}">${icon(isDone ? 'rotate-ccw' : 'check')}<span>${doneLabel}</span></button>
+          <span class="task-actions-icons">
+            <button class="icon-action" data-task-prompt="${task.id}" title="${t('prompt_now')}" aria-label="${t('prompt_now')}">${icon('play')}</button>
+            <button class="icon-action" data-task-view="${task.id}" title="${t('view_task')}" aria-label="${t('view_task')}">${icon('eye')}</button>
+            <button class="icon-action danger" data-task-delete="${task.id}" title="${t('delete')}" aria-label="${t('delete')}">${icon('trash-2')}</button>
+          </span>
+        </div>
       </div>
-      <span class="badge badge-${task.priority}">${t('priority_' + task.priority)}</span>
     </article>
   `;
 }
@@ -106,9 +115,12 @@ export function renderTaskModal(task, categories) {
           </select>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-ghost" data-close-modal>${t('cancel')}</button>
-        <button type="submit" class="btn btn-primary">${isEdit ? t('save') : t('add')}</button>
+      <div class="modal-footer${isEdit ? ' modal-footer-split' : ''}">
+        ${isEdit ? `<button type="button" class="btn btn-ghost btn-text-danger" data-task-delete="${task.id}">${icon('trash-2')} ${t('delete')}</button>` : ''}
+        <div class="modal-footer-group">
+          <button type="button" class="btn btn-ghost" data-close-modal>${t('cancel')}</button>
+          <button type="submit" class="btn btn-primary">${isEdit ? t('save') : t('add')}</button>
+        </div>
       </div>
     </form>
   `;
@@ -147,6 +159,7 @@ export function renderOnboarding() {
 }
 
 export function closeOnboarding() {
+  localStorage.setItem('newsMeva_onboarded', '1');
   localStorage.setItem('newsMeva_onboard_step', '0');
   document.querySelector('#onboarding-overlay').classList.add('hidden');
 }

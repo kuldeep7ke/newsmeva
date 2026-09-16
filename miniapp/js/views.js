@@ -1,4 +1,4 @@
-import { getTasks, getCategories, getScripts, localDateStr, addTask } from './db.js';
+import { getTasks, getCategories, getScripts, getDeletedScripts, localDateStr, addTask } from './db.js';
 import { PRIORITY_CONFIG, TASK_TYPES } from './seed.js';
 import { t } from './i18n.js';
 import { escapeHtml, refreshIcons, statusLabel, renderTaskCard, renderTaskModal, renderOnboarding, closeOnboarding, icon } from './components.js';
@@ -73,12 +73,13 @@ export async function renderTasks() {
   const open = tasks.filter((t) => t.status !== 'completed' && t.status !== 'cancelled' && !t.deletedAt);
   const content = document.querySelector('#view-content');
   content.innerHTML = `
-    <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
-      <select class="field" id="tasks-priority-filter" aria-label="${t('priority')}" style="max-width:140px">
+    <div class="list-toolbar">
+      <select class="field list-toolbar-narrow" id="tasks-priority-filter" aria-label="${t('priority')}">
         <option value="all">All Priority</option>
         ${Object.keys(PRIORITY_CONFIG).map((p) => `<option value="${p}">${PRIORITY_CONFIG[p].label}</option>`).join('')}
       </select>
-      <input class="field" id="tasks-search" placeholder="Search tasks..." aria-label="Search tasks" style="max-width:220px" />
+      <input class="field list-toolbar-search" id="tasks-search" placeholder="Search tasks..." aria-label="Search tasks" />
+      <button class="btn btn-primary btn-sm" data-create-task>${icon('plus')} ${t('new_task')}</button>
     </div>
     <div class="card"><div class="task-list" id="tasks-list">
       ${open.length ? open.map((tk) => renderTaskCard(tk, categoryMap.get(tk.categoryId)?.name)).join('') : `<p class="empty-state">${t('no_tasks')}</p>`}
@@ -98,33 +99,64 @@ export async function renderTasks() {
   refreshIcons();
 }
 
+function scriptRow(s, pending = false) {
+  const updated = (s.updatedAt || '').slice(0, 10);
+  return `
+    <div class="script-row${pending ? ' pending' : ''}" data-script-id="${s.id}">
+      <div class="script-row-main">
+        <div class="script-row-title">${escapeHtml(s.title)}</div>
+        <div class="script-row-meta">
+          ${pending ? `<span class="badge badge-new">${t('new_badge')}</span>` : ''}
+          <span>${s.wordCount} ${t('word_count')}</span>
+          <span>·</span>
+          <span>${s.charCount} ${t('char_count')}</span>
+          ${updated ? `<span>·</span><span>${escapeHtml(updated)}</span>` : ''}
+        </div>
+      </div>
+      <div class="script-row-actions">
+        <button class="btn btn-sm btn-primary btn-icon" data-script-prompt="${s.id}" title="${t('prompt_now')}" aria-label="${t('prompt_now')}">${icon('play')}</button>
+        <button class="btn btn-sm btn-icon" data-script-edit="${s.id}" title="${t('edit')}" aria-label="${t('edit')}">${icon('pencil')}</button>
+        <button class="btn btn-sm btn-icon btn-danger" data-script-delete="${s.id}" title="${t('delete')}" aria-label="${t('delete')}">${icon('trash-2')}</button>
+      </div>
+    </div>
+  `;
+}
+
 export async function renderTeleprompterList() {
-  const scripts = await getScripts();
+  const [{ tasks, categoryMap }, scripts] = await Promise.all([loadViewData(), getScripts()]);
+  const open = tasks.filter((tk) => tk.status !== 'completed' && tk.status !== 'cancelled' && !tk.deletedAt);
+  const completed = tasks.filter((tk) => tk.status === 'completed' && !tk.deletedAt);
+  const pendingScripts = scripts.filter((s) => !s.finishedAt);
+  const finishedScripts = scripts.filter((s) => !!s.finishedAt);
   const content = document.querySelector('#view-content');
   content.innerHTML = `
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-        <h3 style="margin:0">${t('scripts')}</h3>
-        <button class="btn btn-primary btn-sm" data-create-script>${icon('plus')} ${t('new_script')}</button>
+      <div class="list-header">
+        <h3>${t('tasks')} <span class="muted">(${open.length})</span></h3>
       </div>
       <div class="task-list">
-        ${scripts.length ? scripts.map((s) => `
-          <div class="task-card" data-script-id="${s.id}">
-            <div style="flex:1;min-width:0">
-              <div class="task-card-title">${escapeHtml(s.title)}</div>
-              <div class="task-card-meta">
-                <span>${s.wordCount} ${t('word_count')}</span>
-                <span>${s.charCount} ${t('char_count')}</span>
-              </div>
-            </div>
-            <div class="task-card-actions">
-              <button class="btn btn-sm btn-primary" data-script-prompt="${s.id}" title="${t('prompt_now')}">${icon('play')}</button>
-              <button class="btn btn-sm" data-script-edit="${s.id}" title="${t('edit')}">${icon('pencil')}</button>
-              <button class="btn btn-sm btn-danger" data-script-delete="${s.id}" title="${t('delete')}">${icon('trash-2')}</button>
-            </div>
-          </div>
-        `).join('') : `<p class="empty-state">${t('scripts_empty')}</p>`}
+        ${open.map((tk) => renderTaskCard(tk, categoryMap.get(tk.categoryId)?.name, true)).join('')}
       </div>
+      ${completed.length ? `
+        <h3 style="margin:1.5rem 0 0">${t('finished')} <span class="muted">(${completed.length})</span></h3>
+        <div class="task-list">
+          ${completed.map((tk) => renderTaskCard(tk, categoryMap.get(tk.categoryId)?.name)).join('')}
+        </div>
+      ` : ''}
+    </div>
+    <div class="card">
+      <div class="list-header">
+        <h3>${t('scripts')} <span class="muted">(${pendingScripts.length})</span></h3>
+      </div>
+      <div class="task-list">
+        ${pendingScripts.length ? pendingScripts.map((s) => scriptRow(s, true)).join('') : (scripts.length === 0 ? `<p class="empty-state">${t('scripts_empty')}</p>` : '')}
+      </div>
+      ${finishedScripts.length ? `
+        <h3 style="margin:1.5rem 0 0">${t('finished')} <span class="muted">(${finishedScripts.length})</span></h3>
+        <div class="task-list">
+          ${finishedScripts.map((s) => scriptRow(s)).join('')}
+        </div>
+      ` : ''}
     </div>
   `;
   refreshIcons();
@@ -135,26 +167,12 @@ export async function renderScripts() {
   const content = document.querySelector('#view-content');
   content.innerHTML = `
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-        <h3 style="margin:0">${t('scripts')}</h3>
+      <div class="list-header">
+        <h3>${t('scripts')}</h3>
         <button class="btn btn-primary btn-sm" data-create-script>${icon('plus')} ${t('new_script')}</button>
       </div>
       <div class="task-list" id="scripts-list">
-        ${scripts.length ? scripts.map((s) => `
-          <div class="task-card" data-script-id="${s.id}">
-            <div style="flex:1;min-width:0">
-              <div class="task-card-title">${escapeHtml(s.title)}</div>
-              <div class="task-card-meta">
-                <span>${s.wordCount} ${t('word_count')}</span>
-                <span>${s.charCount} ${t('char_count')}</span>
-              </div>
-            </div>
-            <div class="task-card-actions">
-              <button class="btn btn-sm" data-script-edit="${s.id}">${icon('pencil')}</button>
-              <button class="btn btn-sm btn-danger" data-script-delete="${s.id}">${icon('trash-2')}</button>
-            </div>
-          </div>
-        `).join('') : `<p class="empty-state">${t('scripts_empty')}</p>`}
+        ${scripts.length ? scripts.map(scriptRow).join('') : `<p class="empty-state">${t('scripts_empty')}</p>`}
       </div>
     </div>
   `;
@@ -169,9 +187,9 @@ export async function renderScriptEditor(scriptId) {
     <div class="card">
       <div class="modal-header">
         <h3>${isEdit ? t('edit_task') + ': ' + escapeHtml(script.title) : t('new_script')}</h3>
-        <button class="icon-btn" data-nav="scripts">${icon('arrow-left')}</button>
+        <button type="button" class="icon-btn" data-nav="scripts">${icon('arrow-left')}</button>
       </div>
-      <form id="script-form">
+      <form id="script-form" data-edit-id="${isEdit ? script.id : ''}">
         <div class="field-group">
           <label class="field-label">${t('script_title')}</label>
           <input class="field" name="title" required value="${isEdit ? escapeHtml(script.title) : ''}" />
@@ -191,25 +209,31 @@ export async function renderScriptEditor(scriptId) {
 }
 
 export async function renderRecycleBin() {
-  const { tasks, categoryMap } = await loadViewData();
-  const deleted = tasks.filter((t) => t.deletedAt).sort((a, b) => (b.deletedAt || '').localeCompare(a.deletedAt || ''));
+  const { tasks } = await loadViewData();
+  const [deletedTasks, deletedScripts] = await Promise.all([
+    Promise.resolve(tasks.filter((t) => t.deletedAt).sort((a, b) => (b.deletedAt || '').localeCompare(a.deletedAt || ''))),
+    getDeletedScripts()
+  ]);
+  const total = deletedTasks.length + deletedScripts.length;
   const content = document.querySelector('#view-content');
-  content.innerHTML = deleted.length ? `
+  const binRow = (title, deletedAt, id, type) => `
+    <div class="script-row">
+      <div class="script-row-main">
+        <div class="script-row-title">${escapeHtml(title)}</div>
+        <div class="script-row-meta"><span>${t('archived_at')} ${escapeHtml(deletedAt)}</span></div>
+      </div>
+      <div class="script-row-actions">
+        <button class="btn btn-sm btn-icon" data-recycle-restore="${id}" data-recycle-type="${type}" title="${t('restore')}" aria-label="${t('restore')}">${icon('undo-2')}</button>
+        <button class="btn btn-sm btn-icon btn-danger" data-recycle-purge="${id}" data-recycle-type="${type}" title="${t('purge')}" aria-label="${t('purge')}">${icon('trash-2')}</button>
+      </div>
+    </div>
+  `;
+  content.innerHTML = total ? `
     <div class="card">
-      <h3>${t('recycle_bin')} <span class="muted">(${deleted.length})</span></h3>
+      <h3>${t('recycle_bin')} <span class="muted">(${total})</span></h3>
       <div class="task-list">
-        ${deleted.map((tk) => `
-          <div class="task-card">
-            <div style="flex:1;min-width:0">
-              <div class="task-card-title">${escapeHtml(tk.title)}</div>
-              <div class="task-card-meta"><span>${t('archived_at')} ${escapeHtml(tk.deletedAt)}</span></div>
-            </div>
-            <div class="task-card-actions">
-              <button class="btn btn-sm" data-recycle-restore="${tk.id}">${icon('undo-2')}</button>
-              <button class="btn btn-sm btn-danger" data-recycle-purge="${tk.id}">${icon('trash-2')}</button>
-            </div>
-          </div>
-        `).join('')}
+        ${deletedTasks.map((tk) => binRow(tk.title, tk.deletedAt, tk.id, 'task')).join('')}
+        ${deletedScripts.map((s) => binRow(s.title, s.deletedAt, s.id, 'script')).join('')}
       </div>
     </div>
   ` : `<p class="empty-state">${t('archive_empty')}</p>`;

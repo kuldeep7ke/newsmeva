@@ -30,4 +30,26 @@ for (const asset of ASSETS) {
   }
 }
 
-console.log(`Build complete: ${ASSETS.join(', ')} → www/`);
+// Version all module imports so stale browser/HTTP caches never serve a
+// mismatched mix of old and new JS modules after a deploy.
+function versionJsTree(dir, version) {
+  fs.readdirSync(dir, { withFileTypes: true }).forEach((e) => {
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) return versionJsTree(full, version);
+    if (e.name.endsWith('.js')) {
+      let src = fs.readFileSync(full, 'utf8');
+      src = src.replace(/(['"])(\.\/[^'"]*\.js)\1/g, `$1$2?v=${version}$1`);
+      fs.writeFileSync(full, src);
+    }
+  });
+}
+
+const VERSION = Date.now();
+versionJsTree(path.join(WWW, 'js'), VERSION);
+
+const htmlPath = path.join(WWW, 'index.html');
+let html = fs.readFileSync(htmlPath, 'utf8');
+html = html.replace('src="js/app.js"', `src="js/app.js?v=${VERSION}"`);
+fs.writeFileSync(htmlPath, html);
+
+console.log(`Build complete: ${ASSETS.join(', ')} → www/ (version ${VERSION})`);
