@@ -49,6 +49,7 @@ server.log
 server-err.log
 server-restart.log
 server-restart-err.log
+server-serve.log
 smoke2*.log
 proxy/caddy-err.log
 proxy/caddy/caddy-err.log

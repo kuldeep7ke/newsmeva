@@ -228,7 +228,11 @@
         </header>
         <div id="view-content" class="view-content"></div>
       </section>
-      <button id="fab" class="fab" aria-label="New task"><i data-lucide="plus"></i></button>
+      <div id="fab-actions" class="fab-actions hidden">
+        <button class="fab-action" data-fab="task"><i data-lucide="list-todo"></i><span data-fab-label="task"></span></button>
+        <button class="fab-action" data-fab="script"><i data-lucide="file-text"></i><span data-fab-label="script"></span></button>
+      </div>
+      <button id="fab" class="fab" aria-label="New"><i data-lucide="plus"></i></button>
     </div>
 
     <!-- ============ MODALS ============ -->

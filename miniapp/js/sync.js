@@ -1,6 +1,7 @@
 import { db, localDateTimeStr, makeUuid, getByUuid } from './db.js';
 
 const CONFIG_KEY = 'newsMeva_sync';
+const SAVED_KEY = 'newsMeva_savedSync';
 const CONNECTED_URL_KEY = 'newsMeva_connectedUrl';
 const USER_KEY = 'newsMeva_userName';
 const CHANNEL_KEY = 'newsMeva_channel';
@@ -73,6 +74,10 @@ export function getSyncStatus() {
 
 export function getSyncConfig() {
   try { return JSON.parse(localStorage.getItem(CONFIG_KEY)); } catch { return null; }
+}
+
+export function getSavedSync() {
+  try { return JSON.parse(localStorage.getItem(SAVED_KEY)); } catch { return null; }
 }
 
 function emit() {
@@ -239,6 +244,7 @@ export async function connect(config) {
     if (error && error.code !== 'PGRST116') throw error;
     localStorage.setItem(CONFIG_KEY, JSON.stringify({ url: config.url, key: config.key }));
     localStorage.setItem(CONNECTED_URL_KEY, config.url);
+    localStorage.setItem(SAVED_KEY, JSON.stringify({ url: config.url, key: config.key }));
     state.status = 'syncing';
 
     state.channel = state.client

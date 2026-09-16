@@ -213,6 +213,12 @@ async function maybeShowBanner() {
   const banner = { ...b, id: String(b.id) };
   if (!banner.id || !banner.content) return;
   if (!isWithinPeriod(banner.startDate, banner.expires) || !matchesDevice(banner)) return;
+  // Show each banner at most once per browser session, so refresh/reload
+  // doesn't re-open it — only a fresh session (new tab/session) shows it.
+  try {
+    if (sessionStorage.getItem(`newsMeva_bannerShown_${banner.id}`)) return;
+    sessionStorage.setItem(`newsMeva_bannerShown_${banner.id}`, '1');
+  } catch {}
   showBanner(banner);
 }
 

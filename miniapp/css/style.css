@@ -224,7 +224,18 @@ a { color: inherit; text-decoration: none; }
 }
 .fab:hover { transform: scale(1.06); box-shadow: 0 10px 30px rgba(249, 115, 22, 0.5); }
 .fab:active { transform: scale(0.96); }
+.fab.open { transform: rotate(45deg); }
 .fab svg { width: 26px; height: 26px; }
+
+.fab-actions { position: fixed; bottom: 104px; right: 28px; z-index: 59; display: grid; gap: 0.6rem; }
+.fab-action {
+  border: none; border-radius: 12px; background: var(--surface); color: var(--text);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12); display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.65rem 0.9rem; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+  justify-content: flex-end; transition: transform 140ms, box-shadow 140ms;
+}
+.fab-action i { width: 18px; height: 18px; color: var(--accent-strong); }
+.fab-action:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18); }
 
 /* ── Cards ── */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }

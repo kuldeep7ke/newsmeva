@@ -3,13 +3,14 @@ import { t } from './i18n.js';
 export function icon(name) { return `<i data-lucide="${name}"></i>`; }
 export function refreshIcons() { if (window.lucide) window.lucide.createIcons(); }
 export function escapeHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+export function titleCase(value) { return String(value || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()); }
 
 const STATUS_LABEL_MAP = {};
 import('./seed.js').then(({ STATUS_CONFIG }) => {
   Object.keys(STATUS_CONFIG).forEach((k) => { STATUS_LABEL_MAP[k] = STATUS_CONFIG[k].label; });
 });
 
-export function statusLabel(status) { return STATUS_LABEL_MAP[status] || status?.replace(/_/g, ' ') || ''; }
+export function statusLabel(status) { return STATUS_LABEL_MAP[status] || titleCase(status) || ''; }
 
 export function renderSidebar(activeView) {
   const sidebar = document.querySelector('#sidebar');
@@ -53,7 +54,7 @@ export function renderTaskCard(task, categoryName, pending = false) {
   const isDone = task.status === 'completed' || task.status === 'cancelled' || !!task.deletedAt;
   const statusClass = isDone ? 'completed' : '';
   const doneLabel = isDone ? t('reopen_task') : t('mark_done');
-  const typeLabel = String(task.taskType || 'news').replace(/_/g, ' ');
+  const typeLabel = titleCase(task.taskType || 'news');
   return `
     <article class="task-card ${statusClass}${pending ? ' pending' : ''}" data-task-id="${task.id}">
       <div class="task-card-main">
@@ -113,13 +114,13 @@ export function renderTaskModal(task, categories) {
         <div class="field-group">
           <label class="field-label">${t('task_type')}</label>
           <select class="field" name="taskType">
-            ${allTaskTypes.map((tt) => `<option value="${tt}" ${isEdit && task.taskType === tt ? 'selected' : !isEdit && draftType === tt ? 'selected' : ''}>${tt.replace(/_/g, ' ')}</option>`).join('')}
+            ${allTaskTypes.map((tt) => `<option value="${tt}" ${isEdit && task.taskType === tt ? 'selected' : !isEdit && draftType === tt ? 'selected' : ''}>${titleCase(tt)}</option>`).join('')}
           </select>
         </div>
         <div class="field-group">
           <label class="field-label">${t('priority')}</label>
           <select class="field" name="priority">
-            ${['urgent','high','medium','low'].map((p) => `<option value="${p}" ${isEdit && task.priority === p ? 'selected' : !isEdit && draftPriority === p ? 'selected' : ''}>${p}</option>`).join('')}
+            ${['urgent','high','medium','low'].map((p) => `<option value="${p}" ${isEdit && task.priority === p ? 'selected' : !isEdit && draftPriority === p ? 'selected' : ''}>${titleCase(p)}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -141,15 +142,10 @@ export function renderOnboarding() {
     { icon: 'layout-dashboard', title: 'Dashboard', text: 'See your open tasks, due today, and overdue at a glance.' },
     { icon: 'list-todo', title: 'Tasks', text: 'Create tasks with 8 news types — Breaking, Special Report, Story, and more.' },
     { icon: 'monitor', title: 'Teleprompter', text: 'Write scripts and prompt them live. Adjustable speed, font size, and mirror mode.' },
-    { icon: 'cloud', title: 'Cloud Sync', text: 'Optional sync across your devices using your own Supabase project.' },
-    { icon: 'users', title: 'Your Identity', text: 'Set a user name and channel. Channels keep shared data separate; your name tags your changes.', fields: true }
+    { icon: 'cloud', title: 'Cloud Sync', text: 'Optional sync across your devices using your own Supabase project.' }
   ];
   const current = Number(localStorage.getItem('newsMeva_onboard_step') || '0');
   const step = steps[current] || steps[0];
-  const identity = {
-    user: localStorage.getItem('newsMeva_userName') || '',
-    channel: localStorage.getItem('newsMeva_channel') || ''
-  };
 
   document.querySelector('#onboarding-card').innerHTML = `
     <div class="onboarding-step">
@@ -158,16 +154,6 @@ export function renderOnboarding() {
       </div>
       <h3>${step.title}</h3>
       <p>${step.text}</p>
-      ${step.fields ? `
-        <div class="field-group">
-          <label class="field-label" for="onboard-user">${t('cloud_user')}</label>
-          <input class="field" id="onboard-user" name="onboardUser" type="text" maxlength="40" placeholder="${t('cloud_user_ph')}" value="${escapeHtml(identity.user)}" />
-        </div>
-        <div class="field-group">
-          <label class="field-label" for="onboard-channel">${t('cloud_channel')}</label>
-          <input class="field" id="onboard-channel" name="onboardChannel" type="text" maxlength="40" placeholder="${t('cloud_channel_ph')}" value="${escapeHtml(identity.channel)}" />
-        </div>
-      ` : ''}
     </div>
     <div class="onboarding-dots">
       ${steps.map((_, i) => `<span class="onboarding-dot${i === current ? ' active' : ''}"></span>`).join('')}
@@ -182,10 +168,6 @@ export function renderOnboarding() {
 }
 
 export function closeOnboarding() {
-  const userInput = document.querySelector('#onboard-user');
-  const channelInput = document.querySelector('#onboard-channel');
-  if (userInput) localStorage.setItem('newsMeva_userName', userInput.value.trim());
-  if (channelInput) localStorage.setItem('newsMeva_channel', channelInput.value.trim().toLowerCase());
   localStorage.setItem('newsMeva_onboarded', '1');
   localStorage.setItem('newsMeva_onboard_step', '0');
   document.querySelector('#onboarding-overlay').classList.add('hidden');

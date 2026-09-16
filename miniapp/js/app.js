@@ -30,6 +30,7 @@ async function enterApp() {
 }
 
 function goLanding() {
+  if (localStorage.getItem('newsMeva_onboarded')) { closeSidebar(); navigateTo('dashboard'); return; }
   closeSidebar();
   const taskModalEl = document.querySelector('#task-modal');
   if (taskModalEl && !taskModalEl.classList.contains('hidden')) {
@@ -37,7 +38,7 @@ function goLanding() {
     closeTaskModal();
   }
   document.querySelector('#app-shell').classList.add('hidden');
-  showLanding();
+  document.querySelector('#landing-page').classList.remove('hidden');
 }
 
 async function initApp() {
@@ -61,8 +62,41 @@ async function initApp() {
   return initPromise;
 }
 
+function updateFabLabels() {
+  document.querySelectorAll('[data-fab-label]').forEach((el) => {
+    const key = el.dataset.fabLabel;
+    el.textContent = key === 'task' ? t('new_task') : t('new_script');
+  });
+}
+
+function toggleFabMenu() {
+  const actions = document.querySelector('#fab-actions');
+  if (!actions) return;
+  const open = actions.classList.toggle('hidden') === false;
+  const fab = document.querySelector('#fab');
+  if (fab) { fab.classList.toggle('open', open); fab.innerHTML = icon(open ? 'x' : 'plus'); }
+  refreshIcons();
+}
+
+function closeFabMenu() {
+  const actions = document.querySelector('#fab-actions');
+  if (!actions || actions.classList.contains('hidden')) return;
+  actions.classList.add('hidden');
+  const fab = document.querySelector('#fab');
+  if (fab) { fab.classList.remove('open'); fab.innerHTML = icon('plus'); }
+  refreshIcons();
+}
+
 function wireGlobalEvents() {
-  document.querySelector('#fab').addEventListener('click', () => openTaskModal());
+  updateFabLabels();
+  document.querySelector('#fab').addEventListener('click', toggleFabMenu);
+  document.querySelector('#fab-actions').addEventListener('click', (e) => {
+    const action = e.target.closest('[data-fab]');
+    if (!action) return;
+    closeFabMenu();
+    if (action.dataset.fab === 'task') openTaskModal();
+    else navigateTo('script-editor', '');
+  });
   document.querySelector('#mobile-menu-btn').addEventListener('click', openSidebar);
   document.querySelector('#sidebar-backdrop').addEventListener('click', closeSidebar);
   document.querySelector('#theme-toggle').addEventListener('click', toggleTheme);
@@ -106,6 +140,7 @@ function wireGlobalEvents() {
     }
     if (e.key === 'Escape') {
       closeSidebar();
+      closeFabMenu();
       const taskModalEl = document.querySelector('#task-modal');
       if (taskModalEl && !taskModalEl.classList.contains('hidden')) {
         if (taskFormHasContent()) return;
@@ -288,6 +323,7 @@ function handleViewContentSubmit(e) {
 function handleViewContentChange(e) {
   if (e.target.id === 'lang-select') {
     setLang(e.target.value);
+    updateFabLabels();
     refreshCurrentView();
   }
 }
@@ -473,8 +509,9 @@ async function handleTaskPrompt(taskId) {
   if (!task || task.deletedAt) return;
   const categories = await getCategories();
   const categoryName = categories.find((c) => c.id === task.categoryId)?.name || '';
-  const typeLabel = String(task.taskType || 'news').replace(/_/g, ' ');
-  const metaBits = [typeLabel, categoryName, task.priority ? `${task.priority} priority` : '', task.dueDate || ''].filter(Boolean);
+  const typeLabel = String(task.taskType || 'news').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  const priorityLabel = task.priority ? `${String(task.priority).replace(/\b\w/g, (c) => c.toUpperCase())} Priority` : '';
+  const metaBits = [typeLabel, categoryName, priorityLabel, task.dueDate || ''].filter(Boolean);
   const description = (task.description || '').trim();
   const body = description || metaBits.join('\n');
   const existing = await getScriptByTask(task.id);
@@ -561,7 +598,7 @@ function updateUserChip() {
 
 function handleOnboardNext() {
   const step = Number(localStorage.getItem('newsMeva_onboard_step') || '0');
-  if (step >= 4) {
+  if (step >= 3) {
     localStorage.setItem('newsMeva_onboarded', '1');
     closeOnboarding();
     return;
@@ -603,7 +640,7 @@ export async function navigateTo(view, param) {
   closeSidebar();
 
   const fab = document.querySelector('#fab');
-  if (fab) fab.style.display = ['dashboard', 'tasks'].includes(view) ? '' : 'none';
+  if (fab) { fab.style.display = ['dashboard', 'tasks'].includes(view) ? '' : 'none'; closeFabMenu(); }
 
   switch (view) {
     case 'dashboard': await renderDashboard(); break;

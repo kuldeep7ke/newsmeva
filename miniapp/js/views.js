@@ -1,7 +1,7 @@
 import { getTasks, getCategories, getScripts, getDeletedScripts, localDateStr, addTask } from './db.js';
 import { PRIORITY_CONFIG, TASK_TYPES } from './seed.js';
 import { t } from './i18n.js';
-import { escapeHtml, refreshIcons, statusLabel, renderTaskCard, renderTaskModal, renderOnboarding, closeOnboarding, icon } from './components.js';
+import { escapeHtml, refreshIcons, statusLabel, renderTaskCard, renderTaskModal, renderOnboarding, closeOnboarding, icon, titleCase } from './components.js';
 import { setupBackup } from './backup.js';
 import { SCHEMA_SQL, getIdentity } from './sync.js';
 
@@ -51,7 +51,7 @@ export async function renderDashboard() {
           ${TASK_TYPES.map((tt) => `<option value="${tt.value}">${tt.label}</option>`).join('')}
         </select>
         <select class="field" name="priority" aria-label="${t('priority')}" style="max-width:120px">
-          ${['urgent','high','medium','low'].map((p) => `<option value="${p}"${p==='medium'?' selected':''}>${p}</option>`).join('')}
+          ${['urgent','high','medium','low'].map((p) => `<option value="${p}"${p==='medium'?' selected':''}>${titleCase(p)}</option>`).join('')}
         </select>
         <button class="btn btn-primary">${t('add')}</button>
       </form>
@@ -299,6 +299,17 @@ export async function renderCloud() {
         urlLine.style.display = 'block';
         urlLine.textContent = `${t('cloud_connected_to')}: ${cfg.url}`;
       }
+    } else {
+      const saved = sync.getSavedSync ? sync.getSavedSync() : null;
+      if (saved && saved.url) {
+        const form = document.querySelector('#sync-config-form');
+        if (form) { form.url.value = saved.url || ''; form.key.value = saved.key || ''; }
+        const urlLine = document.querySelector('#sync-connected-url');
+        if (urlLine) {
+          urlLine.style.display = 'block';
+          urlLine.textContent = `${t('cloud_saved_link')}: ${saved.url}`;
+        }
+      }
     }
     updateSyncStatusUI(sync.getSyncStatus());
   }
@@ -338,6 +349,23 @@ export async function renderSettings() {
   const lang = localStorage.getItem('newsMeva_lang') || 'en';
   content.innerHTML = `
     <div class="card">
+      <h3>${t('identity')}</h3>
+      <p class="muted" style="font-size:0.88rem;margin:0 0 1rem">${t('identity_info')}</p>
+      <form id="identity-form">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+          <div class="field-group">
+            <label class="field-label" for="settings-identity-user">${t('cloud_user')}</label>
+            <input class="field" id="settings-identity-user" name="user" type="text" maxlength="40" placeholder="${t('cloud_user_ph')}" value="${escapeHtml(getIdentity().user || '')}" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="settings-identity-channel">${t('cloud_channel')}</label>
+            <input class="field" id="settings-identity-channel" name="channel" type="text" maxlength="40" placeholder="${t('cloud_channel_ph')}" value="${escapeHtml(getIdentity().channel || '')}" />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">${t('save')}</button>
+      </form>
+    </div>
+    <div class="card">
       <h3>${t('s_navigation')}</h3>
       <div class="setting-row">
         <div>
@@ -354,39 +382,6 @@ export async function renderSettings() {
         <button class="btn btn-ghost" id="landing-go-btn">${t('s_go')}</button>
       </div>
     </div>
-    <div class="card">
-      <h3>${t('s_guides')}</h3>
-      <div class="setting-row">
-        <div>
-          <div class="setting-label">${t('s_basic_guide')}</div>
-          <div class="setting-sub">${t('s_basic_guide_desc')}</div>
-        </div>
-        <button class="btn btn-ghost" id="basic-guide-btn">${t('s_open')}</button>
-      </div>
-      <div class="setting-row">
-        <div>
-          <div class="setting-label">${t('s_recommended_guide')}</div>
-          <div class="setting-sub">${t('s_recommended_guide_desc')}</div>
-        </div>
-        <button class="btn btn-ghost" id="recommended-guide-btn">${t('s_open')}</button>
-      </div>
-     </div>
-     <div class="card">
-       <h3>${t('identity')}</h3>
-       <p class="muted" style="font-size:0.88rem;margin:0 0 1rem">${t('identity_info')}</p>
-       <form id="identity-form">
-         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
-           <div class="field-group">
-             <label class="field-label" for="settings-identity-user">${t('cloud_user')}</label>
-             </div>
-           <div class="field-group">
-             <label class="field-label" for="settings-identity-channel">${t('cloud_channel')}</label>
-             <input class="field" id="settings-identity-channel" name="channel" type="text" maxlength="40" placeholder="${t('cloud_channel_ph')}" value="${escapeHtml(getIdentity().channel || '')}" />
-           </div>
-         </div>
-         <button type="submit" class="btn btn-primary">${t('save')}</button>
-       </form>
-     </div>
      <div class="card">
        <h3>${t('settings_theme')}</h3>
       <div class="setting-row">
@@ -445,6 +440,23 @@ export async function renderSettings() {
           <button class="btn btn-danger" id="danger-confirm-btn" disabled>${t('s_clear_all')}</button>
           <button class="btn btn-ghost" id="danger-cancel-btn">${t('cancel')}</button>
         </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>${t('s_guides')}</h3>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">${t('s_basic_guide')}</div>
+          <div class="setting-sub">${t('s_basic_guide_desc')}</div>
+        </div>
+        <button class="btn btn-ghost" id="basic-guide-btn">${t('s_open')}</button>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">${t('s_recommended_guide')}</div>
+          <div class="setting-sub">${t('s_recommended_guide_desc')}</div>
+        </div>
+        <button class="btn btn-ghost" id="recommended-guide-btn">${t('s_open')}</button>
       </div>
     </div>
   `;
