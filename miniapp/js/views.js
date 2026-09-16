@@ -3,6 +3,7 @@ import { PRIORITY_CONFIG, TASK_TYPES } from './seed.js';
 import { t } from './i18n.js';
 import { escapeHtml, refreshIcons, statusLabel, renderTaskCard, renderTaskModal, renderOnboarding, closeOnboarding, icon } from './components.js';
 import { setupBackup } from './backup.js';
+import { SCHEMA_SQL, getIdentity } from './sync.js';
 
 let syncModule = null;
 
@@ -99,10 +100,10 @@ export async function renderTasks() {
   refreshIcons();
 }
 
-function scriptRow(s, pending = false) {
+function scriptRow(s, pending = false, finished = false) {
   const updated = (s.updatedAt || '').slice(0, 10);
   return `
-    <div class="script-row${pending ? ' pending' : ''}" data-script-id="${s.id}">
+    <div class="script-row${pending ? ' pending' : ''}${finished ? ' finished' : ''}" data-script-id="${s.id}">
       <div class="script-row-main">
         <div class="script-row-title">${escapeHtml(s.title)}</div>
         <div class="script-row-meta">
@@ -128,36 +129,42 @@ export async function renderTeleprompterList() {
   const completed = tasks.filter((tk) => tk.status === 'completed' && !tk.deletedAt);
   const pendingScripts = scripts.filter((s) => !s.finishedAt);
   const finishedScripts = scripts.filter((s) => !!s.finishedAt);
+  const recent = [
+    ...open.map((tk) => ({ kind: 'task', key: tk.updatedAt || tk.createdAt || '', task: tk })),
+    ...pendingScripts.map((s) => ({ kind: 'script', key: s.updatedAt || s.createdAt || '', script: s })),
+  ].sort((a, b) => String(b.key).localeCompare(String(a.key)));
   const content = document.querySelector('#view-content');
   content.innerHTML = `
     <div class="card">
       <div class="list-header">
-        <h3>${t('tasks')} <span class="muted">(${open.length})</span></h3>
+        <h3>${t('recent_activity')} <span class="muted">(${recent.length})</span></h3>
       </div>
       <div class="task-list">
-        ${open.map((tk) => renderTaskCard(tk, categoryMap.get(tk.categoryId)?.name, true)).join('')}
+        ${recent.length
+          ? recent.map((it) => it.kind === 'task' ? renderTaskCard(it.task, categoryMap.get(it.task.categoryId)?.name, true) : scriptRow(it.script, true)).join('')
+          : `<p class="empty-state">${t('recent_empty')}</p>`}
       </div>
-      ${completed.length ? `
-        <h3 style="margin:1.5rem 0 0">${t('finished')} <span class="muted">(${completed.length})</span></h3>
+    </div>
+    ${completed.length ? `
+      <div class="card">
+        <div class="list-header">
+          <h3>${t('tasks')} <span class="muted">(${completed.length})</span></h3>
+        </div>
         <div class="task-list">
           ${completed.map((tk) => renderTaskCard(tk, categoryMap.get(tk.categoryId)?.name)).join('')}
         </div>
-      ` : ''}
-    </div>
-    <div class="card">
-      <div class="list-header">
-        <h3>${t('scripts')} <span class="muted">(${pendingScripts.length})</span></h3>
       </div>
-      <div class="task-list">
-        ${pendingScripts.length ? pendingScripts.map((s) => scriptRow(s, true)).join('') : (scripts.length === 0 ? `<p class="empty-state">${t('scripts_empty')}</p>` : '')}
-      </div>
-      ${finishedScripts.length ? `
-        <h3 style="margin:1.5rem 0 0">${t('finished')} <span class="muted">(${finishedScripts.length})</span></h3>
-        <div class="task-list">
-          ${finishedScripts.map((s) => scriptRow(s)).join('')}
+    ` : ''}
+    ${finishedScripts.length ? `
+      <div class="card">
+        <div class="list-header">
+          <h3>${t('scripts')} <span class="muted">(${finishedScripts.length})</span></h3>
         </div>
-      ` : ''}
-    </div>
+        <div class="task-list">
+          ${finishedScripts.map((s) => scriptRow(s, false, true)).join('')}
+        </div>
+      </div>
+    ` : ''}
   `;
   refreshIcons();
 }
@@ -172,7 +179,7 @@ export async function renderScripts() {
         <button class="btn btn-primary btn-sm" data-create-script>${icon('plus')} ${t('new_script')}</button>
       </div>
       <div class="task-list" id="scripts-list">
-        ${scripts.length ? scripts.map(scriptRow).join('') : `<p class="empty-state">${t('scripts_empty')}</p>`}
+        ${scripts.length ? scripts.map((s) => scriptRow(s, !s.finishedAt, !!s.finishedAt)).join('') : `<p class="empty-state">${t('scripts_empty')}</p>`}
       </div>
     </div>
   `;
@@ -182,6 +189,12 @@ export async function renderScripts() {
 export async function renderScriptEditor(scriptId) {
   const script = scriptId ? await import('./db.js').then((m) => m.getScript(scriptId)) : null;
   const isEdit = !!script;
+  let draft = null;
+  if (!isEdit) {
+    try { draft = JSON.parse(localStorage.getItem('newsMeva_draft_script') || 'null'); } catch { draft = null; }
+  }
+  const draftTitle = draft && draft.title != null ? draft.title : '';
+  const draftContent = draft && draft.content != null ? draft.content : '';
   const content = document.querySelector('#view-content');
   content.innerHTML = `
     <div class="card">
@@ -192,11 +205,11 @@ export async function renderScriptEditor(scriptId) {
       <form id="script-form" data-edit-id="${isEdit ? script.id : ''}">
         <div class="field-group">
           <label class="field-label">${t('script_title')}</label>
-          <input class="field" name="title" required value="${isEdit ? escapeHtml(script.title) : ''}" />
+          <input class="field" name="title" required value="${isEdit ? escapeHtml(script.title) : escapeHtml(draftTitle)}" />
         </div>
         <div class="field-group">
           <label class="field-label">${t('script_content')}</label>
-          <textarea class="field" name="content" style="min-height:280px;font-size:1rem;line-height:1.7" placeholder="Write your script here...">${isEdit ? escapeHtml(script.content) : ''}</textarea>
+          <textarea class="field" name="content" style="min-height:280px;font-size:1rem;line-height:1.7" placeholder="Write your script here...">${isEdit ? escapeHtml(script.content) : escapeHtml(draftContent)}</textarea>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost" data-nav="scripts">${t('cancel')}</button>
@@ -243,6 +256,7 @@ export async function renderRecycleBin() {
 export async function renderCloud() {
   let sync;
   try { sync = await loadSync(); } catch { sync = null; }
+  const identity = getIdentity();
   const content = document.querySelector('#view-content');
   content.innerHTML = `
     <div class="card">
@@ -263,6 +277,16 @@ export async function renderCloud() {
           <label class="field-label" for="sync-key">${t('cloud_supabase_key')}</label>
           <input class="field" id="sync-key" name="key" placeholder="your-anon-key" />
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+          <div class="field-group">
+            <label class="field-label" for="sync-channel">${t('cloud_channel')}</label>
+            <input class="field" id="sync-channel" name="channel" type="text" maxlength="40" placeholder="${t('cloud_channel_ph')}" value="${escapeHtml(identity.channel || '')}" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="sync-user">${t('cloud_user')}</label>
+            <input class="field" id="sync-user" name="user" type="text" maxlength="40" placeholder="${t('cloud_user_ph')}" value="${escapeHtml(identity.user || '')}" />
+          </div>
+        </div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
           <button type="submit" class="btn btn-primary">${t('cloud_connect')}</button>
           <button type="button" class="btn btn-primary" id="sync-btn">${icon('refresh-cw')} ${t('cloud_sync_btn')}</button>
@@ -273,17 +297,7 @@ export async function renderCloud() {
     <div class="card">
       <h3>Supabase Setup</h3>
       <p class="muted" style="font-size:0.85rem;margin:0 0 0.75rem">${t('cloud_schema_info')}</p>
-      <textarea class="field" id="sync-schema" name="syncSchema" readonly aria-label="Supabase schema" style="font-family:monospace;font-size:0.78rem;min-height:120px;background:var(--surface-soft)">create table if not exists public.sync_docs (
-  id text primary key,
-  entity text not null,
-  data jsonb not null,
-  updated_at timestamptz not null default now()
-);
-
-create index if not exists sync_docs_entity_idx on public.sync_docs (entity);
-create index if not exists sync_docs_updated_at_idx on public.sync_docs (updated_at);
-alter table public.sync_docs enable row level security;
-create policy "sync_docs_anon_all" on public.sync_docs for all to anon using (true) with check (true);</textarea>
+      <textarea class="field" id="sync-schema" name="syncSchema" readonly aria-label="Supabase schema" style="font-family:monospace;font-size:0.78rem;min-height:120px;background:var(--surface-soft)">${SCHEMA_SQL}</textarea>
     </div>
   `;
   if (sync) {
@@ -292,7 +306,14 @@ create policy "sync_docs_anon_all" on public.sync_docs for all to anon using (tr
       const form = document.querySelector('#sync-config-form');
       if (form) { form.url.value = cfg.url || ''; form.key.value = cfg.key || ''; }
       const urlLine = document.querySelector('#sync-connected-url');
-      if (urlLine) { urlLine.style.display = 'block'; urlLine.textContent = cfg.url ? `${t('cloud_connected_to')}: ${cfg.url}` : ''; }
+      if (urlLine) {
+        urlLine.style.display = 'block';
+        const bits = [];
+        if (cfg.url) bits.push(`${t('cloud_connected_to')}: ${cfg.url}`);
+        bits.push(`${t('cloud_channel')}: ${identity.channel || t('cloud_channel_ph')}`);
+        bits.push(`${t('cloud_user')}: ${identity.user || t('cloud_user_ph')}`);
+        urlLine.textContent = bits.join(' · ');
+      }
     }
     updateSyncStatusUI(sync.getSyncStatus());
   }
@@ -332,6 +353,40 @@ export async function renderSettings() {
   const lang = localStorage.getItem('newsMeva_lang') || 'en';
   content.innerHTML = `
     <div class="card">
+      <h3>${t('s_navigation')}</h3>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">${t('s_goto_dashboard')}</div>
+          <div class="setting-sub">${t('s_goto_dashboard_desc')}</div>
+        </div>
+        <button class="btn btn-ghost" id="goto-dashboard-btn">${t('s_go')}</button>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">${t('s_goto_landing')}</div>
+          <div class="setting-sub">${t('s_goto_landing_desc')}</div>
+        </div>
+        <button class="btn btn-ghost" id="landing-go-btn">${t('s_go')}</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>${t('s_guides')}</h3>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">${t('s_basic_guide')}</div>
+          <div class="setting-sub">${t('s_basic_guide_desc')}</div>
+        </div>
+        <button class="btn btn-ghost" id="basic-guide-btn">${t('s_open')}</button>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">${t('s_recommended_guide')}</div>
+          <div class="setting-sub">${t('s_recommended_guide_desc')}</div>
+        </div>
+        <button class="btn btn-ghost" id="recommended-guide-btn">${t('s_open')}</button>
+      </div>
+    </div>
+    <div class="card">
       <h3>${t('settings_theme')}</h3>
       <div class="setting-row">
         <div><div class="setting-label">${t('settings_dark_mode')}</div><div class="setting-sub" id="theme-desc">${isDark ? t('theme_dark') : t('theme_light')}</div></div>
@@ -364,6 +419,33 @@ export async function renderSettings() {
         <button class="btn btn-ghost" id="settings-backup-btn">${icon('download')} ${t('settings_backup_link')}</button>
       </div>
     </div>
+    <div class="card">
+      <h3>${t('s_danger')}</h3>
+      <div id="danger-main">
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">${t('s_clear_all')}</div>
+            <div class="setting-sub">${t('s_clear_all_desc')}</div>
+          </div>
+          <button class="btn btn-danger" id="danger-show-btn">${t('s_clear_all')}</button>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">${t('s_prefs_reset')}</div>
+            <div class="setting-sub">${t('s_prefs_reset_desc')}</div>
+          </div>
+          <button class="btn btn-ghost" id="prefs-reset-btn">${t('s_prefs_reset_btn')}</button>
+        </div>
+      </div>
+      <div id="danger-confirm" class="hidden">
+        <p class="muted" style="margin:0 0 0.5rem">${t('s_confirm_delete')}</p>
+        <input class="field" id="danger-confirm-input" placeholder="${t('s_confirm_placeholder')}" autocomplete="off" aria-label="${t('s_confirm_delete')}" />
+        <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+          <button class="btn btn-danger" id="danger-confirm-btn" disabled>${t('s_clear_all')}</button>
+          <button class="btn btn-ghost" id="danger-cancel-btn">${t('cancel')}</button>
+        </div>
+      </div>
+    </div>
   `;
   refreshIcons();
 }
@@ -391,4 +473,37 @@ export async function renderAbout() {
     </div>
   `;
   refreshIcons();
+}
+
+function renderGuidePage({ titleKey, introKey, itemsKey }) {
+  const content = document.querySelector('#view-content');
+  const items = t(itemsKey);
+  const cards = Array.isArray(items)
+    ? items.map((s) => `
+      <div class="card">
+        <h3>${escapeHtml(s.h)}</h3>
+        <p style="color:var(--muted);line-height:1.65;margin:0">${escapeHtml(s.b)}</p>
+      </div>`).join('')
+    : '';
+  content.innerHTML = `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;gap:0.5rem;align-items:flex-start">
+        <div>
+          <h3 style="margin:0">${t(titleKey)}</h3>
+          <p class="muted" style="font-size:0.88rem;margin:0.4rem 0 0">${t(introKey)}</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="guide-back-btn">${icon('arrow-left')} ${t('guide_back')}</button>
+      </div>
+    </div>
+    ${cards}
+  `;
+  refreshIcons();
+}
+
+export async function renderGuideBasic() {
+  renderGuidePage({ titleKey: 'guide_basic_title', introKey: 'guide_basic_intro', itemsKey: 'guide_basic' });
+}
+
+export async function renderGuideRecommended() {
+  renderGuidePage({ titleKey: 'guide_rec_title', introKey: 'guide_rec_intro', itemsKey: 'guide_rec' });
 }

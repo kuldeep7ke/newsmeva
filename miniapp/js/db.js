@@ -222,3 +222,14 @@ export async function importData(data) {
     if (data.activities?.length) await db.activities.bulkAdd(data.activities.map((a) => { const { id, ...rest } = a; return rest; }));
   });
 }
+
+export async function wipeAllData() {
+  await db.transaction('rw', db.categories, db.templates, db.tasks, db.scripts, db.activities, async () => {
+    await db.activities.clear();
+    await db.scripts.clear();
+    await db.tasks.clear();
+    await db.templates.clear();
+    await db.categories.clear();
+  });
+  await seedDatabase();
+}

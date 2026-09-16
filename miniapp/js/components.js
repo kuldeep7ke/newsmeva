@@ -86,6 +86,14 @@ export function renderTaskModal(task, categories) {
   const isEdit = !!task;
   const title = isEdit ? t('edit_task') : t('create_task');
   const allTaskTypes = ['news','breaking','special_report','story','press','ground_report','live','event'];
+  let draft = null;
+  if (!isEdit) {
+    try { draft = JSON.parse(localStorage.getItem('newsMeva_draft_task') || 'null'); } catch { draft = null; }
+  }
+  const draftTitle = draft && draft.title != null ? draft.title : '';
+  const draftDesc = draft && draft.description != null ? draft.description : '';
+  const draftType = draft && allTaskTypes.includes(draft.taskType) ? draft.taskType : '';
+  const draftPriority = draft && ['urgent','high','medium','low'].includes(draft.priority) ? draft.priority : '';
 
   document.querySelector('#task-modal-body').innerHTML = `
     <div class="modal-header">
@@ -95,23 +103,23 @@ export function renderTaskModal(task, categories) {
     <form id="task-form" ${isEdit ? `data-edit-id="${task.id}"` : ''}>
       <div class="field-group">
         <label class="field-label">${t('title')}</label>
-        <input class="field" name="title" required value="${isEdit ? escapeHtml(task.title) : ''}" placeholder="${t('placeholder_add_task')}" />
+        <input class="field" name="title" required value="${isEdit ? escapeHtml(task.title) : escapeHtml(draftTitle)}" placeholder="${t('placeholder_add_task')}" />
       </div>
       <div class="field-group">
         <label class="field-label">${t('description')}</label>
-        <textarea class="field" name="description" placeholder="Optional description...">${isEdit ? escapeHtml(task.description || '') : ''}</textarea>
+        <textarea class="field" name="description" placeholder="Optional description...">${isEdit ? escapeHtml(task.description || '') : escapeHtml(draftDesc)}</textarea>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
         <div class="field-group">
           <label class="field-label">${t('task_type')}</label>
           <select class="field" name="taskType">
-            ${allTaskTypes.map((tt) => `<option value="${tt}" ${isEdit && task.taskType === tt ? 'selected' : ''}>${tt.replace(/_/g, ' ')}</option>`).join('')}
+            ${allTaskTypes.map((tt) => `<option value="${tt}" ${isEdit && task.taskType === tt ? 'selected' : !isEdit && draftType === tt ? 'selected' : ''}>${tt.replace(/_/g, ' ')}</option>`).join('')}
           </select>
         </div>
         <div class="field-group">
           <label class="field-label">${t('priority')}</label>
           <select class="field" name="priority">
-            ${['urgent','high','medium','low'].map((p) => `<option value="${p}" ${isEdit && task.priority === p ? 'selected' : ''}>${p}</option>`).join('')}
+            ${['urgent','high','medium','low'].map((p) => `<option value="${p}" ${isEdit && task.priority === p ? 'selected' : !isEdit && draftPriority === p ? 'selected' : ''}>${p}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -133,10 +141,15 @@ export function renderOnboarding() {
     { icon: 'layout-dashboard', title: 'Dashboard', text: 'See your open tasks, due today, and overdue at a glance.' },
     { icon: 'list-todo', title: 'Tasks', text: 'Create tasks with 8 news types — Breaking, Special Report, Story, and more.' },
     { icon: 'monitor', title: 'Teleprompter', text: 'Write scripts and prompt them live. Adjustable speed, font size, and mirror mode.' },
-    { icon: 'cloud', title: 'Cloud Sync', text: 'Optional sync across your devices using your own Supabase project.' }
+    { icon: 'cloud', title: 'Cloud Sync', text: 'Optional sync across your devices using your own Supabase project.' },
+    { icon: 'users', title: 'Your Identity', text: 'Set a user name and channel. Channels keep shared data separate; your name tags your changes.', fields: true }
   ];
   const current = Number(localStorage.getItem('newsMeva_onboard_step') || '0');
   const step = steps[current] || steps[0];
+  const identity = {
+    user: localStorage.getItem('newsMeva_userName') || '',
+    channel: localStorage.getItem('newsMeva_channel') || ''
+  };
 
   document.querySelector('#onboarding-card').innerHTML = `
     <div class="onboarding-step">
@@ -145,6 +158,16 @@ export function renderOnboarding() {
       </div>
       <h3>${step.title}</h3>
       <p>${step.text}</p>
+      ${step.fields ? `
+        <div class="field-group">
+          <label class="field-label" for="onboard-user">${t('cloud_user')}</label>
+          <input class="field" id="onboard-user" name="onboardUser" type="text" maxlength="40" placeholder="${t('cloud_user_ph')}" value="${escapeHtml(identity.user)}" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="onboard-channel">${t('cloud_channel')}</label>
+          <input class="field" id="onboard-channel" name="onboardChannel" type="text" maxlength="40" placeholder="${t('cloud_channel_ph')}" value="${escapeHtml(identity.channel)}" />
+        </div>
+      ` : ''}
     </div>
     <div class="onboarding-dots">
       ${steps.map((_, i) => `<span class="onboarding-dot${i === current ? ' active' : ''}"></span>`).join('')}
@@ -159,7 +182,79 @@ export function renderOnboarding() {
 }
 
 export function closeOnboarding() {
+  const userInput = document.querySelector('#onboard-user');
+  const channelInput = document.querySelector('#onboard-channel');
+  if (userInput) localStorage.setItem('newsMeva_userName', userInput.value.trim());
+  if (channelInput) localStorage.setItem('newsMeva_channel', channelInput.value.trim().toLowerCase());
   localStorage.setItem('newsMeva_onboarded', '1');
   localStorage.setItem('newsMeva_onboard_step', '0');
   document.querySelector('#onboarding-overlay').classList.add('hidden');
+}
+
+export function confirmDialog({ title, message, confirmText, cancelText, danger = false }) {
+  return new Promise((resolve) => {
+    const root = document.createElement('div');
+    root.className = 'dialog-backdrop';
+    root.innerHTML = `
+      <div class="dialog-card" role="dialog" aria-modal="true" aria-label="${escapeHtml(title || t('confirm'))}">
+        <h3>${escapeHtml(title || t('confirm'))}</h3>
+        <p class="muted" style="margin:0.75rem 0 0">${escapeHtml(message || '')}</p>
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-ghost" data-dialog="cancel">${escapeHtml(cancelText || t('cancel'))}</button>
+          <button type="button" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-dialog="ok">${escapeHtml(confirmText || t('confirm'))}</button>
+        </div>
+      </div>
+    `;
+    const okBtn = root.querySelector('[data-dialog="ok"]');
+    const cleanup = (value) => {
+      document.removeEventListener('keydown', onKey);
+      root.remove();
+      resolve(value);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') cleanup(false);
+    };
+    root.addEventListener('click', (e) => {
+      if (e.target === root) return cleanup(false);
+      const action = e.target.closest('[data-dialog]');
+      if (action) cleanup(action.dataset.dialog === 'ok');
+    });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(root);
+    okBtn.focus();
+    refreshIcons();
+  });
+}
+
+export function alertDialog({ title, message, okText }) {
+  return new Promise((resolve) => {
+    const root = document.createElement('div');
+    root.className = 'dialog-backdrop';
+    root.innerHTML = `
+      <div class="dialog-card" role="dialog" aria-modal="true" aria-label="${escapeHtml(title || '')}">
+        <h3>${escapeHtml(title || '')}</h3>
+        <p class="muted" style="margin:0.75rem 0 0">${escapeHtml(message || '')}</p>
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-primary" data-dialog="ok">${escapeHtml(okText || t('confirm'))}</button>
+        </div>
+      </div>
+    `;
+    const cleanup = () => {
+      document.removeEventListener('keydown', onKey);
+      root.remove();
+      resolve();
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') cleanup();
+    };
+    root.addEventListener('click', (e) => {
+      if (e.target === root) return cleanup();
+      const action = e.target.closest('[data-dialog]');
+      if (action) cleanup();
+    });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(root);
+    root.querySelector('[data-dialog="ok"]').focus();
+    refreshIcons();
+  });
 }

@@ -1,5 +1,6 @@
 import { exportData, importData } from './db.js';
 import { t } from './i18n.js';
+import { confirmDialog, alertDialog } from './components.js';
 
 export function setupBackup() {
   const exportBtn = document.querySelector('#backup-export-btn');
@@ -35,7 +36,8 @@ async function doExport() {
 async function handleImport(event) {
   const file = event.target.files?.[0];
   if (!file) return;
-  if (!confirm(t('backup_import_confirm'))) { event.target.value = ''; return; }
+  const ok = await confirmDialog({ title: t('backup_import'), message: t('backup_import_confirm'), confirmText: t('confirm') });
+  if (!ok) { event.target.value = ''; return; }
   try {
     const text = await file.text();
     const data = JSON.parse(text);
@@ -43,7 +45,7 @@ async function handleImport(event) {
     window.navigateTo(window.__currentView || 'dashboard');
   } catch (err) {
     console.error('Import failed:', err);
-    alert('Import failed: ' + err.message);
+    await alertDialog({ title: t('import_failed'), message: err.message, okText: t('dialog_ok') });
   }
   event.target.value = '';
 }

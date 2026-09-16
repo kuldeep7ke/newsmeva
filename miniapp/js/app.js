@@ -1,6 +1,6 @@
-import { seedDatabase, addTask, updateTask, deleteTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript, restoreScript, permanentDeleteScript, getScriptByTask } from './db.js';
-import { renderSidebar, refreshIcons, closeOnboarding, icon, escapeHtml } from './components.js';
-import { renderDashboard, renderTasks, renderTeleprompterList, renderScripts, renderScriptEditor, renderRecycleBin, renderCloud, renderBackup, renderSettings, renderAbout, showOnboarding, updateSyncStatusUI } from './views.js';
+import { seedDatabase, addTask, updateTask, deleteTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript, restoreScript, permanentDeleteScript, getScriptByTask, wipeAllData } from './db.js';
+import { renderSidebar, refreshIcons, closeOnboarding, icon, escapeHtml, confirmDialog } from './components.js';
+import { renderDashboard, renderTasks, renderTeleprompterList, renderScripts, renderScriptEditor, renderRecycleBin, renderCloud, renderBackup, renderSettings, renderAbout, renderGuideBasic, renderGuideRecommended, showOnboarding, updateSyncStatusUI } from './views.js';
 import { setupBackup } from './backup.js';
 import { initLang, setLang, t } from './i18n.js';
 import { openPrompter } from './teleprompter.js';
@@ -27,6 +27,17 @@ async function enterApp() {
   document.querySelector('#landing-page').classList.add('hidden');
   document.querySelector('#app-shell').classList.remove('hidden');
   await initApp();
+}
+
+function goLanding() {
+  closeSidebar();
+  const taskModalEl = document.querySelector('#task-modal');
+  if (taskModalEl && !taskModalEl.classList.contains('hidden')) {
+    if (!taskFormHasContent()) clearTaskDraft();
+    closeTaskModal();
+  }
+  document.querySelector('#app-shell').classList.add('hidden');
+  showLanding();
 }
 
 async function initApp() {
@@ -65,6 +76,7 @@ function wireGlobalEvents() {
   document.querySelector('#view-content').addEventListener('click', handleViewContentClick);
   document.querySelector('#view-content').addEventListener('submit', handleViewContentSubmit);
   document.querySelector('#view-content').addEventListener('change', handleViewContentChange);
+  document.querySelector('#view-content').addEventListener('input', handleViewContentInput);
 
   document.querySelector('#task-modal').addEventListener('submit', (e) => {
     const form = e.target;
@@ -75,10 +87,11 @@ function wireGlobalEvents() {
     }
   });
   document.querySelector('#task-modal').addEventListener('click', (e) => {
-    if (e.target.closest('[data-close-modal]')) closeTaskModal();
+    if (e.target.closest('[data-close-modal]')) { clearTaskDraft(); closeTaskModal(); }
     const delBtn = e.target.closest('[data-task-delete]');
     if (delBtn) handleTaskDelete(delBtn.dataset.taskDelete);
   });
+  document.querySelector('#task-modal').addEventListener('input', handleTaskModalInput);
   document.querySelector('#onboarding-overlay').addEventListener('click', (e) => {
     if (e.target.closest('[data-onboard-next]')) return handleOnboardNext();
     if (e.target.closest('[data-onboard-prev]')) return handleOnboardPrev();
@@ -92,6 +105,11 @@ function wireGlobalEvents() {
     }
     if (e.key === 'Escape') {
       closeSidebar();
+      const taskModalEl = document.querySelector('#task-modal');
+      if (taskModalEl && !taskModalEl.classList.contains('hidden')) {
+        if (taskFormHasContent()) return;
+        clearTaskDraft();
+      }
       closeTaskModal();
     }
   });
@@ -131,7 +149,10 @@ function toggleTheme() {
 }
 
 function handleModalBackdropClick(e) {
-  if (e.target.id === 'task-modal') closeTaskModal();
+  if (e.target.id !== 'task-modal') return;
+  if (taskFormHasContent()) return;
+  clearTaskDraft();
+  closeTaskModal();
 }
 
 function handleOnboardingBackdropClick(e) {
@@ -142,9 +163,37 @@ function closeTaskModal() {
   document.querySelector('#task-modal').classList.add('hidden');
 }
 
+const TASK_DRAFT_KEY = 'newsMeva_draft_task';
+const SCRIPT_DRAFT_KEY = 'newsMeva_draft_script';
+
+function taskFormHasContent() {
+  const form = document.querySelector('#task-form');
+  if (!form) return false;
+  const fd = new FormData(form);
+  return !!(fd.get('title') || '').trim() || !!(fd.get('description') || '').trim();
+}
+
+function clearTaskDraft() { localStorage.removeItem(TASK_DRAFT_KEY); }
+function clearScriptDraft() { localStorage.removeItem(SCRIPT_DRAFT_KEY); }
+
+function handleTaskModalInput() {
+  const form = document.querySelector('#task-form');
+  if (!form || form.dataset.editId) return;
+  const fd = new FormData(form);
+  localStorage.setItem(TASK_DRAFT_KEY, JSON.stringify({
+    title: fd.get('title') || '',
+    description: fd.get('description') || '',
+    taskType: fd.get('taskType') || 'news',
+    priority: fd.get('priority') || 'medium'
+  }));
+}
+
 function handleViewContentClick(e) {
   const navBtn = e.target.closest('[data-nav]');
-  if (navBtn) return navigateTo(navBtn.dataset.nav);
+  if (navBtn) {
+    if (activeView === 'script-editor' && navBtn.dataset.nav === 'scripts') clearScriptDraft();
+    return navigateTo(navBtn.dataset.nav);
+  }
   const themeBtn = e.target.closest('#theme-toggle-btn');
   if (themeBtn) {
     toggleTheme();
@@ -170,6 +219,24 @@ function handleViewContentClick(e) {
   if (settingsCloudBtn) return navigateTo('cloud');
   const settingsBackupBtn = e.target.closest('#settings-backup-btn');
   if (settingsBackupBtn) return navigateTo('backup');
+  const gotoDashboardBtn = e.target.closest('#goto-dashboard-btn');
+  if (gotoDashboardBtn) return navigateTo('dashboard');
+  const landingGoBtn = e.target.closest('#landing-go-btn');
+  if (landingGoBtn) return goLanding();
+  const basicGuideBtn = e.target.closest('#basic-guide-btn');
+  if (basicGuideBtn) return navigateTo('guide-basic');
+  const recommendedGuideBtn = e.target.closest('#recommended-guide-btn');
+  if (recommendedGuideBtn) return navigateTo('guide-recommended');
+  const guideBackBtn = e.target.closest('#guide-back-btn');
+  if (guideBackBtn) return navigateTo('settings');
+  const dangerShow = e.target.closest('#danger-show-btn');
+  if (dangerShow) return showDangerPanel();
+  const dangerCancel = e.target.closest('#danger-cancel-btn');
+  if (dangerCancel) return resetDangerPanel();
+  const dangerDo = e.target.closest('#danger-confirm-btn');
+  if (dangerDo) return handleWipeAll();
+  const prefsReset = e.target.closest('#prefs-reset-btn');
+  if (prefsReset) return handlePrefsReset();
   const syncPush = e.target.closest('#sync-btn');
   if (syncPush) return sync.manualSync().then(() => refreshCurrentView());
   const syncDisconnect = e.target.closest('#sync-disconnect-btn');
@@ -221,6 +288,60 @@ function handleViewContentChange(e) {
     setLang(e.target.value);
     refreshCurrentView();
   }
+}
+
+function handleViewContentInput(e) {
+  if (e.target.id === 'danger-confirm-input') {
+    const btn = document.querySelector('#danger-confirm-btn');
+    if (btn) btn.disabled = e.target.value !== 'DELETE';
+    return;
+  }
+  const form = e.target.closest('#script-form');
+  if (form && !form.dataset.editId) {
+    localStorage.setItem(SCRIPT_DRAFT_KEY, JSON.stringify({
+      title: form.elements.title ? form.elements.title.value : '',
+      content: form.elements.content ? form.elements.content.value : ''
+    }));
+  }
+}
+
+function showDangerPanel() {
+  const main = document.querySelector('#danger-main');
+  const panel = document.querySelector('#danger-confirm');
+  if (main) main.classList.add('hidden');
+  if (panel) panel.classList.remove('hidden');
+  const input = document.querySelector('#danger-confirm-input');
+  if (input) input.focus();
+}
+
+function resetDangerPanel() {
+  const main = document.querySelector('#danger-main');
+  const panel = document.querySelector('#danger-confirm');
+  const input = document.querySelector('#danger-confirm-input');
+  const btn = document.querySelector('#danger-confirm-btn');
+  if (main) main.classList.remove('hidden');
+  if (panel) panel.classList.add('hidden');
+  if (input) input.value = '';
+  if (btn) btn.disabled = true;
+}
+
+async function handleWipeAll() {
+  await wipeAllData();
+  resetDangerPanel();
+  refreshCurrentView();
+}
+
+function resetPrefs() {
+  localStorage.setItem('newsMeva_theme', 'light');
+  localStorage.removeItem('newsMeva_brand');
+  setLang('en');
+  document.documentElement.dataset.theme = 'light';
+  document.documentElement.dataset.brand = 'orange';
+}
+
+function handlePrefsReset() {
+  resetPrefs();
+  refreshCurrentView();
 }
 
 let pendingDoneTaskId = null;
@@ -298,7 +419,8 @@ async function handleTaskFormSubmit(form) {
 }
 
 async function handlePermanentDelete(id, type) {
-  if (!confirm('Delete forever?')) return;
+  const ok = await confirmDialog({ title: t('confirm_title'), message: t('del_forever_message'), confirmText: t('dialog_delete'), danger: true });
+  if (!ok) return;
   if (type === 'script') await permanentDeleteScript(id);
   else await permanentDeleteTask(id);
   refreshCurrentView();
@@ -376,14 +498,16 @@ async function handleTaskPrompt(taskId) {
 }
 
 async function handleTaskDelete(taskId) {
-  if (!confirm('Move this task to the recycle bin?')) return;
+  const ok = await confirmDialog({ title: t('confirm_title'), message: t('del_task_message'), confirmText: t('dialog_delete'), danger: true });
+  if (!ok) return;
   await deleteTask(taskId);
   closeTaskModal();
   refreshCurrentView();
 }
 
 async function handleScriptDelete(scriptId) {
-  if (!confirm('Move this script to the recycle bin?')) return;
+  const ok = await confirmDialog({ title: t('confirm_title'), message: t('del_script_message'), confirmText: t('dialog_delete'), danger: true });
+  if (!ok) return;
   await deleteScript(scriptId);
   refreshCurrentView();
 }
@@ -397,6 +521,7 @@ async function handleScriptFormSubmit(form) {
   } else {
     await addScript(data);
   }
+  clearScriptDraft();
   navigateTo('scripts');
 }
 
@@ -404,13 +529,17 @@ async function handleSyncConfig(form) {
   const fd = new FormData(form);
   const url = fd.get('url')?.trim();
   const key = fd.get('key')?.trim();
+  const channel = fd.get('channel')?.trim();
+  const user = fd.get('user')?.trim();
   if (!url || !key) return;
+  if (channel) localStorage.setItem('newsMeva_channel', channel.toLowerCase());
+  if (user) localStorage.setItem('newsMeva_userName', user);
   try { await sync.connect({ url, key }); } catch (err) { console.error('Sync connect error:', err); }
 }
 
 function handleOnboardNext() {
   const step = Number(localStorage.getItem('newsMeva_onboard_step') || '0');
-  if (step >= 3) {
+  if (step >= 4) {
     localStorage.setItem('newsMeva_onboarded', '1');
     closeOnboarding();
     return;
@@ -442,7 +571,9 @@ export async function navigateTo(view, param) {
     settings: t('settings'),
     about: t('about'),
     recycle: t('recycle_bin'),
-    'script-editor': t('scripts')
+    'script-editor': t('scripts'),
+    'guide-basic': t('guide_basic_title'),
+    'guide-recommended': t('guide_rec_title')
   };
   const viewTitle = document.querySelector('#view-title');
   if (viewTitle) viewTitle.textContent = titleMap[view] || view;
@@ -462,6 +593,8 @@ export async function navigateTo(view, param) {
     case 'settings': await renderSettings(); break;
     case 'about': await renderAbout(); break;
     case 'recycle': await renderRecycleBin(); break;
+    case 'guide-basic': await renderGuideBasic(); break;
+    case 'guide-recommended': await renderGuideRecommended(); break;
     default: await renderDashboard();
   }
   refreshIcons();

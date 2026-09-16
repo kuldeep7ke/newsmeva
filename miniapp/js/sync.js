@@ -2,21 +2,59 @@ import { db, localDateTimeStr, makeUuid, getByUuid } from './db.js';
 
 const CONFIG_KEY = 'newsMeva_sync';
 const CONNECTED_URL_KEY = 'newsMeva_connectedUrl';
+const USER_KEY = 'newsMeva_userName';
+const CHANNEL_KEY = 'newsMeva_channel';
+const DEFAULT_CHANNEL = 'main';
 const RECONNECT_INTERVAL = 30000;
 const PUSH_DEBOUNCE = 800;
 const URL_SUFFIX = '.supabase.co';
 
-export const SCHEMA_SQL = `create table if not exists public.sync_docs (
+export function getIdentity() {
+  const user = (localStorage.getItem(USER_KEY) || '').trim();
+  const channel = (localStorage.getItem(CHANNEL_KEY) || '').trim().toLowerCase() || DEFAULT_CHANNEL;
+  return { user, channel };
+}
+
+export const SCHEMA_SQL = `-- News Meva Mini - Cloud & Sync setup
+-- Run once in the Supabase SQL Editor (Dashboard > SQL Editor).
+
+create table if not exists public.sync_docs (
   id text primary key,
   entity text not null,
   data jsonb not null,
+  channel text not null default 'main',
+  author text not null default '',
   updated_at timestamptz not null default now()
 );
+
+-- Upgrade an existing sync_docs table with the channel/author columns (no-op on fresh installs).
+alter table public.sync_docs add column if not exists channel text not null default 'main';
+alter table public.sync_docs add column if not exists author text not null default '';
+
 create index if not exists sync_docs_entity_idx on public.sync_docs (entity);
 create index if not exists sync_docs_updated_at_idx on public.sync_docs (updated_at);
+create index if not exists sync_docs_channel_idx on public.sync_docs (channel);
+
 alter table public.sync_docs enable row level security;
+
+drop policy if exists "sync_docs_anon_all" on public.sync_docs;
 create policy "sync_docs_anon_all" on public.sync_docs
-  for all to anon using (true) with check (true);`;
+  for all to anon using (true) with check (true);
+
+-- Live cross-device updates: broadcasts INSERT/UPDATE/DELETE on sync_docs.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'sync_docs'
+  ) then
+    alter publication supabase_realtime add table public.sync_docs;
+  end if;
+end
+$$;`;
 
 const state = {
   client: null,
@@ -74,10 +112,13 @@ function normalizeTimestamps(entity, data) {
 function pushDeletion(entity, uuid) {
   if (!state.client || !entity || !uuid) return;
   const now = new Date().toISOString();
+  const identity = getIdentity();
   state.client.from('sync_docs').upsert({
     id: `${entity}:${uuid}`,
     entity,
     data: { uuid, deleted: true, updatedAt: now },
+    channel: identity.channel,
+    author: identity.user,
     updated_at: now
   }, { onConflict: 'id' }).then(({ error }) => {
     if (!error) { state.lastSync = new Date().toISOString(); state.status = 'connected'; state.error = null; }
@@ -85,10 +126,13 @@ function pushDeletion(entity, uuid) {
 }
 
 function docRows(entity, records) {
+  const identity = getIdentity();
   return records.map((record) => ({
     id: `${entity}:${record.uuid}`,
     entity,
     data: record,
+    channel: identity.channel,
+    author: identity.user,
     updated_at: toIso(record)
   }));
 }
@@ -125,7 +169,8 @@ export async function pullAll() {
   emit();
   try {
     state.applyingRemote = true;
-    const { data, error } = await state.client.from('sync_docs').select('*').gte('updated_at', new Date(Date.now() - 7 * 86400000).toISOString());
+    const channel = getIdentity().channel;
+    const { data, error } = await state.client.from('sync_docs').select('*').eq('channel', channel).gte('updated_at', new Date(Date.now() - 7 * 86400000).toISOString());
     if (error) throw error;
     await applyRemote(data || []);
     state.lastSync = new Date().toISOString();
@@ -167,6 +212,7 @@ function handleRealtime(payload) {
   if (!payload || !payload.new) return;
   const row = payload.new;
   if (!row.entity || !row.data || !row.data.uuid) return;
+  if (row.channel && row.channel !== getIdentity().channel) return;
   if (state.applyingRemote) return;
   applyRemote([row]).catch(() => {});
 }
@@ -199,6 +245,7 @@ export async function connect(config) {
       .channel('sync-docs')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sync_docs' }, handleRealtime)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'sync_docs' }, handleRealtime)
+      .filter('channel', 'eq', getIdentity().channel)
       .subscribe();
 
     await pushAll();
