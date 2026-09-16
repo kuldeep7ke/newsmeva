@@ -1,6 +1,6 @@
 import { seedDatabase, addTask, updateTask, deleteTask, restoreTask, permanentDeleteTask, getTask, addScript, updateScript, deleteScript, restoreScript, permanentDeleteScript, getScriptByTask, wipeAllData } from './db.js';
 import { renderSidebar, refreshIcons, closeOnboarding, icon, escapeHtml, confirmDialog } from './components.js';
-import { renderDashboard, renderTasks, renderTeleprompterList, renderScripts, renderScriptEditor, renderRecycleBin, renderCloud, renderIdentity, renderBackup, renderSettings, renderAbout, renderGuideBasic, renderGuideRecommended, showOnboarding, updateSyncStatusUI } from './views.js';
+import { renderDashboard, renderTasks, renderTeleprompterList, renderScripts, renderScriptEditor, renderRecycleBin, renderCloud, renderBackup, renderSettings, renderAbout, renderGuideBasic, renderGuideRecommended, showOnboarding, updateSyncStatusUI } from './views.js';
 import { setupBackup } from './backup.js';
 import { initLang, setLang, t } from './i18n.js';
 import { openPrompter } from './teleprompter.js';
@@ -46,6 +46,7 @@ async function initApp() {
     initLang();
     await seedDatabase();
     wireGlobalEvents();
+    updateUserChip();
     await refreshCurrentView();
     showOnboarding();
     initBroadcasts();
@@ -215,8 +216,6 @@ function handleViewContentClick(e) {
     }
     return;
   }
-  const settingsIdentityBtn = e.target.closest('#settings-identity-btn');
-  if (settingsIdentityBtn) return navigateTo('identity');
   const settingsCloudBtn = e.target.closest('#settings-cloud-btn');
   if (settingsCloudBtn) return navigateTo('cloud');
   const settingsBackupBtn = e.target.closest('#settings-backup-btn');
@@ -542,7 +541,22 @@ function handleIdentityForm(form) {
   const channel = fd.get('channel')?.trim().toLowerCase();
   if (user) localStorage.setItem('newsMeva_userName', user);
   if (channel) localStorage.setItem('newsMeva_channel', channel);
+  updateUserChip();
   refreshCurrentView();
+}
+
+function updateUserChip() {
+  const chip = document.querySelector('#user-chip');
+  const label = document.querySelector('#user-chip-label');
+  if (!chip || !label) return;
+  const user = localStorage.getItem('newsMeva_userName') || '';
+  const channel = localStorage.getItem('newsMeva_channel') || '';
+  if (!user && !channel) { chip.classList.add('hidden'); chip.title = ''; label.textContent = ''; return; }
+  chip.classList.remove('hidden');
+  label.textContent = user || channel;
+  const userBit = user ? `${t('cloud_user')}: ${user}` : '';
+  const channelBit = channel ? `${t('cloud_channel')}: ${channel}` : '';
+  chip.title = [userBit, channelBit].filter(Boolean).join('  ·  ');
 }
 
 function handleOnboardNext() {
@@ -566,6 +580,7 @@ function handleOnboardPrev() {
 }
 
 export async function navigateTo(view, param) {
+  localStorage.setItem('newsMeva_activeView', view);
   activeView = view;
   window.__currentView = view;
   renderSidebar(view);
@@ -575,7 +590,6 @@ export async function navigateTo(view, param) {
     'teleprompter-list': t('teleprompter'),
     scripts: t('scripts'),
     cloud: t('cloud_sync'),
-    identity: t('identity'),
     backup: t('backup'),
     settings: t('settings'),
     about: t('about'),
@@ -598,7 +612,6 @@ export async function navigateTo(view, param) {
     case 'scripts': await renderScripts(); break;
     case 'script-editor': await renderScriptEditor(param); break;
     case 'cloud': await renderCloud(); break;
-    case 'identity': await renderIdentity(); break;
     case 'backup': await renderBackup(); break;
     case 'settings': await renderSettings(); break;
     case 'about': await renderAbout(); break;
@@ -618,8 +631,39 @@ async function refreshCurrentView() {
 (async () => {
   setTimeout(async () => {
     hideSplash();
-    showLanding();
-    refreshIcons();
-    document.querySelectorAll('[data-enter-app]').forEach((btn) => btn.addEventListener('click', enterApp));
+    const onboarded = localStorage.getItem('newsMeva_onboarded');
+    const savedUser = localStorage.getItem('newsMeva_userName');
+    const savedChannel = localStorage.getItem('newsMeva_channel');
+    
+    if (onboarded) {
+      // User is onboarded - enter app and restore last view
+      document.querySelector('#app-shell').classList.remove('hidden');
+      await initApp();
+      // Restore active view from localStorage or default to dashboard
+      const savedView = localStorage.getItem('newsMeva_activeView');
+      if (savedView && ['dashboard', 'tasks', 'teleprompter-list', 'scripts', 'cloud', 'backup', 'settings', 'about', 'recycle'].includes(savedView)) {
+        window.__currentView = savedView;
+        activeView = savedView;
+        await navigateTo(savedView);
+      } else {
+        await navigateTo('dashboard');
+      }
+      showOnboarding();
+      initBroadcasts();
+      // Auto-reconnect if previously connected
+      const savedSync = sync.getSyncConfig();
+      if (savedSync && savedSync.url && savedSync.key) {
+        sync.connect(savedSync).catch(() => {});
+      }
+      // Update user chip if identity exists
+      if (savedUser || savedChannel) updateUserChip();
+      hideSplash();
+      setTimeout(() => { document.querySelector('#splash-screen').style.display = 'none'; }, 600);
+    } else {
+      // Not onboarded - show landing page with onboarding
+      showLanding();
+      refreshIcons();
+      document.querySelectorAll('[data-enter-app]').forEach((btn) => btn.addEventListener('click', enterApp));
+    }
   }, 1800);
 })();

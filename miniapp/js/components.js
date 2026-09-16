@@ -35,7 +35,6 @@ export function renderSidebar(activeView) {
       <div class="sidebar-section">
         <p class="sidebar-title">More</p>
         ${[
-          ['identity', 'user-round', t('identity')],
           ['recycle', 'trash-2', t('recycle_bin')],
         ].map(([view, iconName, label]) => `<button class="nav-item ${activeView === view ? 'active' : ''}" data-nav="${view}">${icon(iconName)}<span>${label}</span></button>`).join('')}
       </div>

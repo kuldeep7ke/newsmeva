@@ -245,7 +245,6 @@ export async function connect(config) {
       .channel('sync-docs')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sync_docs' }, handleRealtime)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'sync_docs' }, handleRealtime)
-      .filter('channel', 'eq', getIdentity().channel)
       .subscribe();
 
     await pushAll();

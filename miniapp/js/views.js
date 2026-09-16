@@ -305,31 +305,6 @@ export async function renderCloud() {
   refreshIcons();
 }
 
-export async function renderIdentity() {
-  const identity = getIdentity();
-  const content = document.querySelector('#view-content');
-  content.innerHTML = `
-    <div class="card">
-      <h3>${t('identity')}</h3>
-      <p class="muted" style="font-size:0.88rem;margin:0 0 1rem">${t('identity_info')}</p>
-      <form id="identity-form">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
-          <div class="field-group">
-            <label class="field-label" for="identity-user">${t('cloud_user')}</label>
-            <input class="field" id="identity-user" name="user" type="text" maxlength="40" placeholder="${t('cloud_user_ph')}" value="${escapeHtml(identity.user || '')}" />
-          </div>
-          <div class="field-group">
-            <label class="field-label" for="identity-channel">${t('cloud_channel')}</label>
-            <input class="field" id="identity-channel" name="channel" type="text" maxlength="40" placeholder="${t('cloud_channel_ph')}" value="${escapeHtml(identity.channel || '')}" />
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary">${t('save')}</button>
-      </form>
-    </div>
-  `;
-  refreshIcons();
-}
-
 export function updateSyncStatusUI(status) {
   const dot = document.querySelector('#sync-dot');
   const text = document.querySelector('#sync-status-text');
@@ -424,13 +399,20 @@ export async function renderSettings() {
     </div>
     <div class="card">
       <h3>${t('identity')}</h3>
-      <div class="setting-row">
-        <div>
-          <div class="setting-label">${t('cloud_user')} / ${t('cloud_channel')}</div>
-          <div class="setting-sub">${t('identity_info')}</div>
+      <p class="muted" style="font-size:0.88rem;margin:0 0 1rem">${t('identity_info')}</p>
+      <form id="identity-form">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+          <div class="field-group">
+            <label class="field-label" for="settings-identity-user">${t('cloud_user')}</label>
+            <input class="field" id="settings-identity-user" name="user" type="text" maxlength="40" placeholder="${t('cloud_user_ph')}" value="${escapeHtml(getIdentity().user || '')}" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="settings-identity-channel">${t('cloud_channel')}</label>
+            <input class="field" id="settings-identity-channel" name="channel" type="text" maxlength="40" placeholder="${t('cloud_channel_ph')}" value="${escapeHtml(getIdentity().channel || '')}" />
+          </div>
         </div>
-        <button class="btn btn-ghost" id="settings-identity-btn">${t('s_open')}</button>
-      </div>
+        <button type="submit" class="btn btn-primary">${t('save')}</button>
+      </form>
     </div>
     <div class="card">
       <h3>${t('settings_data')}</h3>
