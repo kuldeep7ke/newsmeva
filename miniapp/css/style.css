@@ -561,6 +561,11 @@ textarea.field { min-height: 100px; resize: vertical; font-family: inherit; }
 .sync-status-dot.disconnected { background: var(--muted); }
 .sync-status-dot.error { background: var(--danger); }
 .sync-status-dot.syncing { background: var(--warning); animation: pulse 1s infinite; }
+
+.sync-url-chip { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.65rem 0.85rem; background: var(--surface-soft); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 1rem; font-size: 0.85rem; }
+.sync-url-chip-label { color: var(--muted); font-weight: 600; flex-shrink: 0; }
+.sync-url-chip-value { color: var(--text); font-weight: 600; word-break: break-all; flex: 1 1 auto; min-width: 0; }
+.sync-url-chip-actions { display: inline-flex; gap: 0.35rem; flex-shrink: 0; }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
 /* ── Broadcast toasts & promo banner ── */

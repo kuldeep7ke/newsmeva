@@ -80,6 +80,19 @@ export function getSavedSync() {
   try { return JSON.parse(localStorage.getItem(SAVED_KEY)); } catch { return null; }
 }
 
+export function saveLink(config) {
+  if (!config || !config.url || !config.key) return false;
+  const url = String(config.url).trim();
+  const key = String(config.key).trim();
+  if (!url || !key) return false;
+  localStorage.setItem(SAVED_KEY, JSON.stringify({ url, key }));
+  return true;
+}
+
+export function clearSavedLink() {
+  localStorage.removeItem(SAVED_KEY);
+}
+
 function emit() {
   document.dispatchEvent(new CustomEvent('newsmeva:sync', { detail: getSyncStatus() }));
 }

@@ -277,6 +277,12 @@ function handleViewContentClick(e) {
   if (syncPush) return sync.manualSync().then(() => refreshCurrentView());
   const syncDisconnect = e.target.closest('#sync-disconnect-btn');
   if (syncDisconnect) return sync.disconnect().then(() => refreshCurrentView());
+  const syncSave = e.target.closest('#sync-save-btn');
+  if (syncSave) return handleSyncSave();
+  const syncUrlCopy = e.target.closest('#sync-url-copy');
+  if (syncUrlCopy) return handleSyncUrlCopy(syncUrlCopy);
+  const syncUrlClear = e.target.closest('#sync-url-clear');
+  if (syncUrlClear) { sync.clearSavedLink(); return refreshCurrentView(); }
   const doneBtn = e.target.closest('[data-task-done]');
   if (doneBtn) return handleTaskDone(doneBtn.dataset.taskDone);
   const donePopupBg = e.target.closest('[data-done-popup]');
@@ -570,6 +576,46 @@ async function handleSyncConfig(form) {
   const key = fd.get('key')?.trim();
   if (!url || !key) return;
   try { await sync.connect({ url, key }); } catch (err) { console.error('Sync connect error:', err); }
+  refreshCurrentView();
+}
+
+function handleSyncSave() {
+  const form = document.querySelector('#sync-config-form');
+  if (!form) return;
+  const fd = new FormData(form);
+  const url = fd.get('url')?.trim();
+  const key = fd.get('key')?.trim();
+  if (!url || !key) return;
+  const saved = sync.saveLink({ url, key });
+  if (saved) refreshCurrentView();
+}
+
+async function handleSyncUrlCopy(btn) {
+  if (!btn || !btn.dataset) return;
+  const value = document.querySelector('#sync-url-chip-value');
+  const url = (value && value.textContent.trim()) || btn.dataset.url || '';
+  if (!url) return;
+  let copied = false;
+  try {
+    if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(url); copied = true; }
+  } catch { copied = false; }
+  if (!copied) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      copied = document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch { copied = false; }
+  }
+  if (!copied) return;
+  btn.innerHTML = icon('check');
+  refreshIcons();
+  setTimeout(() => { if (document.body.contains(btn)) { btn.innerHTML = icon('copy'); refreshIcons(); } }, 1400);
 }
 
 function handleIdentityForm(form) {

@@ -266,20 +266,28 @@ export async function renderCloud() {
         <span id="sync-status-text">${t('cloud_disconnected')}</span>
         <span class="muted" id="sync-last" style="margin-left:auto;font-size:0.78rem"></span>
       </div>
-      <p class="muted" id="sync-connected-url" style="font-size:0.82rem;margin:0.5rem 0 0;display:none"></p>
+      <div class="sync-url-chip hidden" id="sync-url-chip">
+        <span class="sync-url-chip-label" id="sync-url-chip-label">${t('cloud_saved_link')}</span>
+        <span class="sync-url-chip-value" id="sync-url-chip-value"></span>
+        <span class="sync-url-chip-actions">
+          <button type="button" class="chip-btn" id="sync-url-copy" title="${t('cloud_copy_url')}" aria-label="${t('cloud_copy_url')}">${icon('copy')}</button>
+          <button type="button" class="chip-btn" id="sync-url-clear" title="${t('cloud_clear_saved')}" aria-label="${t('cloud_clear_saved')}">${icon('x')}</button>
+        </span>
+      </div>
       <form id="sync-config-form">
         <div class="field-group">
           <label class="field-label" for="sync-url">${t('cloud_supabase_url')}</label>
-          <input class="field" id="sync-url" name="url" type="url" placeholder="https://your-project.supabase.co" />
+          <input class="field" id="sync-url" name="url" type="url" placeholder="https://your-project.supabase.co" autocomplete="off" />
         </div>
         <div class="field-group">
           <label class="field-label" for="sync-key">${t('cloud_supabase_key')}</label>
-          <input class="field" id="sync-key" name="key" placeholder="your-anon-key" />
+          <input class="field" id="sync-key" name="key" placeholder="your-anon-key" autocomplete="off" />
         </div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
           <button type="submit" class="btn btn-primary">${t('cloud_connect')}</button>
-          <button type="button" class="btn btn-primary" id="sync-btn">${icon('refresh-cw')} ${t('cloud_sync_btn')}</button>
-          <button type="button" class="btn btn-ghost" id="sync-disconnect-btn">${t('cloud_disconnect')}</button>
+          <button type="button" class="btn btn-ghost" id="sync-save-btn">${icon('save')} ${t('cloud_save_link')}</button>
+          <button type="button" class="btn btn-primary hidden" id="sync-btn">${icon('refresh-cw')} ${t('cloud_sync_btn')}</button>
+          <button type="button" class="btn btn-ghost hidden" id="sync-disconnect-btn">${t('cloud_disconnect')}</button>
         </div>
       </form>
     </div>
@@ -291,26 +299,27 @@ export async function renderCloud() {
   `;
   if (sync) {
     const cfg = sync.getSyncConfig();
-    if (cfg) {
-      const form = document.querySelector('#sync-config-form');
-      if (form) { form.url.value = cfg.url || ''; form.key.value = cfg.key || ''; }
-      const urlLine = document.querySelector('#sync-connected-url');
-      if (urlLine) {
-        urlLine.style.display = 'block';
-        urlLine.textContent = `${t('cloud_connected_to')}: ${cfg.url}`;
-      }
-    } else {
-      const saved = sync.getSavedSync ? sync.getSavedSync() : null;
-      if (saved && saved.url) {
-        const form = document.querySelector('#sync-config-form');
-        if (form) { form.url.value = saved.url || ''; form.key.value = saved.key || ''; }
-        const urlLine = document.querySelector('#sync-connected-url');
-        if (urlLine) {
-          urlLine.style.display = 'block';
-          urlLine.textContent = `${t('cloud_saved_link')}: ${saved.url}`;
-        }
-      }
+    const saved = sync.getSavedSync ? sync.getSavedSync() : null;
+    const url = (cfg && cfg.url) || (saved && saved.url) || '';
+    const key = (cfg && cfg.key) || (saved && saved.key) || '';
+    const form = document.querySelector('#sync-config-form');
+    if (form) { form.url.value = url || ''; form.key.value = key || ''; }
+    if (url) {
+      const chip = document.querySelector('#sync-url-chip');
+      const label = document.querySelector('#sync-url-chip-label');
+      const value = document.querySelector('#sync-url-chip-value');
+      const clearBtn = document.querySelector('#sync-url-clear');
+      if (chip) chip.classList.remove('hidden');
+      if (label) label.textContent = cfg ? t('cloud_connected_to') : t('cloud_saved_link');
+      if (value) value.textContent = url;
+      if (clearBtn) clearBtn.classList.toggle('hidden', Boolean(cfg));
     }
+    const saveBtn = document.querySelector('#sync-save-btn');
+    const syncBtn = document.querySelector('#sync-btn');
+    const disconnectBtn = document.querySelector('#sync-disconnect-btn');
+    if (saveBtn) saveBtn.classList.toggle('hidden', Boolean(cfg));
+    if (syncBtn) syncBtn.classList.toggle('hidden', !cfg);
+    if (disconnectBtn) disconnectBtn.classList.toggle('hidden', !cfg);
     updateSyncStatusUI(sync.getSyncStatus());
   }
   refreshIcons();
