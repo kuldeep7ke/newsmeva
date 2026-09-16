@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Save, Trash2, Play, Settings2 } from 'lucide-react';
+import { useDialog } from '../context/DialogContext';
 import '../mobile.css';
 
 interface ScriptEntry {
@@ -18,6 +19,7 @@ export default function ScriptEditor() {
   const [title, setTitle] = useState('');
   const [showList, setShowList] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const dialog = useDialog();
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -51,7 +53,7 @@ export default function ScriptEditor() {
 
   const handleSave = () => {
     if (!title.trim()) {
-      alert('Please enter a title');
+      dialog.alert({ title: 'Script title', message: 'Please enter a title' });
       return;
     }
 
@@ -73,13 +75,13 @@ export default function ScriptEditor() {
     setCurrentScript(newScript);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Delete this script?')) {
-      const newScripts = scripts.filter(s => s.id !== id);
-      saveScripts(newScripts);
-      if (currentScript?.id === id) {
-        handleCreateNew();
-      }
+  const handleDelete = async (id: string) => {
+    const confirmed = await dialog.confirm({ title: 'Delete script', message: 'Delete this script?', danger: true, confirmLabel: 'Delete' });
+    if (!confirmed) return;
+    const newScripts = scripts.filter(s => s.id !== id);
+    saveScripts(newScripts);
+    if (currentScript?.id === id) {
+      handleCreateNew();
     }
   };
 

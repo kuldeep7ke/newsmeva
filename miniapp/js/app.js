@@ -5,7 +5,7 @@ import { setupBackup } from './backup.js';
 import { initLang, setLang, t } from './i18n.js';
 import { openPrompter } from './teleprompter.js';
 import * as sync from './sync.js';
-import { initBroadcasts } from './broadcast.js';
+import { initBroadcasts, refreshBroadcasts, getDeviceId } from './broadcast.js';
 
 let initPromise = null;
 let activeView = 'dashboard';
@@ -259,6 +259,10 @@ function handleViewContentClick(e) {
   if (gotoDashboardBtn) return navigateTo('dashboard');
   const landingGoBtn = e.target.closest('#landing-go-btn');
   if (landingGoBtn) return goLanding();
+  const bcCopyIdBtn = e.target.closest('#bc-copy-id-btn');
+  if (bcCopyIdBtn) return handleBroadcastCopyId(bcCopyIdBtn);
+  const bcRefreshBtn = e.target.closest('#bc-refresh-btn');
+  if (bcRefreshBtn) return handleBroadcastRefresh(bcRefreshBtn);
   const basicGuideBtn = e.target.closest('#basic-guide-btn');
   if (basicGuideBtn) return navigateTo('guide-basic');
   const recommendedGuideBtn = e.target.closest('#recommended-guide-btn');
@@ -616,6 +620,38 @@ async function handleSyncUrlCopy(btn) {
   btn.innerHTML = icon('check');
   refreshIcons();
   setTimeout(() => { if (document.body.contains(btn)) { btn.innerHTML = icon('copy'); refreshIcons(); } }, 1400);
+}
+
+async function handleBroadcastCopyId(btn) {
+  const id = getDeviceId();
+  let copied = false;
+  try {
+    if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(id); copied = true; }
+  } catch { copied = false; }
+  if (!copied) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = id;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      copied = document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch { copied = false; }
+  }
+  if (!copied) return;
+  const orig = btn.textContent;
+  btn.textContent = t('bc_copied');
+  refreshIcons();
+  setTimeout(() => { if (document.body.contains(btn)) { btn.textContent = orig; } }, 1400);
+}
+
+async function handleBroadcastRefresh(btn) {
+  btn.disabled = true;
+  await refreshBroadcasts();
+  btn.disabled = false;
 }
 
 function handleIdentityForm(form) {

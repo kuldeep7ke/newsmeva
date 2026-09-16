@@ -233,7 +233,15 @@ const STRINGS = {
     bc_updated: 'Updated',
     bc_listening: 'Listening',
     bc_close: 'Close',
-    bc_banner: 'Announcement'
+    bc_banner: 'Announcement',
+    s_broadcasts: 'Broadcasts',
+    s_broadcasts_desc: 'Live messages and promos pushed by any authorized site (via jsonbin.io).',
+    bc_device_id: 'Device ID',
+    bc_device_id_desc: 'Your private id. A broadcast whose targetId matches shows only here.',
+    bc_copy_id: 'Copy ID',
+    bc_copied: 'Copied!',
+    bc_state: 'Status',
+    bc_refresh: 'Refresh'
   },
   mr: {
     app_name: 'न्यूज मेवा मिनी',
@@ -466,7 +474,15 @@ cloud_push: 'आता Push करा',
     bc_updated: 'अद्ययावत',
     bc_listening: 'ऐकत आहे',
     bc_close: 'बंद करा',
-    bc_banner: 'घोषणा'
+    bc_banner: 'घोषणा',
+    s_broadcasts: 'प्रसारणे',
+    s_broadcasts_desc: 'कोणत्याही अधिकृत साइटकडून थेट संदेश आणि प्रचार (jsonbin.io द्वारे).',
+    bc_device_id: 'डिव्हाइस आयडी',
+    bc_device_id_desc: 'तुमचा खाजगी आयडी. targetId जुळणारे प्रसारण फक्त इथे दिसते.',
+    bc_copy_id: 'आयडी कॉपी करा',
+    bc_copied: 'कॉपी झाले!',
+    bc_state: 'स्थिती',
+    bc_refresh: 'रीफ्रेश'
   },
   hi: {
     app_name: 'न्यूज मेवा मिनी',
@@ -699,7 +715,15 @@ cloud_push: 'आता Push करा',
     bc_updated: 'अपडेट',
     bc_listening: 'सुन रहा है',
     bc_close: 'बंद करें',
-    bc_banner: 'घोषणा'
+    bc_banner: 'घोषणा',
+    s_broadcasts: 'प्रसारण',
+    s_broadcasts_desc: 'किसी भी अधिकृत साइट के लाइव संदेश और प्रचार (jsonbin.io द्वारा).',
+    bc_device_id: 'डिवाइस आईडी',
+    bc_device_id_desc: 'आपकी निजी आईडी। targetId मिलान वाला प्रसारण केवल यहीं दिखेगा.',
+    bc_copy_id: 'आईडी कॉपी करें',
+    bc_copied: 'कॉपी हो गया!',
+    bc_state: 'स्थिति',
+    bc_refresh: 'रीफ़्रेश'
   }
 };
 

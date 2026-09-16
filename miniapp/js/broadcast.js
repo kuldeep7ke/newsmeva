@@ -45,6 +45,24 @@ const HOLDER_ID      = 'broadcast-holder';
 let bannerShownThisLoad = false;
 let pollTimer = null;
 
+let lastState = 'listen'; // 'listen' | 'unconfigured' | 'offline' | 'updated'
+let lastUpdatedStamp = 0;
+
+export function getBroadcastStatus() {
+  if (lastState === 'unconfigured') return t('bc_not_configured');
+  if (lastState === 'offline') return t('bc_offline');
+  if (lastState === 'updated') {
+    const d = new Date(lastUpdatedStamp);
+    return `${t('bc_updated')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  }
+  return t('bc_listening');
+}
+
+function setStateLabel(text) {
+  const el = document.getElementById('bc-state');
+  if (el) el.textContent = text;
+}
+
 function escapeHtml(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -150,14 +168,25 @@ async function loadBroadcasts() {
 }
 
 export async function refreshBroadcasts() {
-  if (!BIN_ID()) return null;
+  if (!BIN_ID()) {
+    lastState = 'unconfigured';
+    setStateLabel(t('bc_not_configured'));
+    return null;
+  }
   const list = await loadBroadcasts();
-  if (list === null) return null;
+  if (list === null) {
+    lastState = 'offline';
+    setStateLabel(t('bc_offline'));
+    return null;
+  }
   const dismissed = getDismissed();
   const visible = list.filter(
     (b) => isWithinPeriod(undefined, b.expires) && matchesDevice(b) && (b.pinned || !dismissed.has(b.id))
   );
   renderPills(visible);
+  lastState = 'updated';
+  lastUpdatedStamp = Date.now();
+  setStateLabel(getBroadcastStatus());
   return visible;
 }
 

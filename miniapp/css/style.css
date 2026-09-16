@@ -533,6 +533,7 @@ textarea.field { min-height: 100px; resize: vertical; font-family: inherit; }
 .setting-row:last-child { border-bottom: none; }
 .setting-label { font-weight: 700; font-size: 0.92rem; }
 .setting-sub { font-size: 0.78rem; color: var(--muted); }
+.bc-device-id { font-family: monospace; font-size: 0.78rem; word-break: break-all; }
 .brand-swatches { display: flex; gap: 0.5rem; }
 .brand-swatch {
   width: 36px; height: 36px; border-radius: 999px; border: 3px solid transparent; cursor: pointer; transition: border-color 140ms;

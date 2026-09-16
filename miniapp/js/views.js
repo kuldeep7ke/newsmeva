@@ -4,6 +4,7 @@ import { t } from './i18n.js';
 import { escapeHtml, refreshIcons, statusLabel, renderTaskCard, renderTaskModal, renderOnboarding, closeOnboarding, icon, titleCase } from './components.js';
 import { setupBackup } from './backup.js';
 import { SCHEMA_SQL, getIdentity } from './sync.js';
+import { getDeviceId, getBroadcastStatus } from './broadcast.js';
 
 let syncModule = null;
 
@@ -356,6 +357,7 @@ export async function renderSettings() {
   const isDark = document.documentElement.dataset.theme === 'dark';
   const brand = document.documentElement.dataset.brand || 'orange';
   const lang = localStorage.getItem('newsMeva_lang') || 'en';
+  const broadcastStatusText = getBroadcastStatus();
   content.innerHTML = `
     <div class="card">
       <h3>${t('identity')}</h3>
@@ -415,6 +417,25 @@ export async function renderSettings() {
            <option value="mr" ${lang === 'mr' ? 'selected' : ''}>मराठी</option>
            <option value="hi" ${lang === 'hi' ? 'selected' : ''}>हिंदी</option>
          </select>
+       </div>
+     </div>
+     <div class="card">
+       <h3>${t('s_broadcasts')}</h3>
+       <p class="muted" style="font-size:0.88rem;margin:0 0 0.75rem">${t('s_broadcasts_desc')}</p>
+       <div class="setting-row">
+         <div>
+           <div class="setting-label">${t('bc_device_id')}</div>
+           <div class="setting-sub bc-device-id">${escapeHtml(getDeviceId())}</div>
+           <div class="setting-sub" style="margin-top:0.25rem">${t('bc_device_id_desc')}</div>
+         </div>
+         <button class="btn btn-ghost" id="bc-copy-id-btn">${t('bc_copy_id')}</button>
+       </div>
+       <div class="setting-row">
+         <div>
+           <div class="setting-label">${t('bc_state')}</div>
+           <div class="setting-sub" id="bc-state">${broadcastStatusText}</div>
+         </div>
+         <button class="btn btn-ghost" id="bc-refresh-btn">${icon('refresh-cw')} ${t('bc_refresh')}</button>
        </div>
      </div>
      <div class="card">

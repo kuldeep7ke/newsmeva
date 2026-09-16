@@ -66,6 +66,11 @@
     .pill-warning { background: rgba(245,158,11,0.15); color: var(--warning); }
     .pill-success { background: rgba(34,197,94,0.15); color: var(--success); }
     .pill-error { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: none; align-items: center; justify-content: center; }
+    .modal-backdrop.show { display: flex; }
+    .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; width: 90%; max-width: 400px; }
+    .modal-card h3 { font-size: 0.95rem; margin-bottom: 0.5rem; }
+    .modal-card p.modal-msg { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-bottom: 1.25rem; }
   </style>
 </head>
 <body>
@@ -172,6 +177,18 @@
     </div>
   </div>
 
+  <!-- Confirm dialog -->
+  <div class="modal-backdrop" id="confirm-modal">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-label="Confirm">
+      <h3 id="confirm-title">Are you sure?</h3>
+      <p class="modal-msg" id="confirm-message"></p>
+      <div class="actions" style="justify-content:flex-end;margin-top:0">
+        <button class="btn btn-ghost btn-sm" id="confirm-cancel">Cancel</button>
+        <button class="btn btn-danger btn-sm" id="confirm-ok">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_BASE = 'https://api.jsonbin.io/v3';
     const _K = 'newsmeva';
@@ -228,6 +245,22 @@
       el.className = 'toast show ' + (ok ? 'ok' : 'err');
       setTimeout(() => el.className = 'toast', 2500);
     }
+
+    let confirmCb = null;
+    function confirmDialog(message, onOk) {
+      confirmCb = onOk;
+      $('#confirm-message').textContent = message;
+      $('#confirm-modal').classList.add('show');
+    }
+    function closeConfirm() {
+      confirmCb = null;
+      $('#confirm-modal').classList.remove('show');
+    }
+    $('#confirm-cancel').addEventListener('click', closeConfirm);
+    $('#confirm-ok').addEventListener('click', () => {
+      if (confirmCb) { const cb = confirmCb; closeConfirm(); cb(); }
+    });
+    $('#confirm-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeConfirm(); });
 
     async function apiFetch(path, method = 'GET', body = null) {
       const key = $('#cfg-api-key').value?.trim() || BAKED_KEY;
@@ -354,17 +387,18 @@
       box.innerHTML = `<div style="${w}"><strong>${esc(banner.title || '')}</strong><br>${esc(banner.content)}${banner.image ? '<br><img src="' + esc(banner.image) + '" style="max-width:100%;border-radius:4px;margin-top:0.5rem" />' : ''}</div>`;
     });
 
-    $('#btn-clear').addEventListener('click', async () => {
-      if (!confirm('Clear all broadcasts and banner?')) return;
-      broadcasts = [];
-      banner = {};
-      renderBroadcasts();
-      loadBannerToForm();
-      updateRawJson();
-      if (binId) {
-        try { await apiFetch(`/b/${binId}`, 'PUT', { broadcasts: [], banner: {} }); toast('Cleared.'); }
-        catch (e) { toast('Clear failed: ' + e.message, false); }
-      }
+    $('#btn-clear').addEventListener('click', () => {
+      confirmDialog('Clear all broadcasts and banner?', async () => {
+        broadcasts = [];
+        banner = {};
+        renderBroadcasts();
+        loadBannerToForm();
+        updateRawJson();
+        if (binId) {
+          try { await apiFetch(`/b/${binId}`, 'PUT', { broadcasts: [], banner: {} }); toast('Cleared.'); }
+          catch (e) { toast('Clear failed: ' + e.message, false); }
+        }
+      });
     });
 
     $('#btn-add-bc').addEventListener('click', () => {
@@ -420,11 +454,12 @@
     };
 
     window.deleteBc = function(i) {
-      if (!confirm('Delete this broadcast?')) return;
-      broadcasts.splice(i, 1);
-      renderBroadcasts();
-      updateRawJson();
-      toast('Deleted.');
+      confirmDialog('Delete this broadcast?', () => {
+        broadcasts.splice(i, 1);
+        renderBroadcasts();
+        updateRawJson();
+        toast('Deleted.');
+      });
     };
 
     $('#btn-copy-json').addEventListener('click', () => {
