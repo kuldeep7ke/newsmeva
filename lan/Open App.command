@@ -12,5 +12,5 @@ CODE=$(curl -s -o /dev/null -m 3 -w '%{http_code}' "http://newsmeva" 2>/dev/null
 if [ "$CODE" = "200" ]; then
   open "http://newsmeva"
 else
-  open "http://$SERVER_IP:3002"
+  open "http://$SERVER_IP:3003"
 fi

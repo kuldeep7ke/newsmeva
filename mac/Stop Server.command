@@ -24,8 +24,8 @@ fi
 # Kill the auto-restart wrapper first (prevents it from respawning node)
 pkill -f "start-server-core.sh" 2>/dev/null || true
 
-if lsof -ti tcp:3002 >/dev/null 2>&1; then
-  lsof -ti tcp:3002 | xargs kill
+if lsof -ti tcp:3003 >/dev/null 2>&1; then
+  lsof -ti tcp:3003 | xargs kill
   echo "NEWS MEVA server stopped."
 else
   echo "Server is not running."

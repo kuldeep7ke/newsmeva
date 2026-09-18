@@ -11,7 +11,7 @@
 #
 # Every start:
 #   1. self-repairs the launcher .bat/.vbs files (restores canonical content)
-#   2. checks port 3002, starts/verifies everything, opens the app
+#   2. checks port 3003, starts/verifies everything, opens the app
 
 param([string]$Mode = 'visible')
 
@@ -22,7 +22,7 @@ $winDir  = Split-Path -Parent $MyInvocation.MyCommand.Path
 $backend = Join-Path $root 'backend'
 $front   = Join-Path $root 'frontend'
 $log     = Join-Path $root 'server.log'
-$PORT    = 3002
+$PORT    = 3003
 
 # Friendly LAN hostname - same value mapped by lan\Add NewsMeva Hosts.bat /
 # lan\Add NewsMeva Hosts.command. The OS computer name may carry the old
@@ -100,7 +100,7 @@ exit /b 0
 title Stop NEWS MEVA Server
 echo Stopping the NEWS MEVA server...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$p = Get-CimInstance Win32_Process -Filter 'Name=''powershell.exe''' | Where-Object { $_.CommandLine -match '-File\s+.*start-server-core\.ps1' }; if ($p) { $p | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue } }"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$c = Get-NetTCPConnection -LocalPort 3002 -State Listen -ErrorAction SilentlyContinue; if ($c) { $c | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue } }"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$c = Get-NetTCPConnection -LocalPort 3003 -State Listen -ErrorAction SilentlyContinue; if ($c) { $c | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue } }"
 taskkill /F /IM caddy.exe >nul 2>nul
 echo Done. The server is stopped (if it was running).
 pause
@@ -129,8 +129,8 @@ REM Elevated helper: adds/repairs the NEWS MEVA inbound firewall rule.
 REM Called from start-server.ps1 when the rule is missing. Covers ALL network
 REM profiles (Domain/Private/Public) so LAN access keeps working even if
 REM Windows reclassifies the network type.
-netsh advfirewall firewall add rule name="NEWS MEVA 3002" dir=in action=allow protocol=TCP localport=3002 profile=any
-netsh advfirewall firewall show rule name="NEWS MEVA 3002"
+netsh advfirewall firewall add rule name="NEWS MEVA 3003" dir=in action=allow protocol=TCP localport=3003 profile=any
+netsh advfirewall firewall show rule name="NEWS MEVA 3003"
 '@
 
   'Install Autostart.bat' = @'
@@ -149,7 +149,7 @@ if errorlevel 1 (
 ) else (
   echo.
   echo Autostart installed. The server will start silently at every login.
-  echo It starts on http://localhost:3002 and is also reachable over LAN.
+  echo It starts on http://localhost:3003 and is also reachable over LAN.
 )
 pause
 '@
@@ -247,9 +247,9 @@ try {
 # ============================================================
 
 try {
-  $hasRule = netsh advfirewall firewall show rule name="NEWS MEVA 3002" 2>&1 | Select-String '^Rule Name:'
+  $hasRule = netsh advfirewall firewall show rule name="NEWS MEVA 3003" 2>&1 | Select-String '^Rule Name:'
   if (-not $hasRule) {
-    Write-Log "Firewall rule 'NEWS MEVA 3002' missing - healing."
+    Write-Log "Firewall rule 'NEWS MEVA 3003' missing - healing."
     Start-Process -FilePath (Join-Path $winDir 'firewall-heal.bat') -Verb RunAs 2>$null
   }
 } catch {

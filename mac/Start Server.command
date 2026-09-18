@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 # NEWS MEVA Online - Start Server (Mac)
 # Works from a cloned repo: installs deps + builds if needed, then starts.
 cd "$(dirname "$0")/.."
@@ -84,19 +84,19 @@ lan_ip() {
 LAN_IP="$(lan_ip)"
 
 show_urls() {
-  echo "  This Mac:      http://localhost:3002"
+  echo "  This Mac:      http://localhost:3003"
   if [ -n "$LAN_IP" ]; then
-    echo "  LAN users:     http://$LAN_IP:3002"
+    echo "  LAN users:     http://$LAN_IP:3003"
     echo "                 http://$LAN_IP        (when the bundled Caddy proxy is running)"
-    echo "                 http://$(hostname -s)   (computer name — resolves from most LAN machines)"
+    echo "                 http://$(hostname -s)   (computer name â€” resolves from most LAN machines)"
     echo ""
     echo "  Tip: the first time you start the server, macOS may ask whether to"
     echo "  allow 'node' to accept incoming connections - click Allow, or LAN"
-    echo "  users cannot reach http://$LAN_IP:3002."
+    echo "  users cannot reach http://$LAN_IP:3003."
   fi
 }
 
-if lsof -ti tcp:3002 >/dev/null 2>&1; then
+if lsof -ti tcp:3003 >/dev/null 2>&1; then
   echo ""
   echo "============================================"
   echo "  Server is already running!"
@@ -105,7 +105,7 @@ if lsof -ti tcp:3002 >/dev/null 2>&1; then
   show_urls
   echo ""
   sleep 1
-  open "http://localhost:3002"
+  open "http://localhost:3003"
   exit 0
 fi
 
@@ -123,7 +123,7 @@ echo "Waiting for the server to be ready (up to 60s)..."
 
 READY=""
 for i in $(seq 1 60); do
-  if curl -s "http://localhost:3002/api/health" 2>/dev/null | grep -q '"status":"ok"'; then
+  if curl -s "http://localhost:3003/api/health" 2>/dev/null | grep -q '"status":"ok"'; then
     READY=1
     break
   fi
@@ -140,7 +140,7 @@ if [ -n "$READY" ]; then
   echo ""
   echo "  To stop: double-click  Stop Server.command"
   echo ""
-  open "http://localhost:3002"
+  open "http://localhost:3003"
 else
   echo "Server failed to start within 60s. Check $LOG_FILE for details."
   read -r -p "Press Enter to close..." _

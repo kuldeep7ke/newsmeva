@@ -15,7 +15,7 @@ Copy one file to the PC and double-click:
 - **Windows** — `Open App.bat` → opens the app in the browser (no admin, no setup)
 - **Mac** — `Open App.command` → same (if macOS blocks it: right-click → Open)
 
-The script opens `http://192.168.1.9:3002`. If the `newsmeva` hostname was
+The script opens `http://192.168.1.9:3003`. If the `newsmeva` hostname was
 already added, it uses the friendlier `http://newsmeva` (no port needed —
 the bundled Caddy proxy serves port 80).
 
@@ -28,7 +28,7 @@ Try typing this in any browser first — no script, no hosts edit:
 http://newsmeva
 ```
 
-(or `http://newsmeva:3002`). If that works you are done — skip everything else.
+(or `http://newsmeva:3003`). If that works you are done — skip everything else.
 
 ## Optional: friendly name `newsmeva` (once per machine)
 
@@ -48,14 +48,14 @@ http://192.168.1.9
 ```
 
 That always works via the Caddy proxy (port 80) — no script needed. The direct
-app port `http://192.168.1.9:3002` also always works.
+app port `http://192.168.1.9:3003` also always works.
 
 ## Note for admins
 
 - The server PC must be on and `windows\Start Server.bat` must be running
   (it heals the firewall rule automatically).
 - Port 80 needs the bundled Caddy (`proxy\caddy\caddy.exe`); without it use
-  the `:3002` URLs.
+  the `:3003` URLs.
 - If the server's IP changes (DHCP), re-run the hosts script on each machine —
   or just use the new IP in the browser. Reserving `192.168.1.9` for the
   server in the router avoids this entirely.

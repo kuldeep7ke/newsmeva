@@ -37,7 +37,7 @@ Create `backend/.env`:
 ```
 DATABASE_URL=postgresql://postgres.<PROJECT-REF>:<PASSWORD>@aws-0-<REGION>.pooler.supabase.com:6543/postgres
 JWT_SECRET=<any long random string>
-PORT=3002
+PORT=3003
 NODE_ENV=production
 ```
 
@@ -60,7 +60,7 @@ are created, default bulletins/channel settings are seeded.
 
 ## Step 5: Verify
 
-1. Visit `http://localhost:3002/api/health` → `{"status":"ok",...}`
+1. Visit `http://localhost:3003/api/health` → `{"status":"ok",...}`
 2. Open the app → **Sign Up** → the **first account becomes the admin**
 3. Check **Backups → Database tab → Database Data** → it should show an empty, fresh database
 
@@ -74,7 +74,7 @@ are created, default bulletins/channel settings are seeded.
 2. https://render.com → **New → Web Service** → connect the repo
 3. Build: `cd backend && npm install && npm run build`
 4. Start: `cd backend && node dist/index.js`
-5. Env vars: `DATABASE_URL`, `JWT_SECRET` (plus `PORT=3002`)
+5. Env vars: `DATABASE_URL`, `JWT_SECRET` (plus `PORT=3003`)
 6. Create the service, wait for first deploy (~3-5 min)
 
 ## Troubleshooting

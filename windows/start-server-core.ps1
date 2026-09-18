@@ -78,8 +78,8 @@ while ($true) {
   }
 }
 
-if (Is-Listening 3002) {
-  Write-Log "Port 3002 already has a server - another wrapper is handling it. Exiting."
+if (Is-Listening 3003) {
+  Write-Log "Port 3003 already has a server - another wrapper is handling it. Exiting."
   exit 0
 }
 

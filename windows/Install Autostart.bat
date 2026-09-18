@@ -13,6 +13,6 @@ if errorlevel 1 (
 ) else (
   echo.
   echo Autostart installed. The server will start silently at every login.
-  echo It starts on http://localhost:3002 and is also reachable over LAN.
+  echo It starts on http://localhost:3003 and is also reachable over LAN.
 )
 pause

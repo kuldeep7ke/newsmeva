@@ -29,9 +29,9 @@ This version uses **your own Supabase PostgreSQL database** (free tier) instead 
 | OS | Ubuntu 20.04 / 22.04 / 24.04 (64-bit), or any Debian-based distro |
 | Runtime | Node.js 18+ (installer auto-installs: bundled v24.19.0 offline, else Node.js 20 LTS) |
 | Database | Supabase PostgreSQL (free tier) — see [SETUP-SUPABASE.md](SETUP-SUPABASE.md) |
-| App URL (local) | `http://localhost:3002` |
-| App URL (LAN) | `http://<SERVER-IP>:3002` — also `http://<SERVER-IP>` (port 80, bundled Caddy proxy) and `http://<HOSTNAME>` when the client can resolve the server's computer name |
-| Port | `3002` (TCP) |
+| App URL (local) | `http://localhost:3003` |
+| App URL (LAN) | `http://<SERVER-IP>:3003` — also `http://<SERVER-IP>` (port 80, bundled Caddy proxy) and `http://<HOSTNAME>` when the client can resolve the server's computer name |
+| Port | `3003` (TCP) |
 | Installed at | `/opt/newsmeva` (config in `backend/.env`) |
 | Service | `newsmeva.service` under systemd |
 
@@ -73,7 +73,7 @@ What `postinst` does automatically on first install:
 2. Extracts the bundled Node.js to `/opt/newsmeva-node`
 3. Creates `/opt/newsmeva/backend/.env` (once, with a generated `JWT_SECRET`)
 4. Registers + starts two systemd services: `newsmeva.service` (the app) and `newsmeva-caddy.service` (proxy on port 80)
-5. Opens ports `80` and `3002` in `ufw` if it's active
+5. Opens ports `80` and `3003` in `ufw` if it's active
 
 Then configure your database (same as below): edit `/opt/newsmeva/backend/.env`,
 set `DATABASE_URL`, and restart:
@@ -147,20 +147,20 @@ sudo systemctl restart newsmeva.service
 On Ubuntu with **ufw**:
 
 ```bash
-sudo ufw allow 3002/tcp
+sudo ufw allow 3003/tcp
 ```
 
 If using firewalld instead:
 
 ```bash
-sudo firewall-cmd --permanent --add-port=3002/tcp && sudo firewall-cmd --reload
+sudo firewall-cmd --permanent --add-port=3003/tcp && sudo firewall-cmd --reload
 ```
 
 ---
 
 ## 5. Optional: Reverse proxy (Caddy)
 
-The server already works for LAN users at `http://<SERVER-IP>:3002`. Caddy only
+The server already works for LAN users at `http://<SERVER-IP>:3003`. Caddy only
 adds: a clean URL without the port (`http://<SERVER-IP>`), gzip compression,
 and static-file caching. **Skip this section if you don't need those** — no
 installs are required otherwise.
@@ -187,7 +187,7 @@ auto-starts it too, and `stop.sh` stops it.
 
 ## 6. First Use
 
-1. Open `http://localhost:3002` on the server, or `http://<SERVER-IP>:3002` from any LAN device
+1. Open `http://localhost:3003` on the server, or `http://<SERVER-IP>:3003` from any LAN device
 2. Click **Sign Up** and create the first account — **the first user automatically becomes the admin**
 3. All further signups are held for admin approval (Dashboard → pending signups)
 4. For the desktop-style quick login experience, add PINs for staff under Users/Profiles
@@ -220,7 +220,7 @@ tools. For full administration, always use the first admin signup.
 sudo systemctl status newsmeva.service --no-pager
 
 # Health endpoint
-curl http://localhost:3002/api/health
+curl http://localhost:3003/api/health
 # → {"status":"ok",...}
 
 # Live logs
@@ -266,9 +266,9 @@ Your `backend/.env` and all data in Supabase are preserved — they live outside
 | `Error: DATABASE_URL not set` | `backend/.env` missing or empty — set your Supabase connection string |
 | `password authentication failed` | Wrong Supabase password, or special characters not URL-encoded |
 | `could not translate host name` | Wrong pooler host — re-check the connection string |
-| Port 3002 busy | `sudo lsof -i tcp:3002` → kill the process, or change `PORT` in `.env` |
+| Port 3003 busy | `sudo lsof -i tcp:3003` → kill the process, or change `PORT` in `.env` |
 | Empty dashboard / no staff | Fresh database — sign up the first user (becomes admin) |
-| LAN users can't connect | Open port 3002 in the firewall (section 4) |
+| LAN users can't connect | Open port 3003 in the firewall (section 4) |
 | Browser shows `Cannot GET /` or `Frontend build not found` | The frontend was never built on this machine — `cd frontend && npm ci && npm run build`, then restart (`sudo systemctl restart newsmeva`) |
 | `http://newsmeva` / `http://<hostname>` doesn't resolve | Name lookup happens on the *client* — use the server IP, run a helper from `lan/` on that client, or add a DNS entry in the router |
 | Health endpoint not ready | Give it a few seconds after start, then `journalctl -u newsmeva.service -n 30` |

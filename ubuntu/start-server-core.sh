@@ -62,7 +62,7 @@ while true; do
     echo ""
     echo "Server crashed $MAX_RESTARTS times quickly. Check server.log for the reason."
     echo "Common fixes:"
-    echo "  - Port 3002 already in use:  sudo ss -ltnp | grep 3002"
+    echo "  - Port 3003 already in use:  sudo ss -ltnp | grep 3003"
     echo "  - DATABASE_URL invalid:      check backend/.env"
     echo "  - Node.js error:             check server.log"
     exit 1

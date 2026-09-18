@@ -25,7 +25,7 @@ $nodeExe = Join-Path $root 'node\node.exe'
 if (-not (Test-Path -LiteralPath $nodeExe)) { $nodeExe = 'node' }
 $probe   = Join-Path $winDir 'db-probe.js'
 
-$script:cfg = @{ PORT = 3002; DATABASE_URL = '' }
+$script:cfg = @{ PORT = 3003; DATABASE_URL = '' }
 
 # Friendly LAN hostname - same name mapped by lan\Add NewsMeva Hosts.bat /
 # lan\Add NewsMeva Hosts.command (192.168.1.9 newsmeva). The machine's OS
@@ -267,7 +267,7 @@ function Set-Status($msg) {
 }
 
 function Read-Config {
-  $script:cfg.PORT = 3002
+  $script:cfg.PORT = 3003
   $script:cfg.DATABASE_URL = ''
   if (Test-Path -LiteralPath $envFile) {
     foreach ($line in (Get-Content -LiteralPath $envFile)) {

@@ -12,7 +12,7 @@ jsonbin.io bin (the CMS you edit)
         │  fetch /latest
         ▼
 Cloudflare Pages Function  functions/api/announcements.js
-        │  edge-cached 10 min, CORS *, served at
+        │  edge-cached 180 min (`TTL_MINUTES` in the function), CORS *, served at
         ▼
 https://newsmeva.pages.dev/api/announcements?type=broadcast|banner
         │  fetched by miniapp/js/broadcast.js (no-store)
@@ -83,7 +83,7 @@ with CORS `*` — the app simply shows nothing.
 ## Managing
 
 Edit the bin JSON at `https://jsonbin.io/b/<bin-id>` (any authorized account).
-Writes appear after the edge-cache TTL (10 min) or on next app poll.
+Writes appear after the edge-cache TTL (3 hours) or on next app poll.
 
 ## Files
 

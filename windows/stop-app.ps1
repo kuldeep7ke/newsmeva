@@ -1,6 +1,6 @@
 # stop-app.ps1 — Kill ONLY this app's processes (used by the uninstaller).
 # Safe: matches node/caddy processes whose executable or command line lives
-# under the install directory (or that own port 3002). Never kills other
+# under the install directory (or that own port 3003). Never kills other
 # Node apps on the machine the way "taskkill /im node.exe" would.
 #
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File stop-app.ps1 [InstallDir]
@@ -16,7 +16,7 @@ if (-not $InstallDir) {
 $root = [System.IO.Path]::GetFullPath($InstallDir.TrimEnd('\'))
 
 # 1) Anything listening on the app port.
-Get-NetTCPConnection -LocalPort 3002 -State Listen -ErrorAction SilentlyContinue |
+Get-NetTCPConnection -LocalPort 3003 -State Listen -ErrorAction SilentlyContinue |
   ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
 
 # 2) node.exe / caddy.exe / wrapper powershell (start-server-core.ps1) whose

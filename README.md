@@ -20,8 +20,8 @@ automatically syncs everything back the moment the connection returns.
 > data, no database, no previous settings — ready for new users only.
 >
 > **Fresh by design** — this repository ships **no user data and no database**.
-> On first start the server creates the schema in your Supabase project, and
-> the **first account that signs up automatically becomes the admin**.
+> On first start the server creates the schema, and the **first account that
+> signs up automatically becomes the admin**.
 
 ---
 
@@ -43,18 +43,15 @@ automatically syncs everything back the moment the connection returns.
 - **One admin page for data** — Backups page with **Backups / Database tabs**:
   backup snapshots and restore, live sync status, multiple saved Supabase
   connections, live row counts, preserve-or-clean fresh-start reset
-- **Database connect rework** — connect to any Supabase DB with Restore (pull
-  online data into app) or Fresh Start (push local data to online); your local
-  copy is never wiped automatically — wiping is always a manual action
 - **Self-managed** — no external services beyond your Supabase project; the
   first signup becomes admin, later signups need admin approval
 - **170+ REST endpoints**, all in-app dialogs (zero browser popups)
 - **One-click launchers for every OS** — server starts **hidden in the
   background**, auto-restarts on crash, and **opens the app in your browser**
-  when ready
+  when ready. **Runs on port 3003** (health check `http://localhost:3003/api/health`)
 - **Self-healing launcher (Windows)** — `windows/start-server.ps1` auto-repairs
-  the launcher files (bat/vbs) on every start, heals the firewall rule, and
-  verifies the server by HTTP before calling it running
+  the launcher files (bat/vbs) on every start, heals the firewall rule
+  (`NEWS MEVA 3003`), and verifies the server by HTTP before calling it running
 - **Control Panel (Windows, native)** — a launch pad for first-time setup and daily use:
   one-click Start/Stop + live health, **Autostart at login** On/Off, **Caddy proxy** status,
   **database status** (paste Supabase URL, live connectivity test), LAN address copy buttons,
@@ -131,8 +128,9 @@ Per-OS guides: [Windows](#windows) · [macOS](#macos) ·
 
 **People & access**
 
-- Users, roles & profiles — admin / editorial / author / viewer, seat limits,
-  pending-signup approval, quick PIN login, avatars, workload tracking
+- Users, roles & profiles — admin / executive editor / manager / staff roles,
+  seat limits, pending-signup approval, quick PIN login, avatars, workload
+  tracking
 
 **News production**
 
@@ -224,19 +222,25 @@ SQLite via sql.js) alongside Supabase.
 backend/           Express + Socket.IO API (TS -> dist/), sync engine, mirror DB
 frontend/          React SPA (Vite)
 miniapp/           News Meva Mini — static vanilla-JS web app (web + Android APK)
-android/           Android wrapper: Capacitor app (News Meva Mini) OR legacy bundled-Node wrapper
+android/           Android wrapper: Capacitor app (News Meva Mini)
 scripts/           Build tooling (scripts/build-web.cjs stages miniapp/ -> www/)
 .github/workflows/ CI: Android APK, GitHub Pages, Cloudflare Pages
-docs/              All guides: memory capsule, from-scratch blueprint, setup guides
-proxy/             Optional reverse proxy: Caddyfile (:80 -> :3002) + caddy.exe (Windows)
-ubuntu/            Ubuntu/Debian installer + systemd service + start/stop scripts
-redhat/            RHEL-family installer + systemd service + start/stop scripts
-mac/               macOS launchers (.command) + auto-start
+docs/              All guides — start at docs/index.md (memory capsule, guides, setup)
+README.md          This file (root quick start)
 windows/           Windows launchers: Start/Stop Server.bat, Start Server Hidden.vbs,
                    start-server.ps1 (self-healing launcher + auto-repair),
                    start-server-core.ps1 (auto-restart wrapper), Repair Launcher.bat,
-                   autostart bats, Create .env.bat, Clean Junk.bat
+                   autostart bats, Create .env.bat, Clean Junk.bat, firewall-heal.bat
+                   (see windows/README.md)
+mac/               macOS launchers (.command) + auto-start + start-server-core.sh
+ubuntu/            Ubuntu/Debian installer + systemd service + start/stop scripts
+                   (see ubuntu/README.md)
+redhat/            RHEL-family installer + systemd service + start/stop scripts
+                   (see redhat/README.md)
 lan/               LAN client helpers (friendly hostname, open-app shortcuts)
+                   (see lan/README.md)
+proxy/             Optional reverse proxy: Caddyfile (:80 -> :3003) + caddy.exe
+                   (see proxy/README.md)
 clean-junk.sh      Junk cleaner for Mac/Linux (auto-run by the launchers)
 create-env.sh      One-time backend/.env creator (Mac/Linux), idempotent
 tools/node/        Bundled Node.js v24.19.0 installers (Windows .msi, macOS .pkg, Linux .tar.xz)
@@ -245,15 +249,22 @@ render.yaml        Render.com cloud config
 
 ## Documentation
 
+**Start with [docs/index.md](docs/index.md)** — the docs map.
+
 | Guide | Purpose |
 |-------|---------|
+| [docs/index.md](docs/index.md) | Documentation map & index |
+| [docs/MEMORY-CAPSULE.md](docs/MEMORY-CAPSULE.md) | Developer memory — architecture, invariants, DB model, auth, roles, key APIs, verification, troubleshooting playbook |
 | [docs/SETUP-SUPABASE.md](docs/SETUP-SUPABASE.md) | Create your free Supabase database + connect (~5 minutes) |
-| [docs/ANNOUNCEMENTS.md](docs/ANNOUNCEMENTS.md) | Mini banner & broadcast announcements (jsonbin feed) |
 | [docs/SETUP-GUIDE-WINDOWS.md](docs/SETUP-GUIDE-WINDOWS.md) | Windows 10 / 11 full install |
 | [docs/SETUP-GUIDE-UBUNTU.md](docs/SETUP-GUIDE-UBUNTU.md) | Ubuntu/Debian full install |
 | [docs/SETUP-GUIDE-RHEL.md](docs/SETUP-GUIDE-RHEL.md) | RHEL/CentOS/Rocky/AlmaLinux/Fedora full install |
+| [docs/ANNOUNCEMENTS.md](docs/ANNOUNCEMENTS.md) | Mini banner & broadcast announcements (jsonbin feed) |
+| [docs/GUIDE-TELEPROMPTER.md](docs/GUIDE-TELEPROMPTER.md) | Teleprompter end-to-end guide |
+| [docs/GUIDE-ADMIN-SETTINGS.md](docs/GUIDE-ADMIN-SETTINGS.md) | Admin settings, database connections, fresh-start reset |
+| [docs/GUIDE-BACKUPS.md](docs/GUIDE-BACKUPS.md) | Backups, snapshots, restore & research data |
 | [docs/from-scratch.md](docs/from-scratch.md) | Complete blueprint: how the app is built, end to end |
-| [docs/MEMORY-CAPSULE.md](docs/MEMORY-CAPSULE.md) | Developer memory — architecture, invariants, critical logic, debugging playbook, work history |
+| [docs/RESEARCH-REPORT-2026-08-11.md](docs/RESEARCH-REPORT-2026-08-11.md) | Baseline security & workflow research report |
 
 ## Installer (Beta)
 
@@ -303,8 +314,8 @@ Both installers are attached to the **v3.2.0 GitHub Release**.
      `Start Server.bat`, `Stop Server.bat`, `Start Server Hidden.vbs`, or
      `firewall-heal.bat` is corrupted, it is restored automatically
      (see `windows/Repair Launcher.bat` for a manual repair option)
-   - heals the Windows firewall rule (`NEWS MEVA 3002`, all network
-     profiles) so other machines on your LAN can open `http://<this-PC-IP>:3002`
+   - heals the Windows firewall rule (`NEWS MEVA 3003`, all network
+     profiles) so other machines on your LAN can open `http://<this-PC-IP>:3003`
    - auto-starts the Caddy reverse proxy (`proxy\caddy\caddy.exe` is bundled),
      which also serves **port 80** → `http://<this-PC-IP>` without a port
 4. Stop: **`windows\Stop Server.bat`** (stops server + wrapper + proxy) ·
@@ -314,11 +325,11 @@ Both installers are attached to the **v3.2.0 GitHub Release**.
 
 ### LAN access from other machines
 
-- Direct: `http://<SERVER-IP>:3002` (firewall rule is healed automatically)
-- No port: `http://<SERVER-IP>` when Caddy is running (port 80 → 3002)
+- Direct: `http://<SERVER-IP>:3003` (firewall rule is healed automatically)
+- No port: `http://<SERVER-IP>` when Caddy is running (port 80 → 3003)
 - Friendly name: run **`lan\Add NewsMeva Hosts.bat`** on each machine
   (Mac: `lan/Add NewsMeva Hosts.command`) so everyone can open
-  `http://newsmeva:3002` — see [lan/README.md](lan/README.md)
+  `http://newsmeva:3003` — see [lan/README.md](lan/README.md)
 - If a fresh clone shows *"Cannot GET /"* or a build-needed page, run the
   frontend build once (`cd frontend && npm run build`) or just restart via the
   launcher, which builds automatically
@@ -347,7 +358,7 @@ Both installers are attached to the **v3.2.0 GitHub Release**.
 ```bash
 git clone https://github.com/kuldeep7ke/newsmeva.git
 cd newsmeva
-sudo bash ubuntu/install.sh        # installs Node (bundled offline v24.19.0, else NodeSource 20 LTS), builds, installs systemd service, creates .env (auto JWT_SECRET)
+sudo bash ubuntu/install.sh        # installs Node, builds, installs systemd service, creates .env (auto JWT_SECRET), opens ufw port 3003
 # .env is created automatically (local database). To use Supabase later:
 sudo nano /opt/newsmeva/backend/.env   # set DATABASE_URL + JWT_SECRET
 sudo systemctl restart newsmeva.service
@@ -355,7 +366,7 @@ sudo systemctl restart newsmeva.service
 
 Manual (no systemd): `bash ubuntu/start.sh` starts the server hidden in the
 background (auto-restart wrapper — restarts after crashes), heals the firewall
-(ufw port 3002), auto-starts Caddy if installed, waits for the health check
+(ufw port 3003), auto-starts Caddy if installed, waits for the health check
 (up to 60 s), then opens the app in the browser on desktop sessions
 (`--foreground` keeps the old foreground mode); stop with `bash ubuntu/stop.sh`
 (stops server + wrapper + Caddy).
@@ -367,14 +378,14 @@ Full guide: **[docs/SETUP-GUIDE-UBUNTU.md](docs/SETUP-GUIDE-UBUNTU.md)**
 ```bash
 git clone https://github.com/kuldeep7ke/newsmeva.git
 cd newsmeva
-sudo bash redhat/install.sh         # dnf + firewalld, opens port 3002, installs Node (bundled offline v24.19.0, else NodeSource 20 LTS), creates .env (auto JWT_SECRET)
+sudo bash redhat/install.sh         # dnf + firewalld, opens port 3003, installs Node, creates .env (auto JWT_SECRET)
 # .env is created automatically (local database). To use Supabase later:
 sudo nano /opt/newsmeva/backend/.env   # set DATABASE_URL + JWT_SECRET
 sudo systemctl restart newsmeva.service
 ```
 
 Manual (no systemd): `bash redhat/start.sh` — same behavior as Ubuntu above
-(firewalld port 3002 instead of ufw).
+(firewalld port 3003 instead of ufw).
 
 Full guide: **[docs/SETUP-GUIDE-RHEL.md](docs/SETUP-GUIDE-RHEL.md)**
 
@@ -382,9 +393,9 @@ Full guide: **[docs/SETUP-GUIDE-RHEL.md](docs/SETUP-GUIDE-RHEL.md)**
 
 ## First Use (any OS)
 
-1. Open `http://localhost:3002` on the server — LAN users open
-   `http://<SERVER-IP>:3002` (or port 80 via Caddy, or the friendly
-   `http://newsmeva:3002` after running the `lan/` scripts on each machine).
+1. Open `http://localhost:3003` on the server — LAN users open
+   `http://<SERVER-IP>:3003` (or port 80 via Caddy, or the friendly
+   `http://newsmeva:3003` after running the `lan/` scripts on each machine).
 2. Click **Sign Up** — the first account becomes the **admin**
 3. The admin approves further signups (Dashboard → pending signups), manages
    seats, and sets up staff PINs
@@ -413,8 +424,8 @@ cd backend && npm install && npm run build   # then:
 cd backend && node dist/index.js
 ```
 
-Env vars: `DATABASE_URL` + `JWT_SECRET` (see `render.yaml`). Note: the offline
-mirror lives on the server's disk — on Render it resets when the instance
+Env vars: `DATABASE_URL` + `JWT_SECRET` (see `render.yaml`, port 3003). Note: the
+offline mirror lives on the server's disk — on Render it resets when the instance
 restarts; offline writes made during an outage are still replayed as long as the
 queue file survives the process lifetime.
 
@@ -428,12 +439,14 @@ cd frontend && npm install && npm run dev    # Vite dev server (:5173, proxies /
 ## Verification
 
 ```bash
-curl http://localhost:3002/api/health        # -> {"status":"ok",...}
+curl http://localhost:3003/api/health        # -> {"status":"ok",...}
 # after login (admin):
 GET  /api/sync/status                        # online, engine, queue pending...
 POST /api/sync/replay                        # force a sync now
 GET  /api/settings/database/state            # live row counts + sync info
 ```
+
+Feature suite (262 automated checks): see [docs/MEMORY-CAPSULE.md](docs/MEMORY-CAPSULE.md) §9.
 
 ## Security Notes
 
@@ -448,7 +461,7 @@ GET  /api/settings/database/state            # live row counts + sync info
 - Secrets leaked into git history must be **rotated** (reset Supabase password,
   change `JWT_SECRET`) — old history keeps the value forever.
 - Production traffic on a public server should be HTTPS: put a TLS-terminating
-  reverse proxy (e.g. Caddy with a real certificate) in front of port 3002.
+  reverse proxy (e.g. Caddy with a real certificate) in front of port 3003.
 
 ---
 

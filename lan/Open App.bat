@@ -19,4 +19,4 @@ if not errorlevel 1 (
   exit /b 0
 )
 
-start "" "http://%SERVER_IP%:3002"
+start "" "http://%SERVER_IP%:3003"

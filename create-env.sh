@@ -32,7 +32,7 @@ DATABASE_URL=
 JWT_SECRET=$SECRET
 
 # Server port
-PORT=3002
+PORT=3003
 
 # Node environment
 NODE_ENV=production

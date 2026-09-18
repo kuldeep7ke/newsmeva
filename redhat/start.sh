@@ -19,7 +19,7 @@ chmod +x "$SCRIPT_DIR_FOR_FIX"/*.sh 2>/dev/null || true
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BASE="${MEVA_SERVER_DIR:-/opt/newsmeva}"
 ENTRY="$BASE/backend/dist/index.js"
-PORT="${PORT:-3002}"
+PORT="${PORT:-3003}"
 URL=""
 LOG=""
 if [[ -w "$BASE" ]]; then

@@ -1,5 +1,5 @@
 #!/bin/bash
-# NEWS MEVA - add "newsmeva" hostname so http://newsmeva:3002 works
+# NEWS MEVA - add "newsmeva" hostname so http://newsmeva:3003 works
 # 192.168.1.9 is the server's current IP - re-run this if the server's IP changes.
 # (Legacy "workstation" entries are cleaned up too.)
 
@@ -17,6 +17,6 @@ killall -HUP mDNSResponder 2>/dev/null
 
 echo
 echo "Done. This Mac can now open:"
-echo "  http://newsmeva:3002"
+echo "  http://newsmeva:3003"
 echo
 exit 0

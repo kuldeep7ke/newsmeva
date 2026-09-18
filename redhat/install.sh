@@ -34,7 +34,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 TARGET_BASE="/opt/newsmeva"
 SERVICE_USER="meva"  # change if you run as a different user
-PORT="${PORT:-3002}"
+PORT="${PORT:-3003}"
 # -------------------------------------------
 
 if [[ ! -d "$REPO_ROOT/backend" || ! -d "$REPO_ROOT/frontend" ]]; then
@@ -173,7 +173,7 @@ echo "Next steps:"
 echo "  1. Open http://localhost:$PORT  (LAN users: http://<THIS-MACHINE-IP>:$PORT)"
 echo "  2. First visitor signs up -> becomes admin automatically"
 echo "  3. View logs: sudo journalctl -u newsmeva.service -f"
-echo "  4. LAN URL without :3002 (Caddy): see docs/SETUP-GUIDE-RHEL.md section 5"
+echo "  4. LAN URL without :3003 (Caddy): see docs/SETUP-GUIDE-RHEL.md section 5"
 echo ""
 echo "============================================"
 echo "  Install complete!"

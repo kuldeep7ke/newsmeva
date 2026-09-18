@@ -809,8 +809,9 @@ app.use('/api/tasks', taskRoutes);
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
-// Start server
-const PORT = process.env.PORT || 3002;
+// Start server - the shipped .env sets PORT=3003 (canonical port);
+// the code fallback below is '3002' but installers always write 3003.
+const PORT = process.env.PORT || '3002';
 server.listen(PORT, () => {
   console.log(`Server running on :${PORT}`);
 });
@@ -1897,7 +1898,7 @@ addToast({ type: 'info', message: 'New notification' });
 ### Server Requirements
 
 - Node.js 18+
-- Port 3002 (API + SPA)
+- Port 3003 (API + SPA)
 - Optional: Caddy reverse proxy on port 80
 
 ### One-Click Launchers
@@ -1924,7 +1925,7 @@ addToast({ type: 'info', message: 'New notification' });
 # backend/.env
 DATABASE_URL=postgresql://postgres.<ref>:<pass>@aws-0-<region>.pooler.supabase.com:6543/postgres
 JWT_SECRET=<random 64-hex>
-PORT=3002
+PORT=3003
 NODE_ENV=production
 ```
 
@@ -1938,7 +1939,7 @@ cd backend && npm ci && npm run build  # tsc → dist/
 cd frontend && npm ci && npm run build  # vite build → dist/
 
 # Run
-node backend/dist/index.js  # Serves API + SPA on :3002
+node backend/dist/index.js  # Serves API + SPA on :3003
 ```
 
 ### Cloud (Render)
@@ -1962,7 +1963,7 @@ services:
 ### Health Check
 
 ```bash
-curl http://localhost:3002/api/health
+curl http://localhost:3003/api/health
 # → {"status":"ok","timestamp":"...","uptime":...}
 ```
 
@@ -2014,12 +2015,12 @@ cd frontend && npm run build
 | File | Purpose |
 |------|---------|
 | `windows/Start Server.bat` | Thin dispatcher → calls `start-server.ps1 -Mode visible` (double-click) |
-| `windows/Stop Server.bat` | Kills wrapper PowerShell FIRST, then node on :3002, then caddy.exe |
+| `windows/Stop Server.bat` | Kills wrapper PowerShell FIRST, then node on :3003, then caddy.exe |
 | `windows/Start Server Hidden.vbs` | Silent launcher (no console) → calls `start-server.ps1 -Mode open` or `-Mode hidden` |
 | `windows/Repair Launcher.bat` | Runs `start-server.ps1 -Mode repair` to restore corrupted launcher files |
 | `windows/Install Autostart.bat` | Creates `.lnk` shortcut in Windows Startup folder pointing to `Start Server Hidden.vbs` |
 | `windows/Remove Autostart.bat` | Deletes the Startup shortcut |
-| `windows/firewall-heal.bat` | Elevated helper — adds inbound rule "NEWS MEVA 3002" (TCP, all profiles) |
+| `windows/firewall-heal.bat` | Elevated helper — adds inbound rule "NEWS MEVA 3003" (TCP, all profiles) |
 | `windows/Create .env.bat` | Creates `backend/.env` from `.env.example` with random JWT_SECRET; `silent` arg skips pauses |
 | `windows/Clean Junk.bat` | Deletes `server.log`, `*.tsbuildinfo`, `smoke2*.log`, `caddy-out/err.log` older than 7 days |
 | `windows/Control Panel.bat` | Launches the **Control Panel** (WPF: `Control Panel.ps1`) — server start/stop + live health, database URL + `db-probe.js` live test, autostart toggle, Caddy proxy toggle, LAN copy buttons, repair/heal/clean tools. Reads/writes the same state as the `.bat` files; `.ps1` also exposes a `WM_PANEL_TEST=1` headless smoke-test hook |
@@ -2051,7 +2052,7 @@ cd frontend && npm run build
 | File | Purpose |
 |------|---------|
 | `redhat/install.sh` | Full installer — same as Ubuntu but uses `dnf` + `firewalld` |
-| `redhat/start.sh` | Manual launcher — same as Ubuntu but `firewalld` port 3002 |
+| `redhat/start.sh` | Manual launcher — same as Ubuntu but `firewalld` port 3003 |
 | `redhat/stop.sh` | Same as Ubuntu |
 | `redhat/start-server-core.sh` | Auto-restart watchdog (bash) |
 | `redhat/newsmeva.service` | systemd unit (identical to Ubuntu) |
@@ -2070,7 +2071,7 @@ cd frontend && npm run build
 | `proxy/Start Caddy.bat` | Starts `caddy.exe run --config Caddyfile` in background |
 | `proxy/Stop Caddy.bat` | Kills caddy.exe process |
 | `proxy/caddy/caddy.exe` | Bundled Caddy binary (Windows) |
-| `proxy/caddy/Caddyfile` | Reverse proxy config — `:80` → `127.0.0.1:3002`, gzip+zstd, WebSocket upgrade |
+| `proxy/caddy/Caddyfile` | Reverse proxy config — `:80` → `127.0.0.1:3003`, gzip+zstd, WebSocket upgrade |
 
 ### LAN (5 files)
 
@@ -2078,7 +2079,7 @@ cd frontend && npm run build
 |------|---------|
 | `lan/Add NewsMeva Hosts.bat` | Windows: adds `192.168.1.9 newsmeva` to hosts file (admin) |
 | `lan/Add NewsMeva Hosts.command` | Mac: same |
-| `lan/Open App.bat` | Windows: opens `http://newsmeva:3002` in browser |
+| `lan/Open App.bat` | Windows: opens `http://newsmeva:3003` in browser |
 | `lan/Open App.command` | Mac: same |
 | `lan/README.md` | LAN setup guide |
 
@@ -2135,9 +2136,9 @@ cd frontend && npm run build
 
 ### Auto-Firewall (Windows)
 
-`start-server.ps1` checks if rule "NEWS MEVA 3002" exists:
+`start-server.ps1` checks if rule "NEWS MEVA 3003" exists:
 - If missing → relaunches `firewall-heal.bat` elevated (UAC `-Verb RunAs`)
-- `firewall-heal.bat` adds inbound TCP rule for port 3002 on all profiles (Domain/Private/Public)
+- `firewall-heal.bat` adds inbound TCP rule for port 3003 on all profiles (Domain/Private/Public)
 
 ### Auto-Caddy (all OS)
 
@@ -2152,9 +2153,9 @@ cd frontend && npm run build
 
 | OS | Trigger | Behavior |
 |----|---------|----------|
-| Windows | `Start Server.bat` (visible/open modes) | Polls `GET /api/health` up to 60s → `Start-Process http://localhost:3002` |
-| macOS | `Start Server.command` | Polls health → `open http://localhost:3002` |
-| Ubuntu | `start.sh` (desktop only, `$DISPLAY` set) | Polls health → `xdg-open http://localhost:3002` |
+| Windows | `Start Server.bat` (visible/open modes) | Polls `GET /api/health` up to 60s → `Start-Process http://localhost:3003` |
+| macOS | `Start Server.command` | Polls health → `open http://localhost:3003` |
+| Ubuntu | `start.sh` (desktop only, `$DISPLAY` set) | Polls health → `xdg-open http://localhost:3003` |
 | RHEL | Same as Ubuntu | Same |
 
 ### Auto-Already-Running Check
@@ -2199,7 +2200,7 @@ android/
 | Target SDK | 34 (Android 14) |
 | Java/Kotlin | JVM target 17 |
 | Node.js | v20.11.1 (linux-arm64 + linux-armv7l) |
-| Server port | 3002 (localhost only) |
+| Server port | 3003 (localhost only) |
 
 ### How It Works
 
@@ -2211,7 +2212,7 @@ android/
 
 2. **Start Server:** `NodeService.startNode()` runs `node dist/index.js` as a foreground service with notification
 
-3. **WebView:** `MainActivity.showNewsmeva()` loads `http://127.0.0.1:3002` in a full-screen WebView
+3. **WebView:** `MainActivity.showNewsmeva()` loads `http://127.0.0.1:3003` in a full-screen WebView
 
 4. **Control Panel:** Start/Stop/Open buttons with status indicator (green pulse = running)
 
@@ -2229,9 +2230,9 @@ android/
 
 ### NodeService Features
 
-- **Foreground service** with persistent notification ("Server running on port 3002")
+- **Foreground service** with persistent notification ("Server running on port 3003")
 - **3-method executable fix:** tries `setExecutable()` → `chmod +x` → copy-to-cache fallback
-- **Environment variables:** `NODE_ENV=production`, `PORT=3002`, `ANDROID=true`
+- **Environment variables:** `NODE_ENV=production`, `PORT=3003`, `ANDROID=true`
 - **Status persistence:** SharedPreferences (`server_status`, `server_status_message`)
 - **Exit handling:** detects process exit, updates notification, stops self
 
