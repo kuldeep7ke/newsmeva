@@ -284,6 +284,10 @@ export async function renderCloud() {
           <label class="field-label" for="sync-key">${t('cloud_supabase_key')}</label>
           <input class="field" id="sync-key" name="key" placeholder="your-anon-key" autocomplete="off" />
         </div>
+        <div class="field-group">
+          <label class="field-label" for="sync-secret">${t('cloud_secret')}</label>
+          <input class="field" id="sync-secret" name="secret" type="password" placeholder="${t('cloud_secret_ph')}" autocomplete="off" />
+        </div>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
           <button type="submit" class="btn btn-primary">${t('cloud_connect')}</button>
           <button type="button" class="btn btn-ghost" id="sync-save-btn">${icon('save')} ${t('cloud_save_link')}</button>
@@ -303,8 +307,9 @@ export async function renderCloud() {
     const saved = sync.getSavedSync ? sync.getSavedSync() : null;
     const url = (cfg && cfg.url) || (saved && saved.url) || '';
     const key = (cfg && cfg.key) || (saved && saved.key) || '';
+    const secret = (cfg && cfg.secret) || (saved && saved.secret) || '';
     const form = document.querySelector('#sync-config-form');
-    if (form) { form.url.value = url || ''; form.key.value = key || ''; }
+    if (form) { form.url.value = url || ''; form.key.value = key || ''; form.secret.value = secret || ''; }
     if (url) {
       const chip = document.querySelector('#sync-url-chip');
       const label = document.querySelector('#sync-url-chip-label');

@@ -385,6 +385,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   footage_source TEXT,
   deadline TIMESTAMPTZ,
   deadline_extended INTEGER DEFAULT 0,
+  trashed_from_status TEXT,
   bulletin_date TEXT,
   version_number INTEGER DEFAULT 1,
   uid TEXT,
@@ -967,6 +968,7 @@ CREATE TABLE IF NOT EXISTS tasks (
       footage_source TEXT,
       deadline TEXT,
       deadline_extended INTEGER DEFAULT 0,
+      trashed_from_status TEXT,
       bulletin_date TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
@@ -1126,6 +1128,9 @@ function runMigrations() {
   }
   if (!columnExists('tasks', 'role_data')) {
     db.run("ALTER TABLE tasks ADD COLUMN role_data TEXT");
+  }
+  if (!columnExists('tasks', 'trashed_from_status')) {
+    db.run("ALTER TABLE tasks ADD COLUMN trashed_from_status TEXT");
   }
   if (!columnExists('tasks', 'bulletin_template_id')) {
     db.run("ALTER TABLE tasks ADD COLUMN bulletin_template_id INTEGER REFERENCES bulletin_templates(id)");
@@ -1703,6 +1708,9 @@ action TEXT NOT NULL CHECK(action IN ('success','failed_password','failed_pin','
       if (!columnExists('tasks', 'location_id')) {
         db.run('ALTER TABLE tasks ADD COLUMN location_id INTEGER REFERENCES locations(id)');
       }
+      if (!columnExists('tasks', 'trashed_from_status')) {
+        db.run('ALTER TABLE tasks ADD COLUMN trashed_from_status TEXT');
+      }
       db.run('DROP TABLE IF EXISTS tasks_new');
       db.run(`CREATE TABLE tasks_new (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1735,7 +1743,7 @@ action TEXT NOT NULL CHECK(action IN ('success','failed_password','failed_pin','
         story_id INTEGER REFERENCES stories(id), completed_at TEXT,
         remarks TEXT, youtube_title TEXT, youtube_description TEXT, youtube_keywords TEXT,
         correction_notes TEXT, correction_response TEXT,         footage_source TEXT,
-        deadline TEXT, deadline_extended INTEGER DEFAULT 0,
+        deadline TEXT, deadline_extended INTEGER DEFAULT 0, trashed_from_status TEXT,
         reporter_id INTEGER REFERENCES reporters(id),
         archive_id INTEGER REFERENCES archives(id),
         location_id INTEGER REFERENCES locations(id),
@@ -1749,7 +1757,7 @@ action TEXT NOT NULL CHECK(action IN ('success','failed_password','failed_pin','
         status, priority, task_type, role_data, bulletin_template_id, story_id,
         completed_at, remarks, youtube_url, youtube_title, youtube_description, youtube_keywords,
         correction_notes, correction_response, footage_source, deadline, deadline_extended,
-        reporter_id, archive_id, location_id, bulletin_date,
+        trashed_from_status, reporter_id, archive_id, location_id, bulletin_date,
         headline, created_at, updated_at
       ) SELECT
         id, title, description, bulletin_id, assigned_by, assigned_to, video_editor_id,
@@ -1781,7 +1789,7 @@ action TEXT NOT NULL CHECK(action IN ('success','failed_password','failed_pin','
         task_type, role_data, bulletin_template_id, story_id,
         completed_at, remarks, youtube_url, youtube_title, youtube_description, youtube_keywords,
         correction_notes, correction_response, footage_source, deadline, deadline_extended,
-        reporter_id, archive_id, location_id, bulletin_date,
+        trashed_from_status, reporter_id, archive_id, location_id, bulletin_date,
         title, created_at, updated_at
       FROM tasks`);
       db.run('DROP TABLE tasks');

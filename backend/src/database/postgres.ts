@@ -45,14 +45,18 @@ export function isSqlite(): boolean {
   return getDbMode() === 'sqlite';
 }
 
+// Single place that decides TLS settings for PostgreSQL connections. Supabase's
+// managed certificates are not a standard CA-signed chain, so connections rely
+// on `rejectUnauthorized: false` (encryption with peer validation skipped).
+export function buildPgPoolConfig(config: PoolConfig): PoolConfig {
+  return { ...config, ssl: config.ssl || { rejectUnauthorized: false } };
+}
+
 export class PostgresAdapter {
   private pool: Pool;
 
   constructor(config: PoolConfig) {
-    this.pool = new Pool({
-      ...config,
-      ssl: config.ssl || { rejectUnauthorized: false },
-    });
+    this.pool = new Pool(buildPgPoolConfig(config));
   }
 
   getPool(): Pool {
@@ -121,7 +125,8 @@ export class PostgresAdapter {
     try {
       result = await this.pool.query(query, params || []);
     } catch (e: any) {
-      console.error('[pg-debug] FAILED QUERY:', query, '| params:', JSON.stringify(params || []));
+      // NOTE: never log `params` — they may contain credentials/hashes.
+      console.error('[pg-debug] FAILED QUERY:', query);
       throw e;
     }
     return {

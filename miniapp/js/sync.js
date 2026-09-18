@@ -1,4 +1,4 @@
-import { db, localDateTimeStr, makeUuid, getByUuid } from './db.js';
+import { db, localDateTimeStr, makeUuid, getByUuid, onLocalChange } from './db.js';
 
 const CONFIG_KEY = 'newsMeva_sync';
 const SAVED_KEY = 'newsMeva_savedSync';
@@ -38,9 +38,33 @@ create index if not exists sync_docs_channel_idx on public.sync_docs (channel);
 
 alter table public.sync_docs enable row level security;
 
+-- Shared secret gate: set a non-empty value below, then enter the SAME value in
+-- the app (Cloud & Sync > "Cloud Secret"). Requests without a matching
+-- x-meva-secret header are rejected, so anonymous clients from other apps on
+-- the same project can no longer read or write the sync table.
+create table if not exists public.sync_config (
+  id boolean primary key default true,
+  secret text not null default ''
+);
+insert into public.sync_config (id, secret) values (true, '') on conflict (id) do nothing;
+
+create or replace function public.sync_secret_ok() returns boolean
+  language sql stable security definer
+  set search_path = public
+as $$
+  select coalesce((select secret from public.sync_config where id = true), '') <> ''
+    and (select secret from public.sync_config where id = true)
+      = nullif(current_setting('request.headers.x-meva-secret', true), '')
+$$;
+
+grant execute on function public.sync_secret_ok() to anon, authenticated;
+
 drop policy if exists "sync_docs_anon_all" on public.sync_docs;
-create policy "sync_docs_anon_all" on public.sync_docs
-  for all to anon using (true) with check (true);
+drop policy if exists "sync_docs_secret" on public.sync_docs;
+create policy "sync_docs_secret" on public.sync_docs
+  for all to anon using (public.sync_secret_ok()) with check (public.sync_secret_ok());
+create policy "sync_docs_secret_authed" on public.sync_docs
+  for all to authenticated using (public.sync_secret_ok()) with check (public.sync_secret_ok());
 
 -- Live cross-device updates: broadcasts INSERT/UPDATE/DELETE on sync_docs.
 do $$
@@ -84,8 +108,9 @@ export function saveLink(config) {
   if (!config || !config.url || !config.key) return false;
   const url = String(config.url).trim();
   const key = String(config.key).trim();
+  const secret = String(config.secret || '').trim();
   if (!url || !key) return false;
-  localStorage.setItem(SAVED_KEY, JSON.stringify({ url, key }));
+  localStorage.setItem(SAVED_KEY, JSON.stringify({ url, key, secret }));
   return true;
 }
 
@@ -188,9 +213,23 @@ export async function pullAll() {
   try {
     state.applyingRemote = true;
     const channel = getIdentity().channel;
-    const { data, error } = await state.client.from('sync_docs').select('*').eq('channel', channel).gte('updated_at', new Date(Date.now() - 7 * 86400000).toISOString());
-    if (error) throw error;
-    await applyRemote(data || []);
+    const since = new Date(Date.now() - 7 * 86400000).toISOString();
+    // Supabase caps a single read at 1000 rows — page through everything newer
+    // than the 7-day window instead of silently dropping the overflow.
+    const fetched = [];
+    const PAGE = 1000;
+    for (let start = 0; ; start += PAGE) {
+      const { data, error } = await state.client.from('sync_docs')
+        .select('*').eq('channel', channel)
+        .gte('updated_at', since)
+        .order('updated_at', { ascending: true })
+        .range(start, start + PAGE - 1);
+      if (error) throw error;
+      const batch = data || [];
+      fetched.push(...batch);
+      if (batch.length < PAGE) break;
+    }
+    await applyRemote(fetched);
     state.lastSync = new Date().toISOString();
     state.status = 'connected';
     state.error = null;
@@ -219,7 +258,7 @@ async function applyRemote(rows) {
     const existing = await getByUuid(table, data.uuid);
     if (!existing) {
       try { await db.table(table).add(data); } catch { /* ignore duplicate */ }
-    } else if (toLocalTimestamp(data) > toLocalTimestamp(existing)) {
+    } else if (toLocalTimestamp(data) >= toLocalTimestamp(existing)) {
       const { id: _id, ...rest } = data;
       try { await db.table(table).update(existing.id, rest); } catch { /* ignore */ }
     }
@@ -240,6 +279,27 @@ function schedulePush() {
   state.pushTimer = setTimeout(() => pushAll().catch(() => {}), PUSH_DEBOUNCE);
 }
 
+const TABLE_TO_ENTITY = { categories: 'category', templates: 'template', tasks: 'task', scripts: 'script', activities: 'activity' };
+
+function handleLocalChange(change) {
+  if (!state.client || state.status === 'error') return;
+  if (!change || !change.table) return;
+  const entity = TABLE_TO_ENTITY[change.table];
+  if (!entity) return;
+  if (change.type === 'deleted') {
+    const uuid = change.record && change.record.uuid;
+    if (uuid) pushDeletion(entity, uuid);
+  } else {
+    schedulePush();
+  }
+}
+
+function watchLocalChanges() {
+  if (dbSubscriptions.length) return;
+  const unsub = onLocalChange(handleLocalChange);
+  dbSubscriptions.push(unsub);
+}
+
 let dbSubscriptions = [];
 
 export async function connect(config) {
@@ -252,12 +312,15 @@ export async function connect(config) {
     return;
   }
   try {
-    state.client = window.supabase.createClient(config.url, config.key, { auth: { persistSession: false } });
+    const secret = String(config.secret || '').trim();
+    const clientOpts = { auth: { persistSession: false } };
+    if (secret) clientOpts.global = { headers: { 'x-meva-secret': secret } };
+    state.client = window.supabase.createClient(config.url, config.key, clientOpts);
     const { error } = await state.client.from('sync_docs').select('id').limit(1);
     if (error && error.code !== 'PGRST116') throw error;
-    localStorage.setItem(CONFIG_KEY, JSON.stringify({ url: config.url, key: config.key }));
+    localStorage.setItem(CONFIG_KEY, JSON.stringify({ url: config.url, key: config.key, secret }));
     localStorage.setItem(CONNECTED_URL_KEY, config.url);
-    localStorage.setItem(SAVED_KEY, JSON.stringify({ url: config.url, key: config.key }));
+    localStorage.setItem(SAVED_KEY, JSON.stringify({ url: config.url, key: config.key, secret }));
     state.status = 'syncing';
 
     state.channel = state.client
@@ -266,6 +329,7 @@ export async function connect(config) {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'sync_docs' }, handleRealtime)
       .subscribe();
 
+    watchLocalChanges();
     await pushAll();
     await pullAll();
     state.status = 'connected';

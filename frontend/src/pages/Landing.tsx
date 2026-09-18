@@ -57,7 +57,7 @@ export default function Landing() {
   const [landingOnline, setLandingOnline] = useState<any[]>([]);
   const [landingConnected, setLandingConnected] = useState(false);
   const landingSocketRef = useRef<any>(null);
-  const pendingApprovalRef = useRef<{ email: string; full_name: string; token?: string } | null>(null);
+  const pendingApprovalRef = useRef<{ email: string; full_name: string; token?: string; pin: string } | null>(null);
 
   const fetchLandingData = useCallback(() => {
     api.get('/analytics/landing').then(r => setData(r.data)).catch(() => {});
@@ -90,7 +90,7 @@ export default function Landing() {
     return () => { s.disconnect(); landingSocketRef.current = null; };
   }, []);
 
-  const [pinModal, setPinModal] = useState<{ email: string; full_name: string; password: string; pin: string } | null>(null);
+  const [pinModal, setPinModal] = useState<{ email: string; full_name: string; pin: string } | null>(null);
   const [pinValue, setPinValue] = useState('');
   const [pinError, setPinError] = useState('');
   const [pinLogining, setPinLogining] = useState(false);
@@ -112,7 +112,7 @@ export default function Landing() {
   const [requestPinSent, setRequestPinSent] = useState(false);
 
   // Approval request state
-  const [awaitingApproval, setAwaitingApproval] = useState<{ email: string; full_name: string; token?: string } | null>(null);
+  const [awaitingApproval, setAwaitingApproval] = useState<{ email: string; full_name: string; token?: string; pin: string } | null>(null);
   const [approvalRejected, setApprovalRejected] = useState(false);
   const [approvalPendingProfile, setApprovalPendingProfile] = useState<any>(null);
 
@@ -120,6 +120,7 @@ export default function Landing() {
   useEffect(() => {
     if (loginApproved && (awaitingApproval || approvalPendingProfile)) {
       const target = awaitingApproval || approvalPendingProfile;
+      const profile = dbProfiles.find((p: any) => (p.email && p.email === target.email) || p.full_name === target.full_name);
       setPinLogining(true);
       loginWithToken(target.token || '').then((data: any) => {
         toast('Welcome back!', 'success');
@@ -143,6 +144,16 @@ export default function Landing() {
       setTimeout(() => { setAwaitingApproval(null); setApprovalRejected(false); }, 4000);
     }
   }, [loginRejected]);
+
+  // PIN-based quick login (no stored password): the PIN is verified by the
+  // server and exchanged for a session token.
+  const doPinLogin = async (profile: any, pin: string) => {
+    const res = await api.post('/auth/login-with-pin', { profile_id: profile.id, pin });
+    localStorage.setItem('token', res.data.token);
+    localStorage.setItem('user', JSON.stringify(res.data.user));
+    sessionStorage.setItem('welcome_pending', '1');
+    window.location.href = '/dashboard';
+  };
 
   const handlePinEntryLogin = async () => {
     if (!pinEntryProfile || pinEntryValue.length !== 4) return;
@@ -223,8 +234,9 @@ export default function Landing() {
   }, [data]);
 
   const quickLoginClick = (s: any) => {
-    if (!s.token) {
-      navigate(`/login?email=${encodeURIComponent(s.email)}`);
+    const profile = dbProfiles.find((p: any) => (p.email && p.email === s.email) || p.full_name === s.full_name);
+    if (!s.token || !profile?.id) {
+      navigate(`/login?email=${encodeURIComponent(s.email || profile?.email || '')}`);
       return;
     }
     // Open PIN window for all saved logins
@@ -237,7 +249,6 @@ export default function Landing() {
       pendingApprovalRef.current = s;
       setApprovalPendingProfile(s);
       setApprovalRejected(false);
-      const profile = dbProfiles.find((p: any) => (p.email && p.email === s.email) || p.full_name === s.full_name);
       landingSocketRef.current?.emit('login:request', { profile_id: profile?.id, full_name: s.full_name });
       toast('Login request sent to video editors', 'info');
     }
@@ -246,6 +257,7 @@ export default function Landing() {
   const completeApprovalLogin = () => {
     const target = pendingApprovalRef.current || awaitingApproval;
     if (!target) return;
+    const profile = dbProfiles.find((p: any) => (p.email && p.email === target.email) || p.full_name === target.full_name);
     setPinLogining(true);
     loginWithToken(target.token || '').then((data: any) => {
       toast('Welcome back!', 'success');
@@ -302,8 +314,17 @@ export default function Landing() {
       setPinError('Wrong PIN');
       return;
     }
-    await doDirectLogin(pinModal);
-    setPinModal(null);
+    if (!profile?.id) {
+      setPinModal(null);
+      navigate(`/login?email=${encodeURIComponent(pinModal.email)}`);
+      return;
+    }
+    setPinLogining(true);
+    try {
+      await doPinLogin(profile, pinValue);
+    } catch (err: any) {
+      toast(err.response?.data?.error || 'Login failed', 'error');
+    } finally { setPinLogining(false); }
   };
 
   const handleResetPin = async () => {

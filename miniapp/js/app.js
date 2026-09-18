@@ -578,8 +578,9 @@ async function handleSyncConfig(form) {
   const fd = new FormData(form);
   const url = fd.get('url')?.trim();
   const key = fd.get('key')?.trim();
+  const secret = fd.get('secret')?.trim();
   if (!url || !key) return;
-  try { await sync.connect({ url, key }); } catch (err) { console.error('Sync connect error:', err); }
+  try { await sync.connect({ url, key, secret }); } catch (err) { console.error('Sync connect error:', err); }
   refreshCurrentView();
 }
 
@@ -589,8 +590,9 @@ function handleSyncSave() {
   const fd = new FormData(form);
   const url = fd.get('url')?.trim();
   const key = fd.get('key')?.trim();
+  const secret = fd.get('secret')?.trim();
   if (!url || !key) return;
-  const saved = sync.saveLink({ url, key });
+  const saved = sync.saveLink({ url, key, secret });
   if (saved) refreshCurrentView();
 }
 

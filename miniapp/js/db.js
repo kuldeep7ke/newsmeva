@@ -55,6 +55,25 @@ export function localDateTimeStr(date = new Date()) {
   return `${localDateStr(d)}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+// Simple pub/sub so the sync engine can watch local writes and push them.
+// Dexie 3's built-in `changes` observable event is not present in the bundled
+// build, so the wrapper functions below notify after each mutation instead.
+const localChangeListeners = [];
+
+export function onLocalChange(listener) {
+  localChangeListeners.push(listener);
+  return () => {
+    const i = localChangeListeners.indexOf(listener);
+    if (i >= 0) localChangeListeners.splice(i, 1);
+  };
+}
+
+function notifyLocalChange(table, type, record) {
+  localChangeListeners.forEach((fn) => {
+    try { fn({ table, type, record }); } catch { /* listener error ignored */ }
+  });
+}
+
 export async function ensureUuids(tx = db) {
   const catMap = new Map((await tx.table('categories').toArray()).map((c) => [c.id, c]));
   await tx.table('categories').toCollection().modify((row) => {
@@ -113,6 +132,7 @@ export async function addTask(task) {
     completedAt: '',
     deletedAt: ''
   });
+  notifyLocalChange('tasks', 'created', { ...task, id, uuid: (await db.tasks.get(id)).uuid });
   await addActivity({ type: 'task_created', taskId: id, description: `Created "${task.title.trim()}"` });
   return id;
 }
@@ -124,23 +144,32 @@ export async function updateTask(id, changes) {
   const updated = { ...changes, updatedAt: now };
   if (changes.status === 'completed' && !task.completedAt) updated.completedAt = now;
   await db.tasks.update(Number(id), updated);
+  notifyLocalChange('tasks', 'updated', { ...task, ...updated });
   if (changes.status) await addActivity({ type: 'status_changed', taskId: id, description: `Moved to "${changes.status}"` });
 }
 
 export async function deleteTask(id) {
   await db.tasks.update(Number(id), { deletedAt: localDateTimeStr(), updatedAt: localDateTimeStr() });
+  const record = await db.tasks.get(Number(id));
+  notifyLocalChange('tasks', 'updated', record || { id });
   await addActivity({ type: 'task_deleted', taskId: id, description: 'Moved to recycle bin' });
 }
 
 export async function restoreTask(id) {
   await db.tasks.update(Number(id), { deletedAt: '', updatedAt: localDateTimeStr() });
+  const record = await db.tasks.get(Number(id));
+  notifyLocalChange('tasks', 'updated', record || { id });
 }
 
-export async function permanentDeleteTask(id) { await db.tasks.delete(Number(id)); }
+export async function permanentDeleteTask(id) {
+  const record = await db.tasks.get(Number(id));
+  await db.tasks.delete(Number(id));
+  if (record) notifyLocalChange('tasks', 'deleted', record);
+}
 
 export async function addScript(script) {
   const now = localDateTimeStr();
-  return db.scripts.add({
+  const id = await db.scripts.add({
     uuid: makeUuid(),
     title: script.title.trim(),
     content: script.content || '',
@@ -152,6 +181,8 @@ export async function addScript(script) {
     updatedAt: now,
     deletedAt: ''
   });
+  notifyLocalChange('scripts', 'created', { ...script, id, uuid: (await db.scripts.get(id)).uuid });
+  return id;
 }
 
 export async function updateScript(id, changes) {
@@ -159,32 +190,44 @@ export async function updateScript(id, changes) {
   const script = await db.scripts.get(Number(id));
   if (!script) return;
   const content = changes.content !== undefined ? changes.content : script.content;
-  await db.scripts.update(Number(id), {
+  const updated = {
     ...changes,
     wordCount: content ? content.trim().split(/\s+/).length : 0,
     charCount: content?.length || 0,
     updatedAt: now
-  });
+  };
+  await db.scripts.update(Number(id), updated);
+  notifyLocalChange('scripts', 'updated', { ...script, ...updated });
 }
 
 export async function deleteScript(id) {
   await db.scripts.update(Number(id), { deletedAt: localDateTimeStr(), updatedAt: localDateTimeStr() });
+  const record = await db.scripts.get(Number(id));
+  notifyLocalChange('scripts', 'updated', record || { id });
 }
 
 export async function restoreScript(id) {
   await db.scripts.update(Number(id), { deletedAt: '', updatedAt: localDateTimeStr() });
+  const record = await db.scripts.get(Number(id));
+  notifyLocalChange('scripts', 'updated', record || { id });
 }
 
-export async function permanentDeleteScript(id) { await db.scripts.delete(Number(id)); }
+export async function permanentDeleteScript(id) {
+  const record = await db.scripts.get(Number(id));
+  await db.scripts.delete(Number(id));
+  if (record) notifyLocalChange('scripts', 'deleted', record);
+}
 
 export async function addActivity(entry) {
-  return db.activities.add({
+  const id = await db.activities.add({
     uuid: makeUuid(),
     type: entry.type,
     taskId: entry.taskId || null,
     description: entry.description || '',
     timestamp: localDateTimeStr()
   });
+  notifyLocalChange('activities', 'created', { ...entry, id, uuid: (await db.activities.get(id)).uuid });
+  return id;
 }
 
 export async function getActivities() { return db.activities.orderBy('timestamp').reverse().toArray(); }

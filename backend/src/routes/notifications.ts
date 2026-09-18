@@ -37,7 +37,10 @@ router.post('/read-all', authenticate, async (req: AuthRequest, res: Response) =
 });
 
 router.post('/read/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  await prepare('UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?').run(parseInt(req.params.id), req.user!.profile_id);
+  const nid = parseInt(req.params.id);
+  const existing = await prepare('SELECT id FROM notifications WHERE id = ? AND user_id = ?').get(nid, req.user!.profile_id) as any;
+  if (!existing) return res.status(404).json({ error: 'Notification not found.' });
+  await prepare('UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?').run(nid, req.user!.profile_id);
   res.json({ success: true });
 });
 

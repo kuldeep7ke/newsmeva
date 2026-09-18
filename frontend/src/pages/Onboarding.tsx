@@ -61,7 +61,7 @@ export default function Onboarding() {
       // Only save to quick access for staff level users (access_level = 3), not admin (access_level = 1)
       if (user?.access_level === 3) {
         const old = getSavedLogins().find(l => l.email === user?.email);
-        saveLogin(profile.email, profile.full_name, old?.token || '', '');
+        saveLogin(profile.email, profile.full_name, old?.token || '', old?.pin || '', user?.access_level, user?.role);
         if (old && old.email !== profile.email) removeLogin(old.email);
       }
       toast(`Welcome to ${getAppName()}!`, 'success');

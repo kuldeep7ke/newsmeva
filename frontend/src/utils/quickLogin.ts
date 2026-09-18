@@ -19,9 +19,29 @@ export interface SessionRecord {
   timestamp: string;
 }
 
+// One-time migration: previously the raw password was persisted in saved_logins.
+// Strip it from any existing entries (and any other unknown keys).
+function cleanEntry(raw: any): SavedLogin {
+  return {
+    email: raw && typeof raw.email === 'string' ? raw.email : '',
+    full_name: raw && typeof raw.full_name === 'string' ? raw.full_name : '',
+    token: raw?.token,
+    pin: raw?.pin || '',
+    lastLogin: raw?.lastLogin || '',
+    access_level: raw?.access_level,
+    role: raw?.role,
+  };
+}
+
 export function getSavedLogins(): SavedLogin[] {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    if (!Array.isArray(raw)) return [];
+    const cleaned = raw.map(cleanEntry).filter((l: SavedLogin) => l.email);
+    if (JSON.stringify(cleaned) !== JSON.stringify(raw)) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch { return []; }
 }
 

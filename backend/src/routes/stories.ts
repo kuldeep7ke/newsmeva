@@ -144,7 +144,7 @@ router.put('/:id', authenticate, authorize(1, 2, 3), async (req: AuthRequest, re
     // /confirm and /send-to-tasks endpoints — a level-3 user must not
     // self-approve their own story through the generic PUT.
     if (req.user!.access_level === 3 && (status === 'approved' || status === 'send_to_tasks')) {
-      return res.status(403).json({ error: 'Only managers and admins can approve stories.' });
+      return res.status(403).json({ error: 'Only managers and admins can approve stories or send them to tasks.' });
     }
     const allowed = STORY_TRANSITIONS[story.status] || [];
     if (!allowed.includes(status)) {
@@ -178,6 +178,9 @@ router.post('/:id/revert', authenticate, authorize(1, 2, 3), async (req: AuthReq
   }
   const { status } = req.body;
   if (!status || !STATUSES.includes(status)) return res.status(400).json({ error: 'Invalid status.' });
+  if (req.user!.access_level === 3 && (status === 'approved' || status === 'send_to_tasks')) {
+    return res.status(403).json({ error: 'Only managers and admins can approve stories or send them to tasks.' });
+  }
   if (story.status === 'send_to_tasks') {
     return res.status(400).json({ error: 'This story cannot be reverted after being sent to tasks.' });
   }
@@ -237,6 +240,11 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   // (the UI offers "undo story create" to the creator).
   if (req.user!.access_level > 1 && story.created_by !== req.user!.profile_id) {
     return res.status(403).json({ error: 'You can only delete stories you created.' });
+  }
+  // A story that already generated a production task can't be deleted — the
+  // task row references it, and deleting it would orphan the assignment.
+  if (story.status === 'send_to_tasks') {
+    return res.status(400).json({ error: 'This story has been sent to tasks and cannot be deleted.' });
   }
   await prepare('INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details) VALUES (?,?,?,?,?)')
     .run(req.user!.profile_id, 'delete_story', 'stories', req.params.id, `Deleted story: ${story.title} (${story.uid})`);

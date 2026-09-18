@@ -61,7 +61,12 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
   if (!reason || !start_date || !end_date) {
     return res.status(400).json({ error: 'Reason, start_date and end_date are required.' });
   }
-  if (new Date(end_date) < new Date(start_date)) {
+  const sMs = new Date(String(start_date)).getTime();
+  const eMs = new Date(String(end_date)).getTime();
+  if (Number.isNaN(sMs) || Number.isNaN(eMs)) {
+    return res.status(400).json({ error: 'Invalid leave dates.' });
+  }
+  if (eMs < sMs) {
     return res.status(400).json({ error: 'End date must be after start date.' });
   }
   // Admins/managers can file leave on behalf of any active profile; everyone else files for themselves.

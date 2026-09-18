@@ -1,5 +1,4 @@
 import { Router, Response } from 'express';
-import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -7,7 +6,7 @@ import { Pool } from 'pg';
 import { authenticate, authorize, authorizeAdminOrDev, AuthRequest } from '../middleware/auth';
 import { prepare, saveManagedBackup, reinitDatabase, seedPostgresDefaults, DB_DIR } from '../database/schema';
 import { getSyncStatus, getHealth, getActiveEngine, resetMirrorAndQueue, clearSyncQueue, pullPostgresToMirror, pushMirrorToPostgres } from '../database/sync';
-import { getDbMode, getAdapter } from '../database/postgres';
+import { getDbMode, getAdapter, buildPgPoolConfig } from '../database/postgres';
 import { countRows, listPublicTables, truncateTables } from '../utils/dbAdmin';
 import {
   getSavedConnections, getConnectionById, saveConnection,
@@ -72,7 +71,7 @@ function parseDbUrl(cs: string): { host: string; projectRef: string; passwordMas
 }
 
 async function testConnectionString(cs: string): Promise<{ ok: boolean; error?: string; data?: DataSummary }> {
-  const pool = new Pool({ connectionString: cs, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 15000 });
+  const pool = new Pool(buildPgPoolConfig({ connectionString: cs, connectionTimeoutMillis: 15000 }));
   try {
     await pool.query('SELECT 1');
     const data = await summarizePoolData(pool);
@@ -479,16 +478,8 @@ router.post('/clean-all-data', authenticate, authorize(1), async (req: AuthReque
     await truncateTables(existing);
     await resetMirrorAndQueue();
 
-    // Seed default admin
-    const password_hash = bcrypt.hashSync('P@ssw0rd', 10);
-    const userResult = await prepare("INSERT INTO users (username, password_hash, is_active) VALUES (?,?,?)")
-      .run('dev@newsmeva.local', password_hash, 1);
-    const userId = userResult.lastInsertRowid as number;
-    await prepare("INSERT INTO profiles (uid, user_id, full_name, role, access_level, email, is_active, status) VALUES (?,?,?,?,?,?,?,?)")
-      .run('PRF-0001', userId, 'News Meva Dev', 'admin', 1, 'dev@newsmeva.local', 1, 'active');
-
-    console.log('[clean-all-data] by user', req.user?.username, '- full reset with default admin seeded');
-    res.json({ message: 'All data cleared. Default admin account (dev@newsmeva.local / P@ssw0rd) has been created.' });
+    console.log(`[clean-all-data] by user ${req.user?.username} - full reset done (no users remain; next signup becomes admin)`);
+    res.json({ message: 'All data cleared. No users remain — the next signup will become the admin account.' });
   } catch (err: any) {
     console.error('[clean-all-data] error:', err);
     res.status(500).json({ error: err.message || 'Failed to clean all data.' });

@@ -160,12 +160,18 @@ router.get('/reminders', authenticate, async (req: AuthRequest, res: Response) =
 router.get('/activity', authenticate, authorize(1, 2), async (req: AuthRequest, res: Response) => {
   const raw = Number.parseInt(String(req.query.limit ?? '50'), 10);
   const limit = Number.isFinite(raw) && raw > 0 ? Math.min(raw, 500) : 50;
+  const isManager = (req.user!.access_level ?? 3) <= 2;
+  // Non-managers (level 3) only see their own activity — the full log is
+  // reserved for admins/managers to avoid cross-team data exposure.
+  const files = isManager ? [] : ['WHERE a.user_id = ?'];
+  const values = isManager ? [limit] : [req.user!.profile_id, limit];
   const logs = await prepare(`
     SELECT a.*, p.full_name, p.access_level
     FROM activity_logs a
     LEFT JOIN profiles p ON a.user_id = p.id
+    ${files.join(' ')}
     ORDER BY a.created_at DESC LIMIT ?
-  `).all(limit);
+  `).all(...values);
   res.json(logs);
 });
 
@@ -213,7 +219,7 @@ router.get('/workload', authenticate, async (req: AuthRequest, res: Response) =>
   res.json({ userStats, teleprompterStats, avgTimes, teleprompterLogs });
 });
 
-router.get('/landing', async (_req: AuthRequest, res: Response) => {
+router.get('/landing', authenticate, async (_req: AuthRequest, res: Response) => {
   const totalTasks = await prepare('SELECT COUNT(*) as count FROM tasks').get();
   const completed = await prepare("SELECT COUNT(*) as count FROM tasks WHERE status = 'completed'").get();
   const inProgress = await prepare(`SELECT COUNT(*) as count FROM tasks WHERE ${ACTIVE_PIPELINE}`).get();

@@ -138,17 +138,18 @@ router.get('/profiles', authenticate, authorize(1), async (req: AuthRequest, res
   const params: any[] = [];
   if (user_id) { sql += ' AND p.user_id = ?'; params.push(user_id); }
   sql += ' ORDER BY p.created_at DESC';
-  res.json(await prepare(sql).all(...params));
+  const profiles: any[] = await prepare(sql).all(...params);
+  res.json(profiles.map(({ pin, ...rest }: any) => rest));
 });
 
 router.get('/profiles/archived', authenticate, authorize(1), async (req: AuthRequest, res: Response) => {
-  const profiles = await prepare(`
+  const profiles: any[] = await prepare(`
     SELECT p.*, u.username FROM profiles p
     JOIN users u ON u.id = p.user_id
     WHERE p.is_archived = 1
     ORDER BY p.deactivated_at DESC
   `).all();
-  res.json(profiles);
+  res.json(profiles.map(({ pin, ...rest }: any) => rest));
 });
 
 router.post('/profiles', authenticate, authorize(1), async (req: AuthRequest, res: Response) => {

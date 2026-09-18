@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { MonitorConfig } from './config';
 import { MONITOR_TABLES } from './push';
+import { buildPgPoolConfig } from '../database/postgres';
 
 const ALLOWED = new Set(MONITOR_TABLES);
 
@@ -8,7 +9,7 @@ let pool: Pool | null = null;
 
 function getPool(url: string): Pool {
   if (!pool) {
-    pool = new Pool({ connectionString: url, ssl: { rejectUnauthorized: false }, max: 3 });
+    pool = new Pool(buildPgPoolConfig({ connectionString: url, max: 3 }));
   }
   return pool;
 }

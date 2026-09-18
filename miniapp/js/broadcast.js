@@ -110,9 +110,9 @@ async function fetchJson(url) {
 function safeUrl(value) {
   try {
     const url = new URL(value, location.href);
-    // Reject dangerous schemes that could lead to XSS
+// Reject dangerous schemes that could lead to XSS
     const scheme = url.protocol.toLowerCase();
-    if (scheme === 'javascript:' || scheme === 'data:') {
+    if (scheme === 'javascript:' || scheme === 'data:' || scheme === 'vbscript:') {
       return null;
     }
     return url.href;

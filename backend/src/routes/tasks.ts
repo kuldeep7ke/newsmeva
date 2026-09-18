@@ -459,8 +459,8 @@ router.get('/teleprompter/history', async (req: AuthRequest, res: Response) => {
   res.json(rows);
 });
 
-// Public: mark prompting as started when the anchor presses Start on the teleprompter.
-router.post('/teleprompter/start/:id', async (req: AuthRequest, res: Response) => {
+// Authenticated: mark prompting as started when the anchor presses Start on the teleprompter.
+router.post('/teleprompter/start/:id', authenticate, async (req: AuthRequest, res: Response) => {
   const task = await prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id) as any;
   if (!task) return res.status(404).json({ error: 'Task not found.' });
   if (task.status !== 'teleprompter_ready') {
@@ -472,10 +472,10 @@ router.post('/teleprompter/start/:id', async (req: AuthRequest, res: Response) =
   res.json({ success: true, task_id: task.id, status: 'prompting' });
 });
 
-// Public: mark recording finished when the teleprompter script reaches the end.
+// Authenticated: mark recording finished when the teleprompter script reaches the end.
 // Auto-completes the recording_done stage and pushes the task to the editor (editing).
 // Marks the current task AND related tasks (same bulletin template slot).
-router.post('/teleprompter/finish/:id', async (req: AuthRequest, res: Response) => {
+router.post('/teleprompter/finish/:id', authenticate, async (req: AuthRequest, res: Response) => {
   const task = await prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id) as any;
   if (!task) return res.status(404).json({ error: 'Task not found.' });
   if (task.status !== 'teleprompter_ready' && task.status !== 'prompting') {
@@ -568,6 +568,17 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
   }
   if (priority && !VALID_PRIORITIES.includes(priority)) {
     return res.status(400).json({ error: 'Invalid priority value.' });
+  }
+  if (deadline && typeof deadline === 'string') {
+    const ident = deadline.trim().length <= 16 && !deadline.includes('T') && !/[zZ]|[+-]\d{2}:\d{2}$/.test(deadline);
+    const norm = ident ? `${deadline.trim()}T00:00` : deadline.replace(' ', 'T');
+    const deadlineMs = new Date(norm).getTime();
+    if (Number.isNaN(deadlineMs)) {
+      return res.status(400).json({ error: 'Invalid deadline value.' });
+    }
+    if (deadlineMs < Date.now() - 60 * 1000) {
+      return res.status(400).json({ error: 'Deadline must be in the future.' });
+    }
   }
 
   // The frontend sends its local calendar day so bulletin slots line up with the
@@ -955,8 +966,9 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'Task cannot be deleted in its current status.' });
   }
 
-  // Soft-delete: move to recycle bin
-  await prepare("UPDATE tasks SET status = 'trashed', updated_at = datetime('now') WHERE id = ?").run(req.params.id);
+  // Soft-delete: move to recycle bin, remembering the previous status so a
+  // restore returns the task to where it was instead of forcing it back to draft.
+  await prepare("UPDATE tasks SET status = 'trashed', trashed_from_status = ?, updated_at = datetime('now') WHERE id = ?").run(task.status, req.params.id);
 
   await prepare('INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details) VALUES (?,?,?,?,?)')
     .run(req.user!.profile_id, 'trash_task', 'tasks', task.id, `Moved task to recycle bin: ${task.title}`);
@@ -976,12 +988,16 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
     }
 
-    await prepare("UPDATE tasks SET status = ?, updated_at = datetime('now') WHERE id = ?").run('draft', task.id);
+    const deletableStatuses = ['draft', 'script_writing', 'footage_collection', 'waiting_confirmation', 'correction_required', 'approved', 'editor_assigned', 'teleprompter_ready', 'prompting', 'recording_done', 'editing', 'uploading', 'published', 'under_review', 'cancelled'];
+    const restoreStatus = task.trashed_from_status && deletableStatuses.includes(task.trashed_from_status)
+      ? task.trashed_from_status
+      : 'draft';
+    await prepare("UPDATE tasks SET status = ?, trashed_from_status = NULL, updated_at = datetime('now') WHERE id = ?").run(restoreStatus, task.id);
 
     await prepare('INSERT INTO activity_logs (user_id, action, entity_type, entity_id, details) VALUES (?,?,?,?,?)')
       .run(req.user!.profile_id, 'restore_task', 'tasks', task.id, `Restored task from recycle bin: ${task.title}`);
 
-    emitEvent('task:updated', { id: task.id, title: task.title, status: 'draft', assigned_to: task.assigned_to, updated_by: req.user!.profile_id, updated_by_name: req.user!.full_name || req.user!.username });
+    emitEvent('task:updated', { id: task.id, title: task.title, status: restoreStatus, assigned_to: task.assigned_to, updated_by: req.user!.profile_id, updated_by_name: req.user!.full_name || req.user!.username });
     res.json({ success: true, restored: true });
   });
 
@@ -1111,7 +1127,7 @@ router.put('/:id/anchor', authenticate, async (req: AuthRequest, res: Response) 
   } else if (updates.length > 1) {
     const cols: string[] = [];
     const ph: string[] = [];
-    const vals: any[] = [];
+    const vals: any[] = [req.params.id];
     for (const u of updates) {
       const [col, ...rest] = u.split(' = ');
       cols.push(col.trim());
@@ -1122,7 +1138,6 @@ router.put('/:id/anchor', authenticate, async (req: AuthRequest, res: Response) 
         ph.push(rest.join(' = '));
       }
     }
-    vals.push(req.params.id);
     await prepare(`INSERT INTO anchor_tasks (task_id, ${cols.join(', ')}) VALUES (?, ${ph.join(', ')})`).run(...vals);
   }
 
@@ -1226,7 +1241,7 @@ router.put('/:id/editor', authenticate, async (req: AuthRequest, res: Response) 
   } else if (updates.length > 1) {
     const cols: string[] = [];
     const ph: string[] = [];
-    const vals: any[] = [];
+    const vals: any[] = [req.params.id];
     for (const u of updates) {
       const [col, ...rest] = u.split(' = ');
       cols.push(col.trim());
@@ -1237,7 +1252,6 @@ router.put('/:id/editor', authenticate, async (req: AuthRequest, res: Response) 
         ph.push(rest.join(' = '));
       }
     }
-    vals.push(req.params.id);
     await prepare(`INSERT INTO video_editor_tasks (task_id, ${cols.join(', ')}) VALUES (?, ${ph.join(', ')})`).run(...vals);
   }
 
