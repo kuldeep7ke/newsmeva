@@ -20,6 +20,7 @@ interface AuthContextType {
   token: string | null;
   isNewUser: boolean;
   login: (email: string, password: string) => Promise<any>;
+  loginWithToken: (token: string) => Promise<any>;
   signup: (data: { username: string; email: string; full_name: string; password: string }) => Promise<any>;
   logout: () => void;
   loading: boolean;
@@ -70,6 +71,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.data;
   };
 
+  const loginWithToken = async (token: string) => {
+    const res = await api.post('/auth/login-with-token', { token });
+    localStorage.setItem('token', res.data.token);
+    localStorage.setItem('user', JSON.stringify(res.data.user));
+    sessionStorage.setItem('welcome_pending', '1');
+    setToken(res.data.token);
+    setUser(res.data.user);
+    setIsNewUser(false);
+    return res.data;
+  };
+
   const logout = () => {
     const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
     const mins = Math.floor(elapsed / 60);
@@ -102,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isNewUser, login, signup, logout, loading, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, isNewUser, login, loginWithToken, signup, logout, loading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

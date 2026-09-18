@@ -1,8 +1,9 @@
 import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { prepare, exec, nextUid } from '../database/schema';
 import { isPostgres } from '../database/postgres';
-import { generateToken, generateDevToken, AuthRequest, authenticate, authorizeDev } from '../middleware/auth';
+import { generateToken, generateDevToken, getJwtSecret, AuthRequest, authenticate, authorizeDev } from '../middleware/auth';
 import { rateLimit } from '../middleware/rateLimit';
 import { verifyPin, hashPin, pinNeedsUpgrade } from '../utils/pin';
 import { ROLES } from '../config/roles';
@@ -417,6 +418,78 @@ router.post('/login-with-pin', rateLimit({ windowMs: 5 * 60 * 1000, max: 10, key
         role: profile.role,
         email: profile.email,
       },
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Login failed.' });
+  }
+});
+
+// Token-only quick login for saved logins: exchange a previously stored JWT
+// for a fresh session. The stored token is the only credential needed — no
+// plaintext password is ever kept in localStorage.
+router.post('/login-with-token', rateLimit({ windowMs: 5 * 60 * 1000, max: 10, keyPrefix: 'tokenlogin' }), async (req: AuthRequest, res: Response) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ error: 'Token required.' });
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, getJwtSecret());
+    } catch {
+      return res.status(401).json({ error: 'Invalid or expired token. Please log in again.' });
+    }
+
+    if (decoded.is_dev) {
+      const dev = getDevCredential();
+      await logLoginAttempt(-1, 'Developer', null, 'success', 'Developer quick login', sanitizeIp(req));
+      emitEvent('user:login', { profile_id: decoded.profile_id ?? -1, full_name: 'Developer', role: 'developer', method: 'token' });
+      return res.json({
+        token: generateDevToken(decoded.profile_id ?? -1),
+        user: {
+          id: -1,
+          username: 'dev',
+          profile_id: decoded.profile_id ?? -1,
+          full_name: 'Developer',
+          access_level: 3,
+          role: 'developer',
+          email: null,
+          is_dev: true,
+          dev_default_password: dev.default_password,
+          dev_username: dev.username,
+        },
+        isNewUser: false,
+      });
+    }
+
+    const profile = await prepare('SELECT * FROM profiles WHERE id = ? AND is_active = 1 AND is_archived = 0').get(decoded.profile_id) as any;
+    if (!profile) return res.status(404).json({ error: 'Profile not found.' });
+    if (profile.status && profile.status !== 'active') {
+      return res.status(403).json({ error: profile.status === 'suspended' ? 'Your account has been terminated. Contact your administrator.' : 'Your account is currently offline. Contact your administrator.' });
+    }
+    const user = await prepare('SELECT * FROM users WHERE id = ? AND is_active = 1').get(profile.user_id) as any;
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    const freshToken = generateToken({
+      id: user.id,
+      username: user.username,
+      profile_id: profile.id,
+      full_name: profile.full_name,
+      access_level: profile.access_level,
+      role: profile.role,
+    });
+    await logLoginAttempt(profile.id, profile.full_name, profile.email, 'success', 'Quick login with token', sanitizeIp(req));
+    emitEvent('user:login', { profile_id: profile.id, full_name: profile.full_name, role: profile.role, method: 'token' });
+    res.json({
+      token: freshToken,
+      user: {
+        id: user.id,
+        username: user.username,
+        profile_id: profile.id,
+        full_name: profile.full_name,
+        access_level: profile.access_level,
+        role: profile.role,
+        email: profile.email,
+      },
+      isNewUser: false,
     });
   } catch (err) {
     res.status(500).json({ error: 'Login failed.' });

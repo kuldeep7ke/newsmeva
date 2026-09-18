@@ -168,7 +168,7 @@ const refreshSavedLoginEdits = () => {
     }
     updateSavedLogin(email, { pin: edit.pin });
     refreshSavedLoginEdits();
-    toast('Saved local login password/PIN', 'success');
+    toast('Saved local login PIN', 'success');
   };
 
   const handleCleanAllData = async () => {
@@ -482,7 +482,7 @@ const refreshSavedLoginEdits = () => {
             )}
           </div>
 
-          {/* Developer login + saved passwords & PINs */}
+          {/* Developer login + saved quick logins */}
           <div className="flat-card">
             <h3 className="text-sm font-semibold text-surface-800 mb-3 flex items-center gap-2">
               <KeyRound className="w-4 h-4 text-accent-500" /> Developer Login
@@ -494,7 +494,7 @@ const refreshSavedLoginEdits = () => {
               </button>
               <button onClick={() => setLoginTab('saved')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${loginTab === 'saved' ? 'bg-white text-accent-700 shadow-sm' : 'text-surface-500 hover:text-surface-700'}`}>
-                <EyeOff className="w-3.5 h-3.5" /> Saved Passwords & PINs
+                <EyeOff className="w-3.5 h-3.5" /> Saved Logins & PINs
               </button>
             </div>
 

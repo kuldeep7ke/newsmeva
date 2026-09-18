@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useSocket } from '../context/SocketContext';
 import api from '../utils/api';
-import { getSavedLogins, removeLogin, updatePin, getSessionHistory, SessionRecord } from '../utils/quickLogin';
+import { getSavedLogins, saveLogin, removeLogin, updatePin, getSessionHistory, SessionRecord } from '../utils/quickLogin';
 import { formatLabel } from '../utils/roles';
 import { getAppName } from '../utils/appConfig';
 import { getAppVersionLabel } from '../utils/appMeta';
@@ -45,7 +45,7 @@ function filterSessions(sessions: SessionRecord[], period: string) {
 }
 
 export default function Landing() {
-  const { user, login, loading } = useAuth();
+  const { user, loginWithToken, loading } = useAuth();
   const { toast } = useToast();
   const { socket, connected, loginApproved, loginRejected, clearLoginApproval, onlineUsers } = useSocket();
   const navigate = useNavigate();
@@ -57,7 +57,7 @@ export default function Landing() {
   const [landingOnline, setLandingOnline] = useState<any[]>([]);
   const [landingConnected, setLandingConnected] = useState(false);
   const landingSocketRef = useRef<any>(null);
-  const pendingApprovalRef = useRef<{ email: string; full_name: string; password: string } | null>(null);
+  const pendingApprovalRef = useRef<{ email: string; full_name: string; token?: string } | null>(null);
 
   const fetchLandingData = useCallback(() => {
     api.get('/analytics/landing').then(r => setData(r.data)).catch(() => {});
@@ -112,7 +112,7 @@ export default function Landing() {
   const [requestPinSent, setRequestPinSent] = useState(false);
 
   // Approval request state
-  const [awaitingApproval, setAwaitingApproval] = useState<{ email: string; full_name: string; password: string } | null>(null);
+  const [awaitingApproval, setAwaitingApproval] = useState<{ email: string; full_name: string; token?: string } | null>(null);
   const [approvalRejected, setApprovalRejected] = useState(false);
   const [approvalPendingProfile, setApprovalPendingProfile] = useState<any>(null);
 
@@ -121,13 +121,18 @@ export default function Landing() {
     if (loginApproved && (awaitingApproval || approvalPendingProfile)) {
       const target = awaitingApproval || approvalPendingProfile;
       setPinLogining(true);
-      login(target.email, target.password).then(() => {
+      loginWithToken(target.token || '').then((data: any) => {
         toast('Welcome back!', 'success');
+        saveLogin(data.user.email || target.email, data.user.full_name, data.token, undefined, data.user.access_level, data.user.role);
+        setSavedLogins(getSavedLogins());
         setPinModal(null);
         setAwaitingApproval(null);
         setApprovalPendingProfile(null);
       }).catch((err: any) => {
         toast(err.response?.data?.error || 'Login failed', 'error');
+        setAwaitingApproval(null);
+        setApprovalPendingProfile(null);
+        navigate(`/login?email=${encodeURIComponent(target.email)}`);
       }).finally(() => setPinLogining(false));
     }
   }, [loginApproved]);
@@ -218,7 +223,7 @@ export default function Landing() {
   }, [data]);
 
   const quickLoginClick = (s: any) => {
-    if (!s.password) {
+    if (!s.token) {
       navigate(`/login?email=${encodeURIComponent(s.email)}`);
       return;
     }
@@ -242,8 +247,10 @@ export default function Landing() {
     const target = pendingApprovalRef.current || awaitingApproval;
     if (!target) return;
     setPinLogining(true);
-    login(target.email, target.password).then(() => {
+    loginWithToken(target.token || '').then((data: any) => {
       toast('Welcome back!', 'success');
+      saveLogin(data.user.email || target.email, data.user.full_name, data.token, undefined, data.user.access_level, data.user.role);
+      setSavedLogins(getSavedLogins());
       setPinModal(null);
       pendingApprovalRef.current = null;
       setAwaitingApproval(null);
@@ -251,6 +258,7 @@ export default function Landing() {
     }).catch((err: any) => {
       toast(err.response?.data?.error || 'Login failed', 'error');
       pendingApprovalRef.current = null;
+      navigate(`/login?email=${encodeURIComponent(target.email)}`);
     }).finally(() => setPinLogining(false));
   };
 
@@ -261,16 +269,19 @@ export default function Landing() {
   };
 
   const doDirectLogin = async (s: any) => {
-    if (!s.password) {
+    if (!s.token) {
       navigate(`/login?email=${encodeURIComponent(s.email)}`);
       return;
     }
     setPinLogining(true);
     try {
-      const res = await login(s.email, s.password);
+      const data = await loginWithToken(s.token);
       toast('Welcome back!', 'success');
+      saveLogin(data.user.email || s.email, data.user.full_name, data.token, undefined, data.user.access_level, data.user.role);
+      setSavedLogins(getSavedLogins());
     } catch (err: any) {
       toast(err.response?.data?.error || 'Login failed', 'error');
+      navigate(`/login?email=${encodeURIComponent(s.email)}`);
     } finally { setPinLogining(false); }
   };
 
