@@ -94,9 +94,13 @@ router.post('/:id/use', authenticate, async (req: AuthRequest, res: Response) =>
 });
 
 router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
-  if (req.user!.access_level > 2) return res.status(403).json({ error: 'Access denied. Only admins can edit archive stock.' });
-  const existing = await prepare('SELECT id FROM archives WHERE id = ?').get(req.params.id);
+  const existing = await prepare('SELECT id, created_by FROM archives WHERE id = ?').get(req.params.id) as any;
   if (!existing) return res.status(404).json({ error: 'Archive entry not found.' });
+  // The archive creator (who may be a level-3 reporter) can edit the entry's
+  // basic fields; stock-management stays admin/manager-only via PUT /:id/stock.
+  if (req.user!.access_level > 2 && req.user!.profile_id !== existing.created_by) {
+    return res.status(403).json({ error: 'Access denied. Only the entry creator or admins can edit archive entries.' });
+  }
   const { name, details, location, category, status, availability } = req.body;
   if (name !== undefined && !name.trim()) return res.status(400).json({ error: 'Archive footage name is required.' });
   if (status !== undefined && !['online', 'offline'].includes(status)) return res.status(400).json({ error: 'Status must be online or offline.' });
