@@ -29,7 +29,7 @@ interface BinShape {
   banner?: BannerRecord | null;
 }
 
-const BAKED_BIN_ID = '6aa9513affd5d160530a2986';
+const BAKED_BIN_ID = '6aafc61affd5d160531bee14';
 const JSONBIN_BASE = () => localStorage.getItem('newsMeva_jsonbinBase') || 'https://api.jsonbin.io/v3/b';
 const JSONBIN_LATEST = (id: string) => `${JSONBIN_BASE()}/${id}/latest`;
 const ANNOUNCEMENTS_API = () => localStorage.getItem('newsMeva_announcementsApi') || 'https://newsmeva.pages.dev/api/announcements';

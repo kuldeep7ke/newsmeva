@@ -27,7 +27,7 @@ function _d(e) {
   } catch { return ''; }
 }
 // TODO: replace with obfuscated real bin ID once the user provides it
-const BAKED_BIN_ID = _d('WAQWSlhURQAIAxNGCVRAUVtWRxJfXE5X');
+const BAKED_BIN_ID = _d('WAQWFQ5TRwAIAxNGCVRAUVtWRhEIAEdV');
 
 const POLL_SECONDS = 60;
 const BANNER_COUNTDOWN_SECONDS = 7;
