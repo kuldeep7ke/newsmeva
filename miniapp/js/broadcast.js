@@ -204,24 +204,62 @@ export async function refreshBroadcasts() {
 
 // ── Banner overlay ──
 
-function bannerHtml(b) {
-  const w = b.width ? `max-width:${b.width}px` : '';
+// Inner banner markup (image + title + body), wrapped in the optional link.
+function bannerInner(b) {
   const body = `${b.image ? `<img class="banner-img" src="${escapeHtml(b.image)}" alt="${escapeHtml(b.title || '')}" />` : ''}
     <div class="banner-body">${b.title ? `<h2>${escapeHtml(b.title)}</h2>` : ''}<p>${escapeHtml(b.content)}</p></div>`;
-  const inner = b.href ? `<a href="${escapeHtml(b.href)}" target="_blank" rel="noopener noreferrer">${body}</a>` : body;
+  return b.href ? `<a href="${escapeHtml(b.href)}" target="_blank" rel="noopener noreferrer">${body}</a>` : body;
+}
+
+// Overlay shell with a skeleton placeholder in the content slot. The skeleton
+// is mounted first and later swapped for the real content once it is ready, so
+// a valid in-period banner appears directly without a blank flash.
+function bannerSkeletonHtml(b) {
+  const w = b.width ? `max-width:${b.width}px` : '';
   return `
     <div class="banner-overlay" data-banner-overlay>
       <div class="banner-modal" style="${w}" role="dialog" aria-modal="true" aria-label="${escapeHtml(b.title || t('bc_banner'))}">
         <div class="banner-topbtn" data-banner-count></div>
         <button class="banner-close hidden" data-banner-close type="button" aria-label="${escapeHtml(t('bc_close'))}"><i data-lucide="x"></i></button>
-        ${inner}
+        <div class="banner-skeleton" data-banner-content role="status" aria-label="${escapeHtml(b.title || t('bc_banner'))}">
+          <div class="banner-sk-banner"></div>
+          <div class="banner-sk-title"></div>
+          <div class="banner-sk-line"></div>
+          <div class="banner-sk-line short"></div>
+        </div>
       </div>
     </div>`;
 }
 
+// Swap the skeleton placeholder for the real banner content. If the banner has
+// an image it is preloaded first so the placeholder stays on screen until the
+// content can actually be painted.
+function revealBannerContent(wrapper, b) {
+  const slot = wrapper.querySelector('[data-banner-content]');
+  const up = () => {
+    if (!slot || !slot.isConnected) return;
+    slot.className = 'banner-content';
+    slot.innerHTML = bannerInner(b);
+    refreshIcons();
+  };
+  if (b.image) {
+    const img = new Image();
+    img.onload = up;
+    img.onerror = up;
+    img.src = b.image;
+  } else {
+    up();
+  }
+}
+
 function showBanner(b) {
   const wrapper = document.createElement('div');
-  wrapper.innerHTML = bannerHtml(b);
+  // Gating rule: the overlay is mounted only here, only after maybeShowBanner()
+  // has confirmed a valid, in-period, visible broadcast exists. The skeleton
+  // fills the content slot while the banner content (image etc.) finishes
+  // loading, so a valid banner appears directly and an expired/hidden bin can
+  // never paint the overlay or a loading flash.
+  wrapper.innerHTML = bannerSkeletonHtml(b);
   document.body.appendChild(wrapper);
   refreshIcons();
 
@@ -242,6 +280,7 @@ function showBanner(b) {
     if (countdown <= 0) { clearInterval(timer); finish(); } else { countEl.textContent = String(countdown); }
   }, 1000);
   closeBtn.addEventListener('click', () => { clearInterval(timer); wrapper.remove(); });
+  revealBannerContent(wrapper, b);
 }
 
 async function maybeShowBanner() {
@@ -253,6 +292,12 @@ async function maybeShowBanner() {
   if (!b) return;
   const banner = { ...b, id: String(b.id) };
   if (!banner.id || !banner.content) return;
+  // Gating rule: the banner overlay is NEVER mounted until every check above
+  // and below proves a valid, in-period, visible broadcast exists. If the bin
+  // is expired, hidden, targeted elsewhere, or absent, we return here without
+  // ever attaching the overlay, so a hard reload paints no skeleton and shows
+  // no overlay at all. The broadcast pills remain independent and are driven
+  // separately by refreshBroadcasts().
   if (!isWithinPeriod(banner.startDate, banner.expires) || !matchesDevice(banner)) return;
   // Show each banner at most once per browser session, so refresh/reload
   // doesn't re-open it — only a fresh session (new tab/session) shows it.
