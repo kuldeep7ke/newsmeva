@@ -224,6 +224,20 @@ APK. MobileApp pages: Broadcast, Tasks, Microphone Timer, Teleprompter,
 Crossfire/Programs, Archives, Stories (list + teleprompter), News Articles,
 Ads, Reporters, Leaves, Notifications, Locations, Workload, Analytics.
 
+**Single-source announcements client.** `miniapp/js/broadcast.js` is the one
+file that serves **all three deploy targets**: GitHub Pages (build copies
+`miniapp/` → `public/`), Cloudflare Pages (deploys `miniapp/` directly), and
+the Android APK (Capacitor `www/` is built from `miniapp/`). No per-target code
+copies — a fix in that file propagates everywhere. See `docs/ANNOUNCEMENTS.md`.
+
+**Gated banner overlay.** The banner overlay/skeleton is mounted **only after a
+request confirms a valid, in-period, device-matching broadcast exists**
+(`maybeShowBanner()` → `isWithinPeriod` + `matchesDevice`). An expired/hidden
+bin therefore paints **no loading flash and no overlay** on hard reload (the
+broadcast pill still works). A valid in-period banner appears **directly** with
+a skeleton placeholder in the content slot that swaps for the real content
+once ready.
+
 ### 3.4 Auxiliary folders
 
 ```

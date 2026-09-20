@@ -23,9 +23,32 @@ https://newsmeva.pages.dev/api/announcements?type=broadcast|banner
 
 - The proxy URL is a **single constant** in `broadcast.js` — **not** derived from
   `location.origin` — so one canonical feed serves all three channels.
+- **One client file is the single source of truth.** `miniapp/js/broadcast.js`
+  is consumed by GitHub Pages (`miniapp/` → `public/`), Cloudflare Pages
+  (`miniapp/` direct deploy), and the Android APK (Capacitor `www/` is built
+  from `miniapp/`). There are **no per-target code copies** — a fix in that one
+  file propagates to every channel.
 - If the proxy is unreachable, the app falls back to a direct jsonbin fetch.
-- A 60 s poll + `visibilitychange` refresh keeps pills current (banner shows
-  once per load with a 7 s countdown, then a close button).
+- A 60 s poll + `visibilitychange` refresh keeps pills current (an in-period
+  banner shows at most once per browser session — 7 s countdown, then a close
+  button).
+
+## Gated overlay (validation before paint)
+
+The banner overlay/skeleton is mounted **only after a request confirms a valid,
+in-period, device-matching broadcast exists** (`maybeShowBanner()` →
+`isWithinPeriod` + `matchesDevice`):
+
+- **Expired / targeted-elsewhere / hidden / absent bin** → the overlay is never
+  attached: a hard reload shows **no loading flash and no overlay**. The
+  broadcast pills are independent (driven by `refreshBroadcasts()`) and keep
+  working.
+- **Valid in-period banner** → the overlay appears **directly** with a
+  **skeleton placeholder** in the content slot. The skeleton swaps for the real
+  content (image preloaded first, if any) so the banner paints without a blank
+  flash.
+- Each banner shows at most once per browser session (`sessionStorage`); a 7 s
+  countdown runs, then a close button appears.
 
 ## Bin shape (one bin holds BOTH)
 
@@ -88,7 +111,7 @@ Writes appear after the edge-cache TTL (3 hours) or on next app poll.
 ## Files
 
 - `functions/api/announcements.js` — Cloudflare Pages Function (edge-cached proxy)
-- `miniapp/js/broadcast.js` — client fetch + pills + banner overlay
+- `miniapp/js/broadcast.js` — client fetch + pills + gated banner overlay
 - `miniapp/js/i18n.js` — `bc_not_configured`, `bc_offline`, `bc_updated`,
   `bc_listening`, `bc_close`, `bc_banner` (EN / MR / HI)
 - `miniapp/css/style.css` — `broadcast-holder`, `.bc-pill*`, `.banner-overlay*`
