@@ -42,10 +42,10 @@ The repo includes everything needed for a machine with no internet:
 
 | File | Purpose |
 |------|---------|
-| `tools/node/node-v24.19.0-x64.msi` | Node.js installer (Windows) |
+| `tools/node/node-v24.19.0-win-x64/` | Portable Node.js runtime (Windows; bundled into the installer as `$INSTDIR\node`) |
 | `proxy/caddy/caddy.exe` | Reverse proxy (port 80 → 3003) |
 
-If `tools/node/` is present on first run, Node is installed automatically from it — no download needed.
+If `tools/node/` is present, the `.exe` installer bundles the portable Node runtime from it — the installed app needs no download or PATH setup.
 
 ---
 
@@ -153,10 +153,12 @@ This is the easiest and recommended path. It handles everything automatically.
 
 ### Step 1 — Install Node.js
 
-Run the bundled offline installer **once** (you will not need to do this again):
+The `.exe` installer already bundles a portable Node.js runtime (`$INSTDIR\node`) — nothing to do there.
+
+If you are running from the repo/zip layout instead, install Node.js 18+:
 
 ```
-tools\node\node-v24.19.0-x64.msi
+winget install OpenJS.NodeJS.LTS
 ```
 
 Or download from https://nodejs.org (any version 18+).
@@ -543,7 +545,7 @@ The self-healing launcher (`windows\start-server.ps1`) runs these steps in order
 
 | Symptom | Likely Cause | Fix |
 |---------|-------------|-----|
-| `node is not recognized` | Node.js not installed or not in PATH | Install from `tools\node\node-v24.19.0-x64.msi` or https://nodejs.org; restart the command prompt |
+| `node is not recognized` | Node.js not installed or not in PATH (repo/zip layout only; the `.exe` installer bundles Node itself) | Install Node.js 18+ from https://nodejs.org, or add the bundled `tools\node\node-v24.19.0-win-x64` to PATH; restart the command prompt |
 | `Start Server.bat` closes instantly with no browser | cmd quoting bug — file corrupted | Run `windows\Repair Launcher.bat`, or re-download `Start Server.bat` from the repo |
 | Server starts but LAN users cannot reach it | Windows firewall blocking port 3003 | `netsh advfirewall firewall add rule name="NEWS MEVA 3003" protocol=TCP dir=in localport=3003 action=allow profile=any` — or let the launcher auto-heal it |
 | "Cannot GET /" in browser | Frontend not built (dist folder missing) | Run `cd frontend && npm run build`; or just restart with `Start Server.bat` which builds automatically |

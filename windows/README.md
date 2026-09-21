@@ -26,7 +26,7 @@ check).
 ## How to run
 
 ```bat
-:: 1. install Node.js LTS first (bundled offline: tools\node\node-v24.19.0-x64.msi)
+:: 1. install Node.js LTS first (the .exe installer bundles a portable node under $INSTDIR\node; for the repo/zip layout use tools\node\node-v24.19.0-win-x64 or https://nodejs.org)
 :: 2. start
 windows\Start Server.bat
 ::    - first run: installs deps (npm ci), builds, creates .env, opens browser

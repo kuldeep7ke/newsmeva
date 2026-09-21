@@ -45,7 +45,7 @@ case "$1" in
     # 5) firewall - best effort, only when ufw is active.
     if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -qi active; then
       ufw allow 80/tcp   >/dev/null 2>&1 || true
-      ufw allow 3002/tcp >/dev/null 2>&1 || true
+      ufw allow 3003/tcp >/dev/null 2>&1 || true
     fi
 
     # 6) register + start services.

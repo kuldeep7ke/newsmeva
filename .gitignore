@@ -12,11 +12,9 @@ backups/
 .dev-credentials
 tsconfig.tsbuildinfo
 
-# Windows installer binary (rebuilt on demand — keep the NSIS script in git)
-installer/*.exe
-
-# Debian/Ubuntu installer binary (rebuilt on demand — keep the build script in git)
-installer/*.deb
+# Windows + Debian/Ubuntu setup binaries ARE tracked (published as setup/releases)
+# installer/*.exe
+# installer/*.deb
 
 # Bundled Node.js runtime for the installer (zip + extracted = regenerable download)
 tools/node/*.zip
@@ -58,6 +56,12 @@ proxy/caddy-err.log
 proxy/caddy/caddy-err.log
 proxy/caddy-out.log
 login.txt
+start.log
+
+# Playwright MCP + temp test screenshots (local-only artifacts)
+android/.playwright-mcp/
+android/tmp-*.png
+android/tp-*.png
 
 # Local-only data snapshots (DB mirrors + full dumps contain real user data;
 # the same dumps live git-ignored under backend/backups/)
