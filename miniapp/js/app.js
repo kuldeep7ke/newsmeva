@@ -30,7 +30,6 @@ async function enterApp() {
 }
 
 function goLanding() {
-  if (localStorage.getItem('newsMeva_onboarded')) { closeSidebar(); navigateTo('dashboard'); return; }
   closeSidebar();
   const taskModalEl = document.querySelector('#task-modal');
   if (taskModalEl && !taskModalEl.classList.contains('hidden')) {
@@ -752,6 +751,7 @@ async function refreshCurrentView() {
 (async () => {
   setTimeout(async () => {
     hideSplash();
+    document.querySelectorAll('[data-enter-app]').forEach((btn) => btn.addEventListener('click', enterApp));
     const onboarded = localStorage.getItem('newsMeva_onboarded');
     const savedUser = localStorage.getItem('newsMeva_userName');
     const savedChannel = localStorage.getItem('newsMeva_channel');
@@ -784,7 +784,6 @@ async function refreshCurrentView() {
       // Not onboarded - show landing page with onboarding
       showLanding();
       refreshIcons();
-      document.querySelectorAll('[data-enter-app]').forEach((btn) => btn.addEventListener('click', enterApp));
     }
   }, 1800);
 })();
