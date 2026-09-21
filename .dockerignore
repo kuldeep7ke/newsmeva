@@ -1,0 +1,45 @@
+# VCS
+.git
+.gitignore
+
+# Node
+**/node_modules
+**/dist
+**/tsconfig.tsbuildinfo
+
+# Runtime/build artifacts
+tools
+www
+*.exe
+*.deb
+*.zip
+*.tar.gz
+*.tar.xz
+*.msi
+*.pkg
+backups
+data-snapshots
+telemetry
+*.log
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env*
+!backend/.env.example
+
+# Platforms / apps not needed in the container image
+android
+miniapp
+windows
+mac
+lan
+ubuntu
+redhat
+proxy
+functions
+render.yaml
+
+# GitHub / local
+.github
+.obsidian
