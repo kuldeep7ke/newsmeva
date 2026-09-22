@@ -14,6 +14,36 @@ window.__currentView = 'dashboard';
 window.navigateTo = navigateTo;
 window.refreshCurrentView = refreshCurrentView;
 
+const NAV_KEY = '__newsMevaView';
+const PROMPTER_MARK = '__prompter__';
+
+function syncViewHistory(view, param) {
+  const curState = window.history.state;
+  const cur = curState && curState[NAV_KEY];
+  if (cur === view) return;
+  const payload = { [NAV_KEY]: view, p: param || null };
+  if (cur) window.history.pushState(payload, '');
+  else window.history.replaceState(payload, '');
+}
+
+function closeOpenPrompter() {
+  const closeBtn = document.querySelector('.tp-root [data-tp="close"]');
+  if (closeBtn) closeBtn.click();
+}
+
+let prompterOpen = false;
+
+window.addEventListener('popstate', (e) => {
+  if (prompterOpen) {
+    closeOpenPrompter();
+    return;
+  }
+  const state = e.state || {};
+  const view = state[NAV_KEY];
+  if (!view || view === activeView) return;
+  navigateTo(view, state.p || undefined, { fromHistory: true });
+});
+
 function hideSplash() {
   const splash = document.querySelector('#splash-screen');
   if (splash) splash.style.display = 'none';
@@ -492,9 +522,17 @@ function tpSettings() {
 function openScriptPrompter({ title, subtitle, body, scriptId, onFinish, doneMessage }) {
   const wrapper = document.createElement('div');
   document.body.appendChild(wrapper);
+  prompterOpen = true;
+  window.history.pushState({ [NAV_KEY]: activeView, p: PROMPTER_MARK }, '');
   openPrompter(wrapper, body, tpSettings(), {
     title, subtitle, scriptId, onFinish, doneMessage,
-    onClose: () => { refreshCurrentView(); }
+    onClose: () => {
+      prompterOpen = false;
+      if (window.history.state && window.history.state[NAV_KEY] === activeView && window.history.state.p === PROMPTER_MARK) {
+        window.history.back();
+      }
+      refreshCurrentView();
+    }
   });
 }
 
@@ -699,10 +737,11 @@ function handleOnboardPrev() {
   refreshIcons();
 }
 
-export async function navigateTo(view, param) {
+export async function navigateTo(view, param, opts = {}) {
   localStorage.setItem('newsMeva_activeView', view);
   activeView = view;
   window.__currentView = view;
+  if (!opts.fromHistory) syncViewHistory(view, param);
   renderSidebar(view);
   const titleMap = {
     dashboard: t('dashboard'),
