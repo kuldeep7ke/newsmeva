@@ -1749,9 +1749,9 @@ export default function TaskDetail() {
                       slugSection,
                       task.youtube_url,
                       '------------',
-                      `à¤®à¤¹à¤¤à¥à¤µà¤¾à¤šà¥à¤¯à¤¾ à¤˜à¤¡à¤¾à¤®à¥‹à¤¡à¥€à¤‚à¤šà¥‡ à¤…à¤ªà¤¡à¥‡à¤Ÿà¥à¤¸ à¤®à¤¿à¤³à¤µà¤£à¥à¤¯à¤¾à¤¸à¤¾à¤ à¥€ "${channelDisplay}" à¤šà¥…à¤¨à¤²à¤²à¤¾ *SUBSCRIBE* à¤•à¤°à¤¾`,
+                      `महत्वाच्या घडामोडींचे अपडेट्स मिळवण्यासाठी "${channelDisplay}" चॅनलला *SUBSCRIBE* करा`,
                       website,
-                      'à¤¯à¤¾ à¤¸à¤‚à¤•à¥‡à¤¤à¤¸à¥à¤¥à¤³à¤¾à¤²à¤¾ à¤­à¥‡à¤Ÿ à¤¦à¥à¤¯à¤¾',
+                      'या संकेतस्थळाला भेट द्या',
                       `${editorName}, ${editorPosition}, ${channelDisplay}`,
                     ].filter(Boolean).join('\n');
                     navigator.clipboard.writeText(msg);
