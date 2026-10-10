@@ -41,7 +41,7 @@ the Marathi newsroom suite. The single most important file is the
 - Server: **port 3003** — health `GET http://localhost:3003/api/health`
 - LAN: `http://<server-ip>:3003` · friendly `http://newsmeva` (Caddy port 80)
 - Dev frontend: Vite on `:5173` proxies `/api` → `:3003`
-- Feature suite: 262 PASS / 0 FAIL (see MEMORY-CAPSULE §9)
+- Feature suite: last recorded run **262 PASS / 0 FAIL** (2026-09-18) — not reproducible from the repo today; the harness was never committed (see MEMORY-CAPSULE §9)
 
 ## Contributing style
 

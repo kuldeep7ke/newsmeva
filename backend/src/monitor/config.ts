@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import crypto from 'crypto';
-import { monitorDbUrl } from './secrets';
 
 const DB_DIR = path.join(__dirname, '..', '..');
 const ENV_PATH = path.join(DB_DIR, '.env');
@@ -65,7 +64,9 @@ export function readEnvValue(key: string): string {
     const t = l.trim();
     if (t.startsWith(key + '=')) return t.slice(key.length + 1).replace(/^"|"$/g, '');
   }
-  return '';
+  // The .env file is the operator's local store; a real process environment
+  // variable supplies any key the file does not carry (containers, CI, systemd).
+  return process.env[key] || '';
 }
 
 function readPackageVersion(): string {
@@ -85,7 +86,11 @@ export function ensureMonitorConfig(): MonitorConfig {
   }
   const token = readEnvValue('MONITOR_TOKEN') || crypto.randomBytes(24).toString('hex');
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-  const dbUrl = readEnvValue('MONITOR_DATABASE_URL') || monitorDbUrl();
+  // The monitor database URL is supplied by the operator (backend/.env or the
+  // process environment) and by nothing else. With it unset `enabled` goes
+  // false below, so a missing key disables the monitor rather than breaking
+  // the app -- see backend/.env.example.
+  const dbUrl = readEnvValue('MONITOR_DATABASE_URL');
   const disabled = readEnvValue('MONITOR_DISABLED') === '1';
   return {
     instanceId,

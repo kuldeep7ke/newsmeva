@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { DB_DIR } from '../database/schema';
 
@@ -9,7 +10,17 @@ import { DB_DIR } from '../database/schema';
 const DEV_FILE = path.join(DB_DIR, '.dev-credentials');
 
 export const DEFAULT_DEV_USERNAME = 'dev-admin';
-export const DEFAULT_DEV_PASSWORD = 'Dev@Meva2026';
+
+// There is deliberately no built-in default password. Set DEV_ADMIN_PASSWORD
+// in backend/.env to choose one; otherwise a random one is generated for this
+// install, written hashed to .dev-credentials, and printed to the server
+// console exactly once at first boot. A constant here would be a credential
+// shared by every copy of this repository.
+function initialPassword(): { password: string; fromEnv: boolean } {
+  const fromEnv = process.env.DEV_ADMIN_PASSWORD || '';
+  if (fromEnv) return { password: fromEnv, fromEnv: true };
+  return { password: crypto.randomBytes(18).toString('base64url'), fromEnv: false };
+}
 
 interface DevCredential {
   username: string;
@@ -52,16 +63,21 @@ export function getDevCredential(): DevCredential {
   if (existing) {
     cred = existing;
   } else {
+    const initial = initialPassword();
     cred = {
       username: DEFAULT_DEV_USERNAME,
-      password_hash: bcrypt.hashSync(DEFAULT_DEV_PASSWORD, 10),
+      password_hash: bcrypt.hashSync(initial.password, 10),
       default_password: true,
       updated_at: new Date().toISOString(),
     };
     writeFile(cred);
-    console.log('[dev-credentials] Created default developer login.');
+    console.log('[dev-credentials] Created developer login for this install.');
     console.log(`[dev-credentials] Username: ${cred.username}`);
-    console.log(`[dev-credentials] Default password: ${DEFAULT_DEV_PASSWORD}`);
+    if (initial.fromEnv) {
+      console.log('[dev-credentials] Password: taken from DEV_ADMIN_PASSWORD (not shown).');
+    } else {
+      console.log(`[dev-credentials] Password (shown once, save it now): ${initial.password}`);
+    }
     console.log('[dev-credentials] Change this password as soon as possible from the Developer page (Dev Tools tab).');
   }
   cached = cred;

@@ -14,7 +14,10 @@
 - **Version note:** this edition replaces the older "WorkStation Online"
   capsule. The stack was re-verified on 2026-09-18 against a clean
   PostgreSQL-less (local SQLite) database with the API feature suite:
-  **262 PASS / 0 FAIL** (see [§7 Verification](#7-verification)).
+  **262 PASS / 0 FAIL** (recorded result — see
+  [§9 Verification](#9-verification-2620-recorded-not-reproducible-today); the
+  harness itself was never committed, so it is not re-runnable from this repo
+  today).
 
 ---
 
@@ -28,7 +31,7 @@
 6. [Roles & Access Levels](#6-roles--access-levels)
 7. [Key APIs](#7-key-apis)
 8. [Teleprompter Flow](#8-teleprompter-flow)
-9. [Verification (proven 262/0)](#9-verification-proven-2620)
+9. [Verification (262/0 recorded; not reproducible today)](#9-verification-2620-recorded-not-reproducible-today)
 10. [Troubleshooting Playbook](#10-troubleshooting-playbook)
 11. [Changelog / Version History](#11-changelog--version-history)
 
@@ -57,7 +60,7 @@ with an offline-first sync engine.
 | Start command | `cd backend && npm run build && node dist/index.js` |
 | Health probe | `GET /api/health` → `{"status":"ok",...}` |
 | Frontend build | `cd frontend && npx tsc -b && npx vite build` → `frontend/dist` |
-| Feature suite | `node C:\Users\Admin\AppData\Local\Temp\opencode\newsmeva-feature-test.js` → **262 PASS / 0 FAIL** |
+| Feature suite | **262 PASS / 0 FAIL** recorded 2026-09-18 — harness never committed, so **not re-runnable from the repo today** (see §9) |
 | Git state | origin `main`, clean tree, 0/0 ahead/behind |
 
 ---
@@ -110,17 +113,21 @@ curl http://localhost:3003/api/health    # {"status":"ok","timestamp":"..."}
 curl http://127.0.0.1:3003/api/health    # same
 ```
 
-### 2.4 Run the feature suite (262 checks, exit 0)
+### 2.4 The feature suite (262 checks — recorded, not currently re-runnable)
 
-```powershell
-node "C:\Users\Admin\AppData\Local\Temp\opencode\newsmeva-feature-test.js"
-```
+The 262-check API feature suite that produced the 262/0 result lived in a
+temp file (`newsmeva-feature-test.js` under the machine's temp directory) and
+was **never committed to this repository**, so no command in a clean checkout
+reproduces it. To make the claim reproducible again the harness itself has to
+be committed (e.g. as `backend/scripts/newsmeva-feature-test.js` or a
+`tests/` suite) and pointed at a fresh database.
 
-It targets `http://127.0.0.1:3003`, bootstraps its own admin/manager/reporter
-accounts on whatever database the server is using, and prints one
+What it did when it ran: targeted `http://127.0.0.1:3003`, bootstrapped its
+own admin/manager/reporter
+accounts on whatever database the server was using, and printed one
 `PASS | ...`/`FAIL | ...` line per check, ending with the total. A **fresh
 database is expected** — it creates `feat_admin`, `Feature Manager` and
-`Feature Reporter` accounts. See [§9](#9-verification-proven-2620).
+`Feature Reporter` accounts. See [§9](#9-verification-2620-recorded-not-reproducible-today).
 
 ### 2.5 One-click OS launchers (alternative to manual)
 
@@ -375,7 +382,8 @@ Plus engine tables: `sync_outbox`, `sync_log`, `sqlite_sequence`.
 
 ### 5.4 Built-in developer login (deliberately NOT admin)
 
-- `dev-admin` / `Dev@Meva2026` (default; change it from Developer page → Dev
+- `dev-admin` (default password printed at first boot in the server console;
+  change it from Developer page → Dev
   Account). File-based (`backend/.dev-credentials`, bcrypt) so it works even
   when the database is missing/corrupt.
 - Its token carries `access_level: 3` + `is_dev: true` → it can open the
@@ -541,31 +549,38 @@ Tasks → Teleprompter.
 
 ---
 
-## 9. Verification (proven 262/0)
+## 9. Verification (262/0 recorded; not reproducible today)
 
-On a **fresh database** (this machine: local SQLite mode, or a reset Supabase
-DB — the suite re-provisions its own users):
+**Recorded result:** on 2026-09-18, against a **fresh database** (this
+machine: local SQLite mode, or a reset Supabase DB — the suite re-provisions
+its own users) and the running server at `http://127.0.0.1:3003`, the API
+feature suite finished **262 PASS / 0 FAIL, exit code 0**.
 
-```powershell
-node "C:\Users\Admin\AppData\Local\Temp\opencode\newsmeva-feature-test.js"
-```
+**Caveat — read this before quoting the number.** The suite was a single-file
+harness (`newsmeva-feature-test.js`) kept in the machine's temp directory and
+**never committed**; the file is gone, so the run cannot be reproduced from a
+clean checkout of this repository. Nothing in the repo (no test script in
+`backend/package.json`, no `tests/` suite) replaces it. Making the claim
+reproducible requires committing that harness — e.g. under `backend/scripts/`
+or a dedicated `tests/` directory — and re-running it against a fresh
+database. Until then, 262/0 is a historical record, not a current guarantee.
 
-- **Result: 262 PASS / 0 FAIL, exit code 0** (re-verified on this machine
-  against the running server at `http://127.0.0.1:3003`).
-- Covers: health, signup→auto-admin, manager/reporter provisioning, login
+What the recorded run covered:
+
+- Health, signup→auto-admin, manager/reporter provisioning, login
   (username + PIN + token), roles, bulletin templates, locations, archives
   (incl. the level-3 creator-edit + stock/scan/import 403 matrix), reporters,
   programs, ads, bulletins, tasks (full lifecycle + teleprompter + news items +
   trash), stories state machine, leaves, news correction, channel metadata,
   notifications, pending requests, analytics, activity, settings, backups,
   sync, telemetry, and the permission/access matrix.
-- The suite treats a **non-fresh DB** as environment error (it asserts fresh
-  signups). Run it against a clean/reset database; afterwards reset again with
-  `POST /api/settings/database/reset` if you started from real data.
+- It treated a **non-fresh DB** as environment error (it asserts fresh
+  signups). Any re-run must target a clean/reset database; afterwards reset
+  again with `POST /api/settings/database/reset` if you started from real data.
 
-### Why 262 and not “all green forever”
+### Why the recorded run reached 262 and not “all green forever”
 
-26 previously-failing items were fixed/classified before this run reached
+26 previously-failing items were fixed/classified before that run reached
 262/0 — a server-side **archives** fix (creator may edit entry fields;
 stock/scan/import admin/manager-only) plus feature-test flow corrections
 (token provisioning, ordering, expected status codes).

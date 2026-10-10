@@ -404,8 +404,10 @@ Full guide: **[docs/SETUP-GUIDE-RHEL.md](docs/SETUP-GUIDE-RHEL.md)**
 
 ### Developer login (restricted — NOT admin)
 
-A built-in file-based login (`dev-admin`, default password `Dev@Meva2026`,
-stored in `backend/.dev-credentials`, never in the database) is available so the
+A built-in file-based login (`dev-admin`; the default password is printed on
+first boot in the server console — only its bcrypt hash is stored in
+`backend/.dev-credentials`, never in the database) is
+available so the
 app stays reachable even when the database is missing/corrupt. It is **deliberately
 not an admin account**:
 
@@ -456,7 +458,8 @@ Feature suite (262 automated checks): see [docs/MEMORY-CAPSULE.md](docs/MEMORY-C
   credentials or local data. Never commit them.
 - The built-in developer login is **not an admin account** (staff level only);
   it exists to keep the app reachable when the database is broken. Change its
-  default password (`Dev@Meva2026`) from the Developer page. For real
+  default password from the Developer page — the value to change is the one
+  printed at first boot on the server console. For real
   administration, use an admin signup instead.
 - Secrets leaked into git history must be **rotated** (reset Supabase password,
   change `JWT_SECRET`) — old history keeps the value forever.

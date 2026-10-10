@@ -2667,7 +2667,7 @@ Saved connections stored in `backend/saved-connections.json` (git-ignored):
 
 ### Developer Login
 
-- Credentials: `dev-admin` / `Dev@Meva2026`
+- Username: `dev-admin` (default password printed at first boot in the server console)
 - Stored in `backend/.dev-credentials` (bcrypt hash, file-based)
 - Works when DB is missing/corrupt
 - Token: `access_level 3` + `is_dev: true`

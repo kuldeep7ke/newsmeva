@@ -52,12 +52,20 @@ jobs:
             -d '{"build_config": {"build_command": "npm run build", "destination_dir": "www", "root_dir": ""}}' \
             || echo "::warning::build_config update failed - fix it manually in the Cloudflare dashboard (Build command: npm run build, Output dir: /www)"
 
-      # Direct upload fallback: this immediately publishes a static deployment
-      # of miniapp/ without waiting for the git-integration build.
+      # Build the SAME artifact the git-integrated config is forced to produce
+      # (npm run build -> www/). The direct upload used to ship the raw
+      # miniapp/ tree instead, so a push could publish two divergent copies of
+      # the site depending on which path won. One build, one artifact.
+      - name: Build static site (www/)
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
+        run: npm run build
+
+      # Direct upload fallback: publishes the freshly built www/ immediately,
+      # without waiting for the git-integration build.
       - name: Deploy to Cloudflare Pages
         if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy miniapp --project-name=newsmeva --branch main
+          command: pages deploy www --project-name=newsmeva --branch main

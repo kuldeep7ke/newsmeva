@@ -168,8 +168,9 @@ Same app features, no matter the OS you install on.
 ### Developer login (restricted — NOT admin)
 
 A built-in file-based login exists as a fallback for when the database is
-missing, corrupt, or locked: **`dev-admin`** (default password `Dev@Meva2026`,
-stored in `backend/.dev-credentials`, change it from the Developer page).
+missing, corrupt, or locked: **`dev-admin`** (default password printed at first
+boot in the server console; only its bcrypt hash is stored in
+`backend/.dev-credentials`, change it from the Developer page).
 It is **deliberately not an admin account** — staff level only, so it cannot
 manage users, change settings, or reset the database. It can only open the
 Developer page (diagnostics, dev tools), the Backups tab, and the repair

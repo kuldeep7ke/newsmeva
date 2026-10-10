@@ -427,7 +427,7 @@ The app ships with the full newsroom module set. Notable recent additions:
 If the database is corrupted or missing, you can still log in with the built-in developer account:
 
 - **Username:** `dev-admin`
-- **Password:** `Dev@Meva2026`
+- **Password:** the default printed at first boot in the server console (`[dev-credentials] Default password: ...`)
 
 This is a **restricted staff account** — it cannot manage users, change settings, or access the Database tab. It exists only to keep the app reachable for diagnostics. Change the password on the Developer page.
 

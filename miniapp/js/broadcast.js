@@ -26,7 +26,9 @@ function _d(e) {
     return out;
   } catch { return ''; }
 }
-// TODO: replace with obfuscated real bin ID once the user provides it
+// Obfuscated copy of the fallback bin ID used by functions/api/announcements.js
+// (same value, XOR'd so the literal does not sit in the client source). It is
+// the live default; per-device override is the newsMeva_broadcastBin key above.
 const BAKED_BIN_ID = _d('WAQWFQ5TRwAIAxNGCVRAUVtWRhEIAEdV');
 
 const POLL_SECONDS = 60;
